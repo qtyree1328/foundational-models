@@ -241,9 +241,10 @@ export default function LiveExplorer() {
     return () => observer.disconnect();
   }, [geeAvailable]);
 
-  // Initialize map
+  // Initialize map — depends on geeAvailable so it runs after container renders
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
+    if (geeAvailable !== true) return;
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -290,7 +291,7 @@ export default function LiveExplorer() {
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [geeAvailable]);
 
   // Handle map click — fetch embedding info
   const handleMapClick = useCallback(async (lng: number, lat: number) => {

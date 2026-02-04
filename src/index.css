@@ -815,6 +815,8 @@ body {
 .map-marker {
   cursor: pointer;
   position: relative;
+  width: 14px;
+  height: 14px;
 }
 .map-marker-dot {
   width: 14px;

@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { models, Model } from '../data/models';
 
 // Model hero images — real FM output/architecture visualizations
+const BASE = import.meta.env.BASE_URL;
 const MODEL_IMAGES: Record<string, { src: string; alt: string }> = {
-  alphaearth: { src: '/imagery/alphaearth-composite.jpg', alt: 'AlphaEarth 64-dim embedding false-color composite across 3 regions' },
-  clay: { src: '/imagery/clay-embedding-viz.jpg', alt: 'Clay Foundation model embedding visualization' },
-  prithvi: { src: '/imagery/prithvi-flood-mapping.png', alt: 'Prithvi-EO flood mapping results on Sen1Floods11' },
-  satmae: { src: '/imagery/satmae-teaser.png', alt: 'SatMAE temporal-spectral masked autoencoder approach' },
-  spectralgpt: { src: '/imagery/spectralgpt-workflow.jpg', alt: 'SpectralGPT 3D spectral masking workflow' },
-  skysense: { src: '/imagery/skysense-architecture.png', alt: 'SkySense factorized multi-modal encoder architecture' },
-  croma: { src: '/imagery/croma-sar-optical.png', alt: 'CROMA SAR-optical cross-modal alignment' },
-  dofa: { src: '/imagery/dofa-architecture.png', alt: 'DOFA wavelength-conditioned hypernetwork architecture' },
+  alphaearth: { src: `${BASE}imagery/alphaearth-composite.jpg`, alt: 'AlphaEarth 64-dim embedding false-color composite across 3 regions' },
+  clay: { src: `${BASE}imagery/clay-embedding-viz.jpg`, alt: 'Clay Foundation model embedding visualization' },
+  prithvi: { src: `${BASE}imagery/prithvi-flood-mapping.png`, alt: 'Prithvi-EO flood mapping results on Sen1Floods11' },
+  satmae: { src: `${BASE}imagery/satmae-teaser.png`, alt: 'SatMAE temporal-spectral masked autoencoder approach' },
+  spectralgpt: { src: `${BASE}imagery/spectralgpt-workflow.jpg`, alt: 'SpectralGPT 3D spectral masking workflow' },
+  skysense: { src: `${BASE}imagery/skysense-architecture.png`, alt: 'SkySense factorized multi-modal encoder architecture' },
+  croma: { src: `${BASE}imagery/croma-sar-optical.png`, alt: 'CROMA SAR-optical cross-modal alignment' },
+  dofa: { src: `${BASE}imagery/dofa-architecture.png`, alt: 'DOFA wavelength-conditioned hypernetwork architecture' },
 };
 
 function ModelCard({ model, onClick, isActive }: { model: Model; onClick: () => void; isActive: boolean }) {

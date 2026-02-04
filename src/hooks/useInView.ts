@@ -4,6 +4,9 @@ export function useInView() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -12,14 +15,23 @@ export function useInView() {
           }
         });
       },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
     );
 
-    const el = ref.current;
-    if (el) {
-      el.querySelectorAll('.fade-in').forEach((child) => observer.observe(child));
-    }
-    return () => observer.disconnect();
+    // Observe all current .fade-in elements
+    const observeAll = () => {
+      el.querySelectorAll('.fade-in:not(.visible)').forEach((child) => observer.observe(child));
+    };
+    observeAll();
+
+    // Watch for dynamically added .fade-in elements (lazy components, conditional renders)
+    const mutation = new MutationObserver(() => observeAll());
+    mutation.observe(el, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutation.disconnect();
+    };
   }, []);
 
   return ref;
