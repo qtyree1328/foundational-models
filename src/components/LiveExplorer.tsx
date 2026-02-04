@@ -216,10 +216,17 @@ export default function LiveExplorer() {
 
   // Check GEE proxy availability
   useEffect(() => {
-    fetch(`${GEE_PROXY_URL}/api/health`, { signal: AbortSignal.timeout(3000) })
-      .then(r => r.json())
-      .then(d => setGeeAvailable(d.status === 'ok'))
-      .catch(() => setGeeAvailable(false));
+    // Cloud Run cold starts can take 15-20s; retry with generous timeout
+    const tryHealth = (attempt: number) => {
+      fetch(`${GEE_PROXY_URL}/api/health`, { signal: AbortSignal.timeout(15000) })
+        .then(r => r.json())
+        .then(d => setGeeAvailable(d.status === 'ok'))
+        .catch(() => {
+          if (attempt < 2) setTimeout(() => tryHealth(attempt + 1), 3000);
+          else setGeeAvailable(false);
+        });
+    };
+    tryHealth(0);
   }, []);
 
   // Observe fade-in elements within this component
