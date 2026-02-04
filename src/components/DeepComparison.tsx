@@ -132,13 +132,15 @@ function SpecsTable({ selectedIds }: { selectedIds: string[] }) {
           <tr>
             <td className="specs-label">Sensors</td>
             {display.map(m => (
-              <td key={m.id} className="specs-value specs-sensors">
-                {m.training.sensors.slice(0, 3).map((s, i) => (
-                  <span key={i} className="sensor-pill">{s}</span>
-                ))}
-                {m.training.sensors.length > 3 && (
-                  <span className="sensor-pill more">+{m.training.sensors.length - 3}</span>
-                )}
+              <td key={m.id} className="specs-value">
+                <div className="specs-sensors">
+                  {m.training.sensors.slice(0, 3).map((s, i) => (
+                    <span key={i} className="sensor-pill">{s}</span>
+                  ))}
+                  {m.training.sensors.length > 3 && (
+                    <span className="sensor-pill more">+{m.training.sensors.length - 3}</span>
+                  )}
+                </div>
               </td>
             ))}
           </tr>
