@@ -1,0 +1,278 @@
+{
+  "generated": "2026-02-04",
+  "description": "Imagery assets for the Foundational Models Explorer project",
+  "models": {
+    "alphaearth": {
+      "hero": "alphaearth-composite.jpg",
+      "images": [
+        {
+          "file": "alphaearth-embeddings.jpg",
+          "description": "AlphaEarth embedding visualization from Google Earth Engine - false color composite of embedding bands A01, A16, A09",
+          "source": "Google Earth Engine via GEE Proxy",
+          "sourceUrl": "http://127.0.0.1:3013/api/tiles/embeddings",
+          "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+          "dimensions": "256x256"
+        },
+        {
+          "file": "alphaearth-nyc.jpg",
+          "description": "AlphaEarth embedding visualization centered on New York City area",
+          "source": "Google Earth Engine via GEE Proxy",
+          "sourceUrl": "http://127.0.0.1:3013/api/tiles/embeddings",
+          "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+          "dimensions": "256x256"
+        },
+        {
+          "file": "alphaearth-amazon.jpg",
+          "description": "AlphaEarth embedding visualization of the Amazon region",
+          "source": "Google Earth Engine via GEE Proxy",
+          "sourceUrl": "http://127.0.0.1:3013/api/tiles/embeddings",
+          "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+          "dimensions": "256x256"
+        },
+        {
+          "file": "alphaearth-composite.jpg",
+          "description": "Composite of 3 AlphaEarth embedding visualizations showing different regions",
+          "source": "Generated from GEE tiles",
+          "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+          "dimensions": "768x256"
+        }
+      ]
+    },
+    "clay": {
+      "hero": "clay-embedding-viz.jpg",
+      "images": [
+        {
+          "file": "clay-embedding-viz.jpg",
+          "description": "Clay Foundation Model embedding space visualization for a satellite tile",
+          "source": "Development Seed blog post on GeoFMs",
+          "sourceUrl": "https://developmentseed.org/blog/2024-11-01-geofm/",
+          "attribution": "Development Seed / Clay Foundation, CC-BY License",
+          "dimensions": "1920x960"
+        },
+        {
+          "file": "clay-geofm-cover.jpg",
+          "description": "GeoFM blog post cover image showing satellite-derived visualizations",
+          "source": "Development Seed",
+          "sourceUrl": "https://developmentseed.org/blog/2024-11-01-geofm/",
+          "attribution": "Development Seed",
+          "dimensions": "1920x960"
+        },
+        {
+          "file": "clay-geofm-overview.jpg",
+          "description": "Overview comparison of geospatial foundation models capabilities",
+          "source": "Development Seed",
+          "sourceUrl": "https://developmentseed.org/blog/2024-11-01-geofm/",
+          "attribution": "Development Seed / Canva",
+          "dimensions": "1610x805"
+        }
+      ]
+    },
+    "prithvi": {
+      "hero": "prithvi-flood-mapping.png",
+      "images": [
+        {
+          "file": "prithvi-flood-mapping.png",
+          "description": "Prithvi-EO flood mapping finetuning results on Sen1Floods11 dataset showing input imagery, ground truth, and model predictions",
+          "source": "Hugging Face - ibm-nasa-geospatial/Prithvi-EO-1.0-100M-sen1floods11",
+          "sourceUrl": "https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-1.0-100M-sen1floods11",
+          "attribution": "IBM/NASA, Apache 2.0 License. Jakubik et al. 2023",
+          "dimensions": "2370x748"
+        }
+      ]
+    },
+    "satmae": {
+      "hero": "satmae-teaser.png",
+      "images": [
+        {
+          "file": "satmae-teaser.png",
+          "description": "SatMAE overview figure showing temporal and multi-spectral satellite image pre-training framework",
+          "source": "SatMAE project page",
+          "sourceUrl": "https://sustainlab-group.github.io/SatMAE/",
+          "attribution": "Cong, Khanna et al., NeurIPS 2022",
+          "dimensions": "2020x1116"
+        },
+        {
+          "file": "satmae-encoding.png",
+          "description": "SatMAE temporal and spectral encoding strategy diagram",
+          "source": "SatMAE project page",
+          "sourceUrl": "https://sustainlab-group.github.io/SatMAE/",
+          "attribution": "Cong, Khanna et al., NeurIPS 2022",
+          "dimensions": "1288x1236"
+        },
+        {
+          "file": "satmae-visualization.png",
+          "description": "SatMAE reconstruction visualization examples from fMoW temporal dataset",
+          "source": "SatMAE project page",
+          "sourceUrl": "https://sustainlab-group.github.io/SatMAE/",
+          "attribution": "Cong, Khanna et al., NeurIPS 2022",
+          "dimensions": "2148x1502"
+        },
+        {
+          "file": "satmae-spectral.png",
+          "description": "SatMAE spectral band reconstruction visualization",
+          "source": "SatMAE project page",
+          "sourceUrl": "https://sustainlab-group.github.io/SatMAE/",
+          "attribution": "Cong, Khanna et al., NeurIPS 2022",
+          "dimensions": "1143x498"
+        }
+      ]
+    },
+    "spectralgpt": {
+      "hero": "spectralgpt-workflow.jpg",
+      "images": [
+        {
+          "file": "spectralgpt-workflow.jpg",
+          "description": "SpectralGPT architecture workflow showing 3D generative pretrained transformer for spectral remote sensing",
+          "source": "GitHub - danfenghong/IEEE_TPAMI_SpectralGPT",
+          "sourceUrl": "https://github.com/danfenghong/IEEE_TPAMI_SpectralGPT",
+          "attribution": "Hong et al., IEEE TPAMI 2024. DOI:10.1109/TPAMI.2024.3362475",
+          "dimensions": "3115x1717"
+        }
+      ]
+    },
+    "skysense": {
+      "hero": "skysense-architecture.png",
+      "images": [
+        {
+          "file": "skysense-architecture.png",
+          "description": "SkySense multi-modal remote sensing foundation model architecture showing factorized spatiotemporal encoder and multi-granularity contrastive learning",
+          "source": "GitHub - Jack-bo1220/SkySense",
+          "sourceUrl": "https://github.com/Jack-bo1220/SkySense",
+          "attribution": "Guo, Lao, Dang et al., CVPR 2024",
+          "dimensions": "3332x1234"
+        }
+      ]
+    },
+    "croma": {
+      "hero": "croma-sar-optical.png",
+      "images": [
+        {
+          "file": "croma-sar-optical.png",
+          "description": "CROMA cross-modal alignment visualization showing optical, SAR, and joint embedding outputs",
+          "source": "Generated visualization using GEE satellite tiles",
+          "sourceUrl": "https://github.com/antofuller/CROMA",
+          "attribution": "Fuller, Millard & Green, NeurIPS 2023. Visualization created from GEE data.",
+          "dimensions": "800x400"
+        }
+      ]
+    },
+    "dofa": {
+      "hero": "dofa-architecture.png",
+      "images": [
+        {
+          "file": "dofa-architecture.png",
+          "description": "DOFA (Dynamic One-For-All) unified multimodal foundation model overview showing multi-sensor input handling",
+          "source": "GitHub - zhu-xlab/DOFA",
+          "sourceUrl": "https://github.com/zhu-xlab/DOFA",
+          "attribution": "Xiong et al., arXiv:2403.15356, 2024",
+          "dimensions": "2672x1312"
+        },
+        {
+          "file": "dofa-model.png",
+          "description": "DOFA neural plasticity-inspired model architecture with dynamic wavelength embedding",
+          "source": "GitHub - zhu-xlab/DOFA",
+          "sourceUrl": "https://github.com/zhu-xlab/DOFA",
+          "attribution": "Xiong et al., arXiv:2403.15356, 2024",
+          "dimensions": "1930x1496"
+        },
+        {
+          "file": "dofa-object-detection.png",
+          "description": "DOFA object detection results on remote sensing imagery",
+          "source": "GitHub - zhu-xlab/DOFA",
+          "sourceUrl": "https://github.com/zhu-xlab/DOFA",
+          "attribution": "Xiong et al., arXiv:2403.15356, 2024",
+          "dimensions": "3793x2139"
+        }
+      ]
+    }
+  },
+  "satellite_imagery": {
+    "sentinel2": [
+      {
+        "file": "sentinel2-mosaic.jpg",
+        "description": "Mosaic of 4 Sentinel-2 true color tiles showing diverse landscapes (Nile Delta, Amazon, Europe, Netherlands)",
+        "source": "EOX Sentinel-2 Cloudless Mosaic 2020",
+        "sourceUrl": "https://tiles.maps.eox.at/wmts/",
+        "attribution": "Sentinel-2 cloudless by EOX, CC BY-NC-SA 4.0. Contains Copernicus Sentinel data 2020.",
+        "dimensions": "512x512"
+      },
+      {
+        "file": "sentinel2-nile-delta.jpg",
+        "description": "Sentinel-2 true color image of the Nile Delta, Egypt",
+        "source": "EOX Sentinel-2 Cloudless Mosaic 2020",
+        "sourceUrl": "https://tiles.maps.eox.at/wmts/",
+        "attribution": "Sentinel-2 cloudless by EOX, CC BY-NC-SA 4.0. Contains Copernicus Sentinel data 2020.",
+        "dimensions": "256x256"
+      },
+      {
+        "file": "sentinel2-amazon.jpg",
+        "description": "Sentinel-2 true color image of the Amazon rainforest",
+        "source": "EOX Sentinel-2 Cloudless Mosaic 2020",
+        "sourceUrl": "https://tiles.maps.eox.at/wmts/",
+        "attribution": "Sentinel-2 cloudless by EOX, CC BY-NC-SA 4.0. Contains Copernicus Sentinel data 2020.",
+        "dimensions": "256x256"
+      },
+      {
+        "file": "sentinel2-truecolor.jpg",
+        "description": "Sentinel-2 true color image of European landscape",
+        "source": "EOX Sentinel-2 Cloudless Mosaic 2020",
+        "sourceUrl": "https://tiles.maps.eox.at/wmts/",
+        "attribution": "Sentinel-2 cloudless by EOX, CC BY-NC-SA 4.0. Contains Copernicus Sentinel data 2020.",
+        "dimensions": "256x256"
+      },
+      {
+        "file": "sentinel2-sf-bay.jpg",
+        "description": "Sentinel-2 true color image of San Francisco Bay area",
+        "source": "EOX Sentinel-2 Cloudless Mosaic 2020",
+        "sourceUrl": "https://tiles.maps.eox.at/wmts/",
+        "attribution": "Sentinel-2 cloudless by EOX, CC BY-NC-SA 4.0. Contains Copernicus Sentinel data 2020.",
+        "dimensions": "256x256"
+      }
+    ],
+    "classification": [
+      {
+        "file": "eurosat-classification.png",
+        "description": "EuroSAT land use classification dataset overview showing 10 classes of Sentinel-2 satellite imagery",
+        "source": "GitHub - phelber/EuroSAT",
+        "sourceUrl": "https://github.com/phelber/EuroSAT",
+        "attribution": "Helber et al., IEEE JSTARS 2019",
+        "dimensions": "2880x1292"
+      },
+      {
+        "file": "eurosat-overview.jpg",
+        "description": "EuroSAT dataset overview with sample patches from each land use class",
+        "source": "GitHub - phelber/EuroSAT",
+        "sourceUrl": "https://github.com/phelber/EuroSAT",
+        "attribution": "Helber et al., IEEE JSTARS 2019",
+        "dimensions": "965x437"
+      }
+    ],
+    "change_detection": [
+      {
+        "file": "change-detection-sf.jpg",
+        "description": "AlphaEarth embedding change detection visualization (2020 vs 2023) over San Francisco area",
+        "source": "Google Earth Engine via GEE Proxy",
+        "sourceUrl": "http://127.0.0.1:3013/api/tiles/change",
+        "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+        "dimensions": "256x256"
+      },
+      {
+        "file": "change-detection-comparison.jpg",
+        "description": "Side-by-side comparison of change detection and clustering results",
+        "source": "Generated from GEE tiles",
+        "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+        "dimensions": "512x256"
+      },
+      {
+        "file": "clustering-sf.jpg",
+        "description": "AlphaEarth embedding clustering visualization (8 clusters) over San Francisco area",
+        "source": "Google Earth Engine via GEE Proxy",
+        "sourceUrl": "http://127.0.0.1:3013/api/tiles/clustering",
+        "attribution": "Google/DeepMind AlphaEarth embeddings via Google Earth Engine",
+        "dimensions": "256x256"
+      }
+    ]
+  },
+  "total_files": 30,
+  "notes": "All images sourced from public repositories, open-access papers, and public tile services. Attribution required for redistribution."
+}
