@@ -5,71 +5,80 @@ export interface CaseStudy {
   coords: [number, number]; // [lng, lat]
   description: string;
   detail: string;
+  source: string; // Citation/source for the real event
+  sourceUrl: string;
   bbox: [number, number, number, number]; // [west, south, east, north]
   beforeYear: number;
   afterYear: number;
   zoom: number;
   color: string;
-  // What this study demonstrates
   application: 'change-detection' | 'classification' | 'urban-analysis' | 'disaster';
 }
 
-// Real case studies in US and South America only
+// REAL case studies with documented sources - US and South America only
 export const caseStudies: CaseStudy[] = [
   {
-    id: 'amazon-deforestation',
-    title: 'Amazon Deforestation',
-    location: 'Amazonas, Brazil',
-    coords: [-60.0, -3.0],
-    description: 'Tracking deforestation using embedding change detection',
-    detail: 'Compare annual AlphaEarth embeddings to detect where the landscape changed significantly. Areas with large embedding shifts indicate deforestation, degradation, or regrowth — no labels needed.',
-    bbox: [-60.5, -3.5, -59.5, -2.5],
-    beforeYear: 2020,
-    afterYear: 2023,
-    zoom: 9,
-    color: '#e07a2f',
-    application: 'change-detection'
-  },
-  {
-    id: 'iowa-cropland',
-    title: 'Iowa Cropland',
-    location: 'Iowa, USA',
-    coords: [-93.5, 42.0],
-    description: 'Crop type classification from embeddings alone',
-    detail: 'AlphaEarth embeddings capture phenological signatures unique to each crop type. Different crops cluster naturally in embedding space — corn, soy, and other crops form distinct groups without any training.',
-    bbox: [-94.0, 41.5, -93.0, 42.5],
-    beforeYear: 2022,
-    afterYear: 2023,
-    zoom: 10,
-    color: '#1a73e8',
-    application: 'classification'
-  },
-  {
-    id: 'california-wildfire',
-    title: 'California Wildfire Recovery',
+    id: 'palisades-fire',
+    title: 'Palisades Fire (2025)',
     location: 'Los Angeles, CA',
-    coords: [-118.5, 34.1],
-    description: 'Mapping burn severity and vegetation recovery',
-    detail: 'Temporal embedding comparison reveals burn severity gradations and tracks vegetation recovery over time. The embedding shift magnitude correlates with fire damage intensity.',
-    bbox: [-118.8, 33.9, -118.2, 34.3],
-    beforeYear: 2019,
-    afterYear: 2023,
-    zoom: 10,
+    coords: [-118.53, 34.05], // Pacific Palisades
+    description: 'Mapping burn extent from the January 2025 LA fires',
+    detail: 'The Palisades Fire ignited January 7, 2025 and burned ~24,000 acres in one week. Embedding comparison between 2024 (pre-fire) and 2025 (post-fire) reveals burn severity — areas with large embedding shifts indicate vegetation loss.',
+    source: 'NASA Earth Observatory',
+    sourceUrl: 'https://earthobservatory.nasa.gov/images/153831/the-palisades-fires-footprint',
+    bbox: [-118.65, 33.95, -118.40, 34.15],
+    beforeYear: 2024,
+    afterYear: 2025,
+    zoom: 11,
     color: '#dc2626',
     application: 'disaster'
   },
   {
-    id: 'sao-paulo-urban',
-    title: 'São Paulo Urban Expansion',
-    location: 'São Paulo, Brazil',
-    coords: [-46.63, -23.55],
-    description: 'Urban sprawl detection through embedding similarity',
-    detail: 'Urban areas have distinct embedding signatures from vegetation and water. Tracking where embeddings shift toward "urban-like" patterns reveals expansion at city edges over time.',
-    bbox: [-46.9, -23.8, -46.3, -23.3],
-    beforeYear: 2018,
-    afterYear: 2023,
+    id: 'amazon-prodes',
+    title: 'Amazon Deforestation',
+    location: 'Rondônia, Brazil',
+    coords: [-63.0, -10.5], // Rondônia state - documented deforestation hotspot
+    description: 'INPE PRODES monitoring of forest loss',
+    detail: 'Brazil\'s INPE monitors Amazon deforestation via satellite since 1988. PRODES detected 5,796 km² of deforestation in 2024-2025. Embedding change detection identifies where landscape vectors shifted from forest-like to cleared signatures.',
+    source: 'INPE PRODES / Mongabay',
+    sourceUrl: 'https://news.mongabay.com/2025/10/heading-into-cop-brazils-amazon-deforestation-rate-is-falling-what-about-fires/',
+    bbox: [-63.5, -11.0, -62.5, -10.0],
+    beforeYear: 2020,
+    afterYear: 2024,
+    zoom: 9,
+    color: '#16a34a',
+    application: 'change-detection'
+  },
+  {
+    id: 'iowa-cdl',
+    title: 'Iowa Cropland (CDL)',
+    location: 'Central Iowa, USA',
+    coords: [-93.5, 42.0],
+    description: 'USDA Cropland Data Layer classification',
+    detail: 'The USDA Cropland Data Layer provides annual crop type maps at 30m resolution. AlphaEarth embeddings cluster by crop phenology — corn, soybeans, and other crops form distinct groups in embedding space without any training labels.',
+    source: 'USDA NASS Cropland Data Layer',
+    sourceUrl: 'https://nassgeodata.gmu.edu/CropScape/',
+    bbox: [-94.0, 41.5, -93.0, 42.5],
+    beforeYear: 2023,
+    afterYear: 2024,
     zoom: 10,
-    color: '#7c3aed',
-    application: 'urban-analysis'
+    color: '#ca8a04',
+    application: 'classification'
+  },
+  {
+    id: 'creek-fire',
+    title: 'Creek Fire (2020)',
+    location: 'Fresno County, CA',
+    coords: [-119.3, 37.2], // Sierra National Forest
+    description: 'One of California\'s largest wildfires',
+    detail: 'The Creek Fire started September 4, 2020 and burned 379,895 acres across Fresno and Madera Counties. Comparing 2019 (pre-fire) to 2021 (post-fire) embeddings shows burn severity patterns and early vegetation recovery.',
+    source: 'CAL FIRE / Sierra RCD',
+    sourceUrl: 'https://sierrarcd.com/creekfirerecovery/',
+    bbox: [-119.6, 37.0, -119.0, 37.5],
+    beforeYear: 2019,
+    afterYear: 2021,
+    zoom: 10,
+    color: '#ea580c',
+    application: 'disaster'
   }
 ];

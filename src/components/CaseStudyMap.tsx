@@ -44,8 +44,11 @@ function StudyPanel({
       
       <p className="case-panel-desc">{study.detail}</p>
       
-      <div className="case-panel-app">
+      <div className="case-panel-meta">
         <span className="case-app-badge">{APPLICATION_LABELS[study.application]}</span>
+        <a href={study.sourceUrl} target="_blank" rel="noopener" className="case-source-link">
+          Source: {study.source} ↗
+        </a>
       </div>
 
       {loading ? (

@@ -965,8 +965,12 @@ body {
   line-height: 1.6;
   margin-bottom: 12px;
 }
-.case-panel-app {
+.case-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 .case-app-badge {
   display: inline-block;
@@ -978,6 +982,15 @@ body {
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+.case-source-link {
+  font-size: 11px;
+  color: #64748b;
+  text-decoration: none;
+}
+.case-source-link:hover {
+  color: #3b82f6;
+  text-decoration: underline;
 }
 
 /* Loading State */
