@@ -879,17 +879,6 @@ export default function DemoClassification() {
                 />
               </div>
             )}
-
-            {/* Confusion matrix for classification mode */}
-            {mode === 'classify' && classifyResult && (
-              <div className="demo-confusion-panel">
-                <h4>Confusion Matrix</h4>
-                <ConfusionMatrix
-                  matrix={classifyResult.confusionMatrix}
-                  labels={classifyResult.classLabels}
-                />
-              </div>
-            )}
           </div>
 
           {/* Side panel */}
@@ -962,6 +951,17 @@ export default function DemoClassification() {
               <div className="demo-point-placeholder">
                 <span className="demo-point-placeholder-icon">👆</span>
                 <p>Hover or click a point to inspect its 64D embedding vector and similarity profile.</p>
+              </div>
+            )}
+
+            {/* Confusion matrix for classification mode */}
+            {mode === 'classify' && classifyResult && (
+              <div className="demo-confusion-panel">
+                <h4>Confusion Matrix</h4>
+                <ConfusionMatrix
+                  matrix={classifyResult.confusionMatrix}
+                  labels={classifyResult.classLabels}
+                />
               </div>
             )}
 

@@ -4305,13 +4305,18 @@ body {
 
 /* Confusion matrix */
 .demo-confusion-panel {
-  margin-bottom: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
 }
 .demo-confusion-panel h4 {
   font-family: var(--font-heading);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
 }
 .demo-confusion-wrap {
   position: relative;
