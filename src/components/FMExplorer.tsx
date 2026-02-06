@@ -129,6 +129,8 @@ const BAND_PRESETS = [
   { name: 'Sequential', r: 0, g: 1, b: 2, desc: 'First 3 axes' },
   { name: 'Spread', r: 0, g: 21, b: 42, desc: 'Even distribution' },
   { name: 'High Dims', r: 50, g: 55, b: 60, desc: 'Later axes' },
+  { name: 'Alt 1', r: 3, g: 12, b: 25, desc: 'Alternative combo 1' },
+  { name: 'Alt 2', r: 7, g: 32, b: 48, desc: 'Alternative combo 2' },
 ];
 
 // Category colors
@@ -364,6 +366,21 @@ export default function FMExplorer() {
         cache.burn = results[4].tileUrl;
       }
 
+      // Fetch deforestation gradient for deforestation events
+      if (event.category === 'deforestation') {
+        try {
+          const deforestResp = await fetch(
+            `${GEE_PROXY_URL}/api/tiles/deforestation?year=${event.afterYear}&bbox=${event.bbox.join(',')}`
+          );
+          const deforestData = await deforestResp.json();
+          if (deforestData.tileUrl) {
+            cache.degradation = deforestData.tileUrl;
+          }
+        } catch (e) {
+          console.error('Failed to load deforestation gradient:', e);
+        }
+      }
+
       setTileCache(cache);
 
       // Add the 'after' layer by default
@@ -428,6 +445,13 @@ export default function FMExplorer() {
     setBandR(preset.r);
     setBandG(preset.g);
     setBandB(preset.b);
+  };
+
+  // Randomize bands
+  const randomizeBands = () => {
+    setBandR(Math.floor(Math.random() * 64));
+    setBandG(Math.floor(Math.random() * 64));
+    setBandB(Math.floor(Math.random() * 64));
   };
 
   // Reload tiles with new bands
@@ -545,6 +569,13 @@ export default function FMExplorer() {
                   {p.name}
                 </button>
               ))}
+              <button
+                className="fm-preset-btn random"
+                onClick={randomizeBands}
+                title="Discover new band combinations"
+              >
+                🎲 Random
+              </button>
             </div>
 
             {selectedEvent && tilesReady && (
@@ -634,6 +665,15 @@ export default function FMExplorer() {
                   onClick={() => switchLayer('burn')}
                 >
                   dNBR
+                </button>
+              )}
+              {tileCache.degradation && (
+                <button
+                  className={`fm-toggle-btn degradation ${activeLayerId?.includes('degradation') ? 'active' : ''}`}
+                  onClick={() => switchLayer('degradation')}
+                  title="Forest Degradation Index (Process Vector)"
+                >
+                  Degradation
                 </button>
               )}
             </div>

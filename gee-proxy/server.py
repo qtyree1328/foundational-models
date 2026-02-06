@@ -426,6 +426,91 @@ def classify_embedding(embedding):
     }
 
 
+# ========== Endpoint: Deforestation Gradient (Process Vector) ==========
+@app.route('/api/tiles/deforestation')
+def tiles_deforestation():
+    """
+    GET /api/tiles/deforestation?year=2023&bbox=-63.5,-11,-62.5,-10
+    Returns XYZ tile URL for deforestation degradation index using process vector approach.
+    Based on Guneet Mutreja's "Geospatial Calculus" methodology.
+    """
+    try:
+        year = request.args.get('year', '2023')
+        bbox = request.args.get('bbox', '-63.5,-11.0,-62.5,-10.0')
+
+        cache_key = _cache_key('deforestation', year, bbox)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # Parse bbox
+        coords = [float(x) for x in bbox.split(',')]
+        region = ee.Geometry.Rectangle(coords)
+
+        # Load Hansen Global Forest Change for anchor definitions
+        gfc = ee.Image('UMD/hansen/global_forest_change_2022_v1_10')
+        
+        # Define "pristine forest": high canopy (>80%) in 2000, zero loss
+        pristine_mask = gfc.select('treecover2000').gt(80).And(gfc.select('loss').eq(0))
+        
+        # Define "deforested": was dense forest, lost in recent years (lossyear >= 18 = 2018+)
+        deforested_mask = gfc.select('treecover2000').gt(80).And(gfc.select('lossyear').gte(18))
+
+        # Get embeddings for the requested year
+        mosaic = get_embedding_mosaic(year)
+        all_bands = [f'A{i:02d}' for i in range(64)]
+        emb_image = mosaic.select(all_bands)
+
+        # Calculate mean embedding for pristine forest in the region
+        mean_pristine = emb_image.updateMask(pristine_mask).reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=region,
+            scale=1000,
+            maxPixels=1e8
+        )
+
+        # Calculate mean embedding for deforested land in the region
+        mean_deforested = emb_image.updateMask(deforested_mask).reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=region,
+            scale=1000,
+            maxPixels=1e8
+        )
+
+        # Create constant images from the mean vectors
+        pristine_image = ee.Image.constant([mean_pristine.get(b) for b in all_bands]).rename(all_bands)
+        deforested_image = ee.Image.constant([mean_deforested.get(b) for b in all_bands]).rename(all_bands)
+
+        # Compute deforestation vector: deforested - pristine
+        deforestation_vector = deforested_image.subtract(pristine_image)
+
+        # Normalize the vector
+        norm = deforestation_vector.pow(2).reduce(ee.Reducer.sum()).sqrt()
+        deforestation_vector_normalized = deforestation_vector.divide(norm)
+
+        # Project every pixel onto this deforestation axis (dot product)
+        degradation_index = emb_image.multiply(deforestation_vector_normalized).reduce(ee.Reducer.sum())
+
+        # Only show forested areas (>30% tree cover)
+        forest_mask = gfc.select('treecover2000').gt(30)
+        degradation_index = degradation_index.updateMask(forest_mask)
+
+        # Visualize: green = healthy forest, red = degraded/deforested
+        vis = degradation_index.visualize(
+            min=-0.5,
+            max=0.5,
+            palette=['#1a9850', '#91cf60', '#d9ef8b', '#ffffbf', '#fee08b', '#fc8d59', '#d73027']
+        )
+
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Endpoint: CDL (Cropland Data Layer) Tiles ==========
 @app.route('/api/tiles/cdl')
 def tiles_cdl():

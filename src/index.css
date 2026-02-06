@@ -6422,3 +6422,17 @@ body {
 .fm-toggle-btn.burn.active {
   background: #dc2626;
 }
+
+.fm-toggle-btn.degradation.active {
+  background: #16a34a;
+}
+
+.fm-preset-btn.random {
+  background: linear-gradient(135deg, #f59e0b, #ef4444, #8b5cf6, #3b82f6);
+  color: white;
+  border: none;
+}
+
+.fm-preset-btn.random:hover {
+  opacity: 0.9;
+}
