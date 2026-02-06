@@ -21,6 +21,13 @@ const BAND_PRESETS: BandPresets = {
   'Change Sensitive': 'A01,A08,A32',
 };
 
+const MODE_DESCRIPTIONS: Record<VizMode, string> = {
+  embeddings: 'Maps 3 of the 64 axes to R/G/B. Similar colors = similar embeddings = similar landscape type. The axes aren\'t labeled — the model learned them automatically from data.',
+  clustering: 'Runs K-means on all 64 dimensions in the visible region. Each cluster represents a distinct landscape type discovered from embedding similarity — no labels required.',
+  change: 'Computes embedding difference between two years. High values = the 64D vector changed significantly, indicating land cover change (deforestation, urbanization, etc.).',
+  similarity: 'Click a reference point, then compute cosine similarity against the entire map. Find locations with similar landscape characteristics anywhere in the world.',
+};
+
 interface EmbeddingInfo {
   embedding: number[];
   landCover: {
@@ -503,11 +510,44 @@ export default function LiveExplorer() {
           <span className="section-label">Live Earth Engine</span>
           <h2>Live Explorer</h2>
           <p className="section-subtitle">
-            Explore real Google AlphaEarth Foundation embeddings — 64-dimensional 
-            representations of the Earth's surface at 4km resolution. Powered by 
-            Google Earth Engine with 91,021 embedding images.
+            Explore real AlphaEarth geo-embeddings — 64-dimensional vectors that encode 
+            the Earth's surface at 4km resolution. Click anywhere to see what a LEOM 
+            actually produces. Each pixel contains a 64-dimensional vector learned by 
+            AlphaEarth from multi-modal satellite data (Sentinel-1/2, Landsat, GEDI LiDAR, climate). 
+            These vectors are unit-length (normalized to the 64-dimensional hypersphere), 
+            meaning similar landscapes have high dot product / cosine similarity.
+            This viewer displays actual embeddings from Google Earth Engine — the official AlphaEarth dataset: <a href="https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL" target="_blank" rel="noopener"><code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code></a>.
           </p>
         </div>
+
+        {/* What They Unlock - 4 boxes */}
+        <div className="live-unlock-boxes fade-in">
+          <div className="live-unlock-box">
+            <span className="unlock-icon">🔍</span>
+            <strong>Similarity Search</strong>
+            <p>Draw a box around deforestation in Brazil → instantly find every similar pattern globally. No training, no labels — just vector math.</p>
+            <span className="unlock-stat">&lt; 1 sec global</span>
+          </div>
+          <div className="live-unlock-box">
+            <span className="unlock-icon">🌾</span>
+            <strong>Zero-Shot Transfer</strong>
+            <p>A model trained on Sentinel-2 crop mapping in Iowa works in Mozambique — because the embeddings capture agricultural signatures, not pixel values.</p>
+            <span className="unlock-stat">0 labels needed</span>
+          </div>
+          <div className="live-unlock-box">
+            <span className="unlock-icon">⏱️</span>
+            <strong>Temporal Intelligence</strong>
+            <p>Compare embeddings of the same location over time. Sudden vector shift = change event (fire, flood, deforestation, construction). No baselines required.</p>
+            <span className="unlock-stat">64-dim monitoring</span>
+          </div>
+          <div className="live-unlock-box">
+            <span className="unlock-icon">📡</span>
+            <strong>Cross-Modal</strong>
+            <p>SAR radar and optical imagery produce comparable embeddings — so cloudy regions still get analyzed. Shanghai and Chicago cluster together (urban), far from adjacent farmland.</p>
+            <span className="unlock-stat">∞ weather independence</span>
+          </div>
+        </div>
+
       </div>
 
       <div className="live-wrapper fade-in">
@@ -611,6 +651,12 @@ export default function LiveExplorer() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Current mode description */}
+        <div className="live-mode-description fade-in">
+          <span className="mode-desc-icon">{VIZ_MODES.find(m => m.id === vizMode)?.icon}</span>
+          <span className="mode-desc-text">{MODE_DESCRIPTIONS[vizMode]}</span>
         </div>
 
         {/* Map */}

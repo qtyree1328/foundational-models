@@ -729,14 +729,23 @@ export default function EmbeddingViz() {
     <section className="section embedding-section" data-section="embeddings">
       <div className="container">
         <div className="section-header fade-in">
-          <span className="section-label">Interactive Demos</span>
+          <span className="section-label">Educational Demos</span>
           <h2>Embedding Visualizations</h2>
           <p className="section-subtitle">
-            Explore how foundation model embeddings encode landscape information.
-            These demos run real PCA and K-means algorithms in your browser on 
-            synthetic 64-dimensional vectors that mimic geospatial embedding distributions — 
-            no API keys or server required.
+            Learn how foundation model embeddings encode landscape information through 
+            interactive algorithms running in your browser.
           </p>
+        </div>
+
+        {/* Simulation notice */}
+        <div className="viz-simulation-notice fade-in">
+          <span className="simulation-badge-small">📊 SYNTHETIC DATA</span>
+          <span className="simulation-notice-text">
+            These visualizations use <strong>generated data</strong> that mimics the statistical 
+            properties of real embeddings (64D unit vectors, land cover clustering). The algorithms 
+            (PCA, K-means, cosine similarity) are real — only the input data is synthetic for 
+            educational purposes. See <a href="#explorer">Live Explorer</a> for real GEE data.
+          </span>
         </div>
         <div className="viz-tabs fade-in">
           {tabs.map(tab => (

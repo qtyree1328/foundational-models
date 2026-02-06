@@ -1,13 +1,16 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import Hero from './components/Hero';
 import Pipeline from './components/Pipeline';
+import ParadigmShift from './components/ParadigmShift';
 import ModelGallery from './components/ModelGallery';
 import CaseStudyMap from './components/CaseStudyMap';
 import LiveExplorer from './components/LiveExplorer';
 import EmbeddingViz from './components/EmbeddingViz';
 import DeepComparison from './components/DeepComparison';
+import Ecosystem from './components/Ecosystem';
 import ModelRecommender from './components/ModelRecommender';
 import GettingStarted from './components/GettingStarted';
+import Sources from './components/Sources';
 import { useInView, useSectionInView } from './hooks/useInView';
 
 // Lazy load heavy components
@@ -28,14 +31,16 @@ function LazySection({ children }: { children: React.ReactNode }) {
 
 const NAV_ITEMS = [
   { id: 'pipeline', label: 'How It Works' },
+  { id: 'paradigm', label: 'Why It Matters' },
   { id: 'models', label: 'Models' },
   { id: 'deep-compare', label: 'Compare' },
+  { id: 'ecosystem', label: 'Ecosystem' },
   { id: 'explorer', label: 'Live Explorer' },
   { id: 'demo-classify', label: 'Demo' },
   { id: 'map', label: 'Case Studies' },
   { id: 'insights', label: 'Expert' },
   { id: 'recommender', label: 'Recommender' },
-  { id: 'embeddings', label: 'Embedding Viz' },
+  { id: 'sources', label: 'Sources' },
 ];
 
 function Nav({ activeSection }: { activeSection: string }) {
@@ -60,7 +65,7 @@ function Nav({ activeSection }: { activeSection: string }) {
             <circle cx="12" cy="12" r="10" />
             <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
-          <span>GeoFM Explorer</span>
+          <span>LEOM Explorer</span>
         </div>
         <div className="nav-links">
           {NAV_ITEMS.map(item => (
@@ -88,7 +93,7 @@ function Footer() {
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
-            <span>Geospatial Foundation Models Explorer</span>
+            <span>Large Earth Observation Models Explorer</span>
           </div>
           <div className="footer-center">
             <span>Built by <a href="https://tyreespatial.com" target="_blank" rel="noopener">Quintin Tyree</a></span>
@@ -117,14 +122,16 @@ export default function App() {
       <Nav activeSection={activeSection} />
       <Hero />
       <Pipeline />
+      <ParadigmShift />
       <ModelGallery />
       <DeepComparison />
+      <Ecosystem />
       <LiveExplorer />
       <LazySection><DemoClassification /></LazySection>
       <CaseStudyMap />
       <LazySection><ExpertInsights /></LazySection>
       <ModelRecommender />
-      <EmbeddingViz />
+      <Sources />
       <GettingStarted />
       <Footer />
     </div>

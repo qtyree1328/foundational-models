@@ -506,10 +506,10 @@ export default function DeepComparison() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">Deep Dive</span>
-          <h2>Expert Comparison</h2>
+          <h2>Model Comparison</h2>
           <p className="section-subtitle">
             Every architecture detail, training specification, and benchmark result — verified from published papers.
-            Filter models and switch views to explore dimensions that matter for your use case.
+            Compare how each LEOM generates geo-embeddings and which dimensions matter for your use case.
           </p>
         </div>
 

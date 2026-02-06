@@ -67,7 +67,7 @@ function Collapsible({ title, children, defaultOpen = false }: { title: string; 
 function PretrainingDeepDive() {
   return (
     <div className="ei-tab-content">
-      <h3 className="insights-subtitle">How GeoFMs Learn from the Unlabeled Archive</h3>
+      <h3 className="insights-subtitle">How LEOMs Learn from the Unlabeled Archive</h3>
       <p className="insights-desc">
         Self-supervised pre-training is the engine that makes foundation models possible. But the choice of
         pre-training strategy has profound implications for downstream task performance, embedding quality,
@@ -945,7 +945,7 @@ export default function ExpertInsights() {
     { id: 'pretrain', label: 'Pre-training Strategies', icon: '⚙️' },
     { id: 'embedding', label: 'Embedding Spaces', icon: '🌌' },
     { id: 'questions', label: 'Open Questions', icon: '❓' },
-    { id: 'geofm', label: 'GeoFM vs ImageNet', icon: '🧠' },
+    { id: 'geofm', label: 'LEOM vs ImageNet', icon: '🧠' },
   ];
 
   return (
@@ -953,10 +953,10 @@ export default function ExpertInsights() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">Expert Analysis</span>
-          <h2>Deep Dive: Understanding GeoFMs</h2>
+          <h2>Deep Dive: Understanding LEOMs</h2>
           <p className="section-subtitle">
             Pre-training strategies, embedding geometry, and the open questions shaping
-            the next generation of Earth observation AI — written for practitioners.
+            the next generation of Large Earth Observation Models — written for practitioners.
           </p>
         </div>
 

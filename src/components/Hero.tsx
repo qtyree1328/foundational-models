@@ -187,13 +187,14 @@ export default function Hero() {
     <section className="hero" data-section="hero">
       <canvas ref={canvasRef} className="hero-canvas" />
       <div className="hero-content">
-        <div className="hero-badge">Earth Observation × AI</div>
+        <div className="hero-badge">Large Earth Observation Models</div>
         <h1>Geospatial<br />Foundation Models</h1>
         <p className="hero-tagline">
-          AI models trained on petabytes of satellite imagery that encode 
-          the Earth's surface into dense vector representations — enabling 
-          crop mapping, disaster response, and environmental monitoring at 
-          planetary scale.
+          For 20 years, text search relied on keywords — until vector embeddings 
+          changed everything. Now the same shift is happening for Earth observation: 
+          LEOMs turn petabytes of satellite imagery into geo-embeddings — compact, 
+          searchable representations that let AI reason about our planet across 
+          space, time, and meaning.
         </p>
         <div className="hero-stats">
           <div className="hero-stat">

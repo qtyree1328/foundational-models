@@ -260,11 +260,12 @@ export default function ModelGallery() {
     <section className="section model-gallery-section" data-section="models">
       <div className="container">
         <div className="section-header fade-in">
-          <span className="section-label">The Models</span>
-          <h2>Foundation Model Gallery</h2>
+          <span className="section-label">The LEOMs</span>
+          <h2>Large Earth Observation Models</h2>
           <p className="section-subtitle">
-            Eight prominent models pushing the boundaries of Earth observation AI. 
-            Click any card to explore architecture, capabilities, and code examples.
+            The major LEOMs producing geo-embeddings today. Each takes a different approach 
+            to encoding Earth — from multi-temporal optical to SAR fusion to hyperspectral. 
+            Click any card for architecture, benchmarks, and code.
           </p>
         </div>
         <div className="model-grid">

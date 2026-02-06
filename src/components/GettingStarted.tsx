@@ -15,7 +15,7 @@ export default function GettingStarted() {
           <span className="section-label">Get Started</span>
           <h2>Code Examples</h2>
           <p className="section-subtitle">
-            Start working with geospatial foundation models today. 
+            Start generating geo-embeddings with LEOMs today. 
             Each example shows the core pattern: load model → input imagery → get embeddings.
           </p>
         </div>

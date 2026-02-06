@@ -33,8 +33,8 @@ const steps = [
         <line x1="30" y1="30" x2="24" y2="24" stroke="currentColor" strokeWidth="1" opacity="0.3" />
       </svg>
     ),
-    title: 'Foundation Model',
-    desc: 'Vision Transformers with masked autoencoder pre-training on billions of patches'
+    title: 'LEOM Processing',
+    desc: 'Large Earth Observation Models — Vision Transformers pre-trained on billions of satellite patches via masked autoencoders'
   },
   {
     icon: (
@@ -48,8 +48,8 @@ const steps = [
         <text x="24" y="44" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.5" fontFamily="monospace">64-dim</text>
       </svg>
     ),
-    title: 'Dense Embeddings',
-    desc: '64–768 dimensional vectors encoding landscape features, phenology, and structure'
+    title: 'Geo-Embeddings',
+    desc: 'Compact vector representations (64–768 dim) that encode everything about a place — universal, searchable summaries of Earth'
   },
   {
     icon: (
@@ -83,11 +83,13 @@ export default function Pipeline() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">How It Works</span>
-          <h2>From Pixels to Understanding</h2>
+          <h2>From Pixels to Embeddings to Insights</h2>
           <p className="section-subtitle">
-            Geospatial foundation models transform raw satellite imagery into 
-            dense vector representations that encode everything about a location — 
-            vegetation type, soil moisture, urban density, elevation, and seasonal patterns.
+            Large Earth Observation Models (LEOMs) transform raw satellite imagery into 
+            geo-embeddings — compact vector representations that capture everything about a 
+            location. Also known as geospatial foundation models, these models enable 
+            similarity search, classification, and change detection without building 
+            task-specific models from scratch.
           </p>
         </div>
         <div className="pipeline-flow fade-in">
@@ -101,20 +103,6 @@ export default function Pipeline() {
               {i < steps.length - 1 && <Arrow />}
             </React.Fragment>
           ))}
-        </div>
-        <div className="pipeline-detail fade-in">
-          <div className="pipeline-detail-card">
-            <div className="pipeline-detail-header">
-              <span className="pipeline-detail-tag">Key Insight</span>
-            </div>
-            <p>
-              Unlike task-specific models that must be retrained for each application, 
-              foundation model embeddings are <strong>general-purpose</strong>. The same 
-              64-dimensional vector that enables crop type classification also supports 
-              change detection, similarity search, and anomaly detection — all without 
-              additional training.
-            </p>
-          </div>
         </div>
       </div>
     </section>

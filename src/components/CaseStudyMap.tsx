@@ -448,10 +448,9 @@ export default function CaseStudyMap() {
           <span className="section-label">Real-World Validation</span>
           <h2>Global Case Studies</h2>
           <p className="section-subtitle">
-            Foundation models prove their worth in real-world applications. These case 
-            studies demonstrate how dense vector embeddings solve specific geospatial 
-            challenges — from flood mapping to crop classification — validating model 
-            performance across diverse environments and tasks.
+            LEOMs prove their worth in real-world applications. These case studies demonstrate 
+            how geo-embeddings solve specific challenges — from flood mapping to crop 
+            classification — validating LEOM performance across diverse environments and tasks.
           </p>
           <p className="section-hint">
             Click a marker to explore a case study · Load Sentinel-2 imagery with Before/After thumbnails

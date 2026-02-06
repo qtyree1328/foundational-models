@@ -280,9 +280,9 @@ export default function ModelRecommender() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">Interactive Tool</span>
-          <h2>Model Recommender</h2>
+          <h2>LEOM Recommender</h2>
           <p className="section-subtitle">
-            Answer five questions about your project and get ranked model recommendations
+            Answer five questions about your project and get ranked LEOM recommendations
             based on verified capabilities, data compatibility, and practical constraints.
           </p>
         </div>

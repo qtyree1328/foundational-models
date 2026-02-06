@@ -726,11 +726,23 @@ export default function DemoClassification() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">Interactive Demo</span>
-          <h2>Embedding Classification Lab</h2>
+          <h2>Geo-Embedding Classification Lab</h2>
           <p className="section-subtitle">
-            Explore how 64-dimensional AlphaEarth embeddings enable land cover classification —
-            all computed client-side in your browser.
+            See how geo-embeddings make classification trivial — once a LEOM has compressed 
+            satellite imagery into 64-dimensional vectors, a simple K-means or linear classifier 
+            can separate land cover types. All computed client-side in your browser.
+            This demo uses synthetic data — not real satellite imagery. The embeddings are generated to mimic AlphaEarth's statistical properties (unit-length 64D vectors with land cover clustering), letting you learn the concepts without GEE access. For real data, see the <a href="#explorer">Live Explorer</a> above.
           </p>
+        </div>
+
+        {/* Learning objectives */}
+        <div className="demo-learning-objectives fade-in">
+          <h4>What You'll Learn</h4>
+          <ul>
+            <li><strong>PCA Scatter:</strong> High-dimensional embeddings cluster by land cover type — similar landscapes have similar vectors</li>
+            <li><strong>K-Means:</strong> Unsupervised clustering on embeddings discovers natural landscape groupings without labels</li>
+            <li><strong>Classification:</strong> A simple nearest-centroid classifier achieves high accuracy because embeddings encode semantic meaning</li>
+          </ul>
         </div>
 
         {/* Mode Selector */}
