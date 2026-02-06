@@ -9,6 +9,12 @@ const GEE_PROXY_URL = import.meta.env.PROD
 
 type ViewMode = 'before' | 'after' | 'alphaearth';
 
+interface TileCache {
+  before: string | null;
+  after: string | null;
+  alphaearth: string | null;
+}
+
 const APPLICATION_LABELS: Record<string, string> = {
   'change-detection': 'Change Detection',
   'classification': 'Classification',
@@ -95,14 +101,15 @@ export default function CaseStudyMap() {
   const [selectedStudy, setSelectedStudy] = useState<CaseStudy | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('before');
   const [loading, setLoading] = useState(false);
-  const [geeLayerId, setGeeLayerId] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [tileCache, setTileCache] = useState<TileCache>({ before: null, after: null, alphaearth: null });
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
 
-  // Americas-centered view
-  const INITIAL_CENTER: [number, number] = [-70, 5];
-  const INITIAL_ZOOM = 3;
+  // Central America centered, more zoomed out
+  const INITIAL_CENTER: [number, number] = [-85, 12];
+  const INITIAL_ZOOM = 2.5;
 
-  // Initialize map with light style and GeoJSON markers (no lag)
+  // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -129,7 +136,7 @@ export default function CaseStudyMap() {
     mapRef.current = map;
 
     map.on('load', () => {
-      // Add case study points as GeoJSON (renders as map layer = no lag)
+      // Add case study points as GeoJSON (no lag)
       const geojson: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
         features: caseStudies.map(study => ({
@@ -141,7 +148,6 @@ export default function CaseStudyMap() {
 
       map.addSource('case-studies', { type: 'geojson', data: geojson });
 
-      // Outer glow circle
       map.addLayer({
         id: 'case-markers-glow',
         type: 'circle',
@@ -154,7 +160,6 @@ export default function CaseStudyMap() {
         }
       });
 
-      // Main marker circle
       map.addLayer({
         id: 'case-markers',
         type: 'circle',
@@ -167,7 +172,6 @@ export default function CaseStudyMap() {
         }
       });
 
-      // Click handler
       map.on('click', 'case-markers', (e) => {
         if (e.features && e.features[0]) {
           const id = e.features[0].properties?.id;
@@ -176,7 +180,6 @@ export default function CaseStudyMap() {
         }
       });
 
-      // Cursor pointer on hover
       map.on('mouseenter', 'case-markers', () => {
         map.getCanvas().style.cursor = 'pointer';
       });
@@ -193,14 +196,92 @@ export default function CaseStudyMap() {
     };
   }, []);
 
+  // Pre-load ALL 3 tile URLs when a study is selected
+  const preloadAllLayers = useCallback(async (study: CaseStudy) => {
+    setLoading(true);
+
+    try {
+      // Fetch all 3 tile URLs in parallel
+      const [beforeResp, afterResp, alphaResp] = await Promise.all([
+        fetch(`${GEE_PROXY_URL}/api/tiles/optical?year=${study.beforeYear}&bbox=${study.bbox.join(',')}`),
+        fetch(`${GEE_PROXY_URL}/api/tiles/optical?year=${study.afterYear}&bbox=${study.bbox.join(',')}`),
+        fetch(`${GEE_PROXY_URL}/api/tiles/embeddings?year=${study.afterYear}&bands=A01,A16,A09&min=-0.3&max=0.3`)
+      ]);
+
+      const [beforeData, afterData, alphaData] = await Promise.all([
+        beforeResp.json(),
+        afterResp.json(),
+        alphaResp.json()
+      ]);
+
+      const cache: TileCache = {
+        before: beforeData.tileUrl || null,
+        after: afterData.tileUrl || null,
+        alphaearth: alphaData.tileUrl || null
+      };
+
+      setTileCache(cache);
+
+      // Now add the initial layer (before) to map
+      if (cache.before) {
+        showLayer('before', cache);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to preload layers:', err);
+      setLoading(false);
+    }
+  }, []);
+
+  // Show a specific layer from cache (instant swap)
+  const showLayer = useCallback((mode: ViewMode, cache?: TileCache) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const tiles = cache || tileCache;
+    const tileUrl = tiles[mode];
+    if (!tileUrl) return;
+
+    // Remove existing layer
+    if (activeLayerId) {
+      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
+      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
+    }
+
+    const layerId = `layer-${mode}-${Date.now()}`;
+
+    map.addSource(layerId, {
+      type: 'raster',
+      tiles: [tileUrl],
+      tileSize: 256
+    });
+
+    map.addLayer({
+      id: layerId,
+      type: 'raster',
+      source: layerId,
+      paint: { 'raster-opacity': 0.9 }
+    }, 'case-markers-glow');
+
+    setActiveLayerId(layerId);
+  }, [activeLayerId, tileCache]);
+
   // Handle study selection
   const selectStudy = useCallback((study: CaseStudy) => {
     const map = mapRef.current;
     if (!map) return;
 
+    // Clear previous layer
+    if (activeLayerId) {
+      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
+      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
+      setActiveLayerId(null);
+    }
+
     setSelectedStudy(study);
     setViewMode('before');
-    setLoading(true);
+    setTileCache({ before: null, after: null, alphaearth: null });
 
     // Zoom to study area
     map.flyTo({
@@ -209,75 +290,14 @@ export default function CaseStudyMap() {
       duration: 1500
     });
 
-    // Load imagery
-    loadImagery(study, 'before');
-  }, []);
+    // Pre-load all 3 layers
+    preloadAllLayers(study);
+  }, [activeLayerId, preloadAllLayers]);
 
-  // Load imagery based on view mode
-  const loadImagery = useCallback(async (study: CaseStudy, mode: ViewMode) => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    setLoading(true);
-
-    // Remove existing GEE layer
-    if (geeLayerId && map.getLayer(geeLayerId)) {
-      map.removeLayer(geeLayerId);
-      map.removeSource(geeLayerId);
-    }
-
-    const layerId = `gee-layer-${Date.now()}`;
-    
-    try {
-      let tileUrl: string;
-      
-      if (mode === 'alphaearth') {
-        const resp = await fetch(
-          `${GEE_PROXY_URL}/api/tiles/embeddings?year=${study.afterYear}&bands=A01,A16,A09&min=-0.3&max=0.3`
-        );
-        const data = await resp.json();
-        tileUrl = data.tileUrl;
-      } else {
-        const year = mode === 'before' ? study.beforeYear : study.afterYear;
-        const resp = await fetch(
-          `${GEE_PROXY_URL}/api/tiles/optical?year=${year}&bbox=${study.bbox.join(',')}`
-        );
-        const data = await resp.json();
-        tileUrl = data.tileUrl;
-      }
-
-      if (tileUrl && map.getSource('case-studies')) {
-        map.addSource(layerId, {
-          type: 'raster',
-          tiles: [tileUrl],
-          tileSize: 256
-        });
-
-        // Insert below the markers
-        map.addLayer({
-          id: layerId,
-          type: 'raster',
-          source: layerId,
-          paint: { 'raster-opacity': 0.9 }
-        }, 'case-markers-glow');
-
-        setGeeLayerId(layerId);
-
-        // Wait for tiles to load
-        map.once('idle', () => {
-          setLoading(false);
-        });
-      }
-    } catch (err) {
-      console.error('Failed to load imagery:', err);
-      setLoading(false);
-    }
-  }, [geeLayerId]);
-
-  // Update imagery when view mode changes
+  // Switch layer when view mode changes (instant, no loading)
   useEffect(() => {
-    if (selectedStudy && mapReady) {
-      loadImagery(selectedStudy, viewMode);
+    if (selectedStudy && !loading && tileCache[viewMode]) {
+      showLayer(viewMode);
     }
   }, [viewMode]);
 
@@ -286,20 +306,21 @@ export default function CaseStudyMap() {
     const map = mapRef.current;
     if (!map) return;
 
-    // Remove imagery layer
-    if (geeLayerId && map.getLayer(geeLayerId)) {
-      map.removeLayer(geeLayerId);
-      map.removeSource(geeLayerId);
+    if (activeLayerId) {
+      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
+      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
     }
-    setGeeLayerId(null);
+
+    setActiveLayerId(null);
     setSelectedStudy(null);
+    setTileCache({ before: null, after: null, alphaearth: null });
 
     map.flyTo({
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
       duration: 1200
     });
-  }, [geeLayerId]);
+  }, [activeLayerId]);
 
   return (
     <section className="section case-study-section" data-section="cases">
@@ -313,11 +334,10 @@ export default function CaseStudyMap() {
         </div>
 
         <div className="case-study-container fade-in">
-          {/* Loading overlay */}
           {loading && (
             <div className="case-loading-overlay">
               <div className="case-loading-spinner"></div>
-              <span>Loading satellite imagery...</span>
+              <span>Loading all imagery layers...</span>
             </div>
           )}
 
