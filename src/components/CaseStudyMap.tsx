@@ -37,7 +37,7 @@ function StudyPanel({
           <h3>{study.title}</h3>
           <span className="case-panel-location">{study.location}</span>
         </div>
-        <button className="case-panel-close" onClick={onClose} title="Close and zoom out">
+        <button className="case-panel-close" onClick={onClose} title="Close">
           ✕
         </button>
       </div>
@@ -47,52 +47,42 @@ function StudyPanel({
       <div className="case-panel-meta">
         <span className="case-app-badge">{APPLICATION_LABELS[study.application]}</span>
         <a href={study.sourceUrl} target="_blank" rel="noopener" className="case-source-link">
-          Source: {study.source} ↗
+          {study.source} ↗
         </a>
       </div>
 
-      {loading ? (
-        <div className="case-panel-loading">
-          <div className="loading-spinner"></div>
-          <span>Loading imagery...</span>
+      <div className="case-panel-legend">
+        <div className="legend-buttons-compact">
+          <button
+            className={`legend-btn-sm ${viewMode === 'before' ? 'active' : ''}`}
+            onClick={() => setViewMode('before')}
+            disabled={loading}
+          >
+            {study.beforeYear}
+          </button>
+          <button
+            className={`legend-btn-sm ${viewMode === 'after' ? 'active' : ''}`}
+            onClick={() => setViewMode('after')}
+            disabled={loading}
+          >
+            {study.afterYear}
+          </button>
+          <button
+            className={`legend-btn-sm alpha ${viewMode === 'alphaearth' ? 'active' : ''}`}
+            onClick={() => setViewMode('alphaearth')}
+            disabled={loading}
+          >
+            LEOM
+          </button>
         </div>
-      ) : (
-        <>
-          <div className="case-panel-legend">
-            <span className="legend-label">Visualization:</span>
-            <div className="legend-buttons">
-              <button
-                className={`legend-btn ${viewMode === 'before' ? 'active' : ''}`}
-                onClick={() => setViewMode('before')}
-              >
-                <span className="legend-icon">📅</span>
-                Before ({study.beforeYear})
-              </button>
-              <button
-                className={`legend-btn ${viewMode === 'after' ? 'active' : ''}`}
-                onClick={() => setViewMode('after')}
-              >
-                <span className="legend-icon">📅</span>
-                After ({study.afterYear})
-              </button>
-              <button
-                className={`legend-btn ${viewMode === 'alphaearth' ? 'active' : ''}`}
-                onClick={() => setViewMode('alphaearth')}
-              >
-                <span className="legend-icon">🧠</span>
-                AlphaEarth
-              </button>
-            </div>
-          </div>
-          
-          <p className="case-panel-hint">
-            {viewMode === 'alphaearth' 
-              ? 'AlphaEarth embedding visualization (RGB from 64D). Similar colors = similar landscape types.'
-              : `Sentinel-2 optical imagery from ${viewMode === 'before' ? study.beforeYear : study.afterYear}.`
-            }
-          </p>
-        </>
-      )}
+      </div>
+      
+      <p className="case-panel-hint">
+        {viewMode === 'alphaearth' 
+          ? 'AlphaEarth embeddings — similar colors indicate similar land types.'
+          : `Sentinel-2 imagery, ${viewMode === 'before' ? study.beforeYear : study.afterYear}`
+        }
+      </p>
     </div>
   );
 }
@@ -101,18 +91,18 @@ function StudyPanel({
 export default function CaseStudyMap() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
   
   const [selectedStudy, setSelectedStudy] = useState<CaseStudy | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('before');
   const [loading, setLoading] = useState(false);
   const [geeLayerId, setGeeLayerId] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   // Americas-centered view
   const INITIAL_CENTER: [number, number] = [-70, 5];
   const INITIAL_ZOOM = 3;
 
-  // Initialize map
+  // Initialize map with light style and GeoJSON markers (no lag)
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -121,43 +111,83 @@ export default function CaseStudyMap() {
       style: {
         version: 8,
         sources: {
-          'carto-dark': {
+          'carto-voyager': {
             type: 'raster',
-            tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'],
+            tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
             tileSize: 256,
             attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
           }
         },
-        layers: [{ id: 'carto-dark-layer', type: 'raster', source: 'carto-dark' }]
+        layers: [{ id: 'basemap', type: 'raster', source: 'carto-voyager' }]
       },
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
       maxZoom: 15
     });
 
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
 
-    // Add markers for each study
     map.on('load', () => {
-      caseStudies.forEach(study => {
-        const el = document.createElement('div');
-        el.className = 'case-marker';
-        el.style.backgroundColor = study.color;
-        el.innerHTML = `<span class="case-marker-pulse"></span>`;
-        el.title = study.title;
+      // Add case study points as GeoJSON (renders as map layer = no lag)
+      const geojson: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: caseStudies.map(study => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: study.coords },
+          properties: { id: study.id, title: study.title, color: study.color }
+        }))
+      };
 
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat(study.coords)
-          .addTo(map);
+      map.addSource('case-studies', { type: 'geojson', data: geojson });
 
-        el.addEventListener('click', () => selectStudy(study));
-        markersRef.current.push(marker);
+      // Outer glow circle
+      map.addLayer({
+        id: 'case-markers-glow',
+        type: 'circle',
+        source: 'case-studies',
+        paint: {
+          'circle-radius': 18,
+          'circle-color': ['get', 'color'],
+          'circle-opacity': 0.25,
+          'circle-blur': 1
+        }
       });
+
+      // Main marker circle
+      map.addLayer({
+        id: 'case-markers',
+        type: 'circle',
+        source: 'case-studies',
+        paint: {
+          'circle-radius': 10,
+          'circle-color': ['get', 'color'],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff'
+        }
+      });
+
+      // Click handler
+      map.on('click', 'case-markers', (e) => {
+        if (e.features && e.features[0]) {
+          const id = e.features[0].properties?.id;
+          const study = caseStudies.find(s => s.id === id);
+          if (study) selectStudy(study);
+        }
+      });
+
+      // Cursor pointer on hover
+      map.on('mouseenter', 'case-markers', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'case-markers', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      setMapReady(true);
     });
 
     return () => {
-      markersRef.current.forEach(m => m.remove());
       map.remove();
       mapRef.current = null;
     };
@@ -179,17 +209,16 @@ export default function CaseStudyMap() {
       duration: 1500
     });
 
-    // Simulate loading then show imagery
-    setTimeout(() => {
-      setLoading(false);
-      loadImagery(study, 'before');
-    }, 800);
+    // Load imagery
+    loadImagery(study, 'before');
   }, []);
 
   // Load imagery based on view mode
   const loadImagery = useCallback(async (study: CaseStudy, mode: ViewMode) => {
     const map = mapRef.current;
     if (!map) return;
+
+    setLoading(true);
 
     // Remove existing GEE layer
     if (geeLayerId && map.getLayer(geeLayerId)) {
@@ -203,14 +232,12 @@ export default function CaseStudyMap() {
       let tileUrl: string;
       
       if (mode === 'alphaearth') {
-        // Get AlphaEarth embedding tiles
         const resp = await fetch(
           `${GEE_PROXY_URL}/api/tiles/embeddings?year=${study.afterYear}&bands=A01,A16,A09&min=-0.3&max=0.3`
         );
         const data = await resp.json();
         tileUrl = data.tileUrl;
       } else {
-        // Get Sentinel-2 optical tiles via GEE
         const year = mode === 'before' ? study.beforeYear : study.afterYear;
         const resp = await fetch(
           `${GEE_PROXY_URL}/api/tiles/optical?year=${year}&bbox=${study.bbox.join(',')}`
@@ -219,33 +246,40 @@ export default function CaseStudyMap() {
         tileUrl = data.tileUrl;
       }
 
-      if (tileUrl) {
+      if (tileUrl && map.getSource('case-studies')) {
         map.addSource(layerId, {
           type: 'raster',
           tiles: [tileUrl],
           tileSize: 256
         });
 
+        // Insert below the markers
         map.addLayer({
           id: layerId,
           type: 'raster',
           source: layerId,
-          paint: { 'raster-opacity': 0.85 }
-        }, 'carto-dark-layer');
+          paint: { 'raster-opacity': 0.9 }
+        }, 'case-markers-glow');
 
         setGeeLayerId(layerId);
+
+        // Wait for tiles to load
+        map.once('idle', () => {
+          setLoading(false);
+        });
       }
     } catch (err) {
       console.error('Failed to load imagery:', err);
+      setLoading(false);
     }
   }, [geeLayerId]);
 
   // Update imagery when view mode changes
   useEffect(() => {
-    if (selectedStudy && !loading) {
+    if (selectedStudy && mapReady) {
       loadImagery(selectedStudy, viewMode);
     }
-  }, [viewMode, selectedStudy, loading]);
+  }, [viewMode]);
 
   // Close panel and zoom out
   const handleClose = useCallback(() => {
@@ -260,7 +294,6 @@ export default function CaseStudyMap() {
     setGeeLayerId(null);
     setSelectedStudy(null);
 
-    // Zoom back out
     map.flyTo({
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
@@ -275,16 +308,20 @@ export default function CaseStudyMap() {
           <span className="section-label">Real Applications</span>
           <h2>Case Studies</h2>
           <p className="section-subtitle">
-            Explore real-world applications of LEOMs. Click a location to see before/after satellite imagery 
-            and AlphaEarth embedding visualizations. These examples demonstrate how geo-embeddings 
-            enable change detection, classification, and analysis without custom model training.
+            Click a marker to explore real-world LEOM applications with before/after imagery.
           </p>
         </div>
 
         <div className="case-study-container fade-in">
-          <div className="case-map-wrapper" ref={mapContainerRef}>
-            {/* Map renders here */}
-          </div>
+          {/* Loading overlay */}
+          {loading && (
+            <div className="case-loading-overlay">
+              <div className="case-loading-spinner"></div>
+              <span>Loading satellite imagery...</span>
+            </div>
+          )}
+
+          <div className="case-map-wrapper" ref={mapContainerRef} />
 
           {selectedStudy && (
             <StudyPanel
@@ -296,23 +333,9 @@ export default function CaseStudyMap() {
             />
           )}
 
-          {!selectedStudy && (
-            <div className="case-instructions">
-              <div className="case-instruction-icon">📍</div>
-              <p>Click a marker to explore a case study</p>
-              <div className="case-study-list">
-                {caseStudies.map(s => (
-                  <button 
-                    key={s.id} 
-                    className="case-study-chip"
-                    style={{ borderColor: s.color }}
-                    onClick={() => selectStudy(s)}
-                  >
-                    <span className="chip-dot" style={{ backgroundColor: s.color }}></span>
-                    {s.title}
-                  </button>
-                ))}
-              </div>
+          {!selectedStudy && mapReady && (
+            <div className="case-instructions-simple">
+              <span>👆 Click a pin to explore</span>
             </div>
           )}
         </div>
