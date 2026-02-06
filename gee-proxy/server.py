@@ -114,6 +114,43 @@ def tiles_embeddings():
         return jsonify({'error': str(e)}), 500
 
 
+# ========== Endpoint: Optical (Sentinel-2) Tiles ==========
+@app.route('/api/tiles/optical')
+def tiles_optical():
+    """
+    GET /api/tiles/optical?year=2023&bbox=-94,41,-93,42
+    Returns XYZ tile URL for Sentinel-2 true color visualization.
+    """
+    try:
+        year = request.args.get('year', '2023')
+        bbox = request.args.get('bbox', '')
+        
+        cache_key = _cache_key('optical', year, bbox)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # Get Sentinel-2 Surface Reflectance
+        start = f'{year}-01-01'
+        end = f'{int(year) + 1}-01-01'
+        
+        s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') \
+            .filterDate(start, end) \
+            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20)) \
+            .median()
+        
+        # True color RGB
+        vis = s2.select(['B4', 'B3', 'B2']).visualize(min=0, max=3000)
+        tile_url = get_tile_url(vis)
+
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Endpoint: Clustering Tiles ==========
 @app.route('/api/tiles/clustering')
 def tiles_clustering():
