@@ -685,6 +685,32 @@ export default function FMExplorer() {
               <button className="fm-info-close" onClick={clearSelection}>×</button>
               <h3>{selectedEvent.name}</h3>
               <p>{selectedEvent.description}</p>
+              
+              {/* Layer explanation */}
+              <div className="fm-layer-explain">
+                {activeLayerId?.includes('before') && (
+                  <p className="fm-explain">📅 <strong>Before:</strong> Embedding from {selectedEvent.beforeYear}. Pre-event baseline.</p>
+                )}
+                {activeLayerId?.includes('after') && !activeLayerId?.includes('before') && (
+                  <p className="fm-explain">📅 <strong>After:</strong> Embedding from {selectedEvent.afterYear}. Post-event state.</p>
+                )}
+                {activeLayerId?.includes('change') && (
+                  <p className="fm-explain">📈 <strong>Change:</strong> Embedding difference between years. Bright colors = large shifts in the 64D vector.</p>
+                )}
+                {activeLayerId?.includes('optical') && (
+                  <p className="fm-explain">🛰️ <strong>Optical:</strong> Sentinel-2 true color imagery for visual reference.</p>
+                )}
+                {activeLayerId?.includes('cdl') && (
+                  <p className="fm-explain">🌾 <strong>CDL:</strong> USDA Cropland Data Layer — purpose-trained crop classifier. Compare to FM embeddings.</p>
+                )}
+                {activeLayerId?.includes('burn') && (
+                  <p className="fm-explain">🔥 <strong>dNBR:</strong> Differenced Normalized Burn Ratio. Red = severe burn, blue = unburned.</p>
+                )}
+                {activeLayerId?.includes('degradation') && (
+                  <p className="fm-explain">🌳 <strong>Degradation:</strong> Process vector projection. Red = high deforestation similarity, green = healthy forest.</p>
+                )}
+              </div>
+              
               <div className="fm-info-meta">
                 <span className="fm-info-source">Source: {selectedEvent.source}</span>
                 <span className="fm-info-bands">
