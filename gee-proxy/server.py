@@ -426,6 +426,104 @@ def classify_embedding(embedding):
     }
 
 
+# ========== Endpoint: CDL (Cropland Data Layer) Tiles ==========
+@app.route('/api/tiles/cdl')
+def tiles_cdl():
+    """
+    GET /api/tiles/cdl?year=2023
+    Returns XYZ tile URL for USDA Cropland Data Layer visualization.
+    """
+    try:
+        year = request.args.get('year', '2023')
+
+        cache_key = _cache_key('cdl', year)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # CDL is available from 2008-2023
+        cdl = ee.ImageCollection('USDA/NASS/CDL') \
+            .filter(ee.Filter.calendarRange(int(year), int(year), 'year')) \
+            .first() \
+            .select('cropland')
+
+        # CDL has its own color palette - use the built-in visualization
+        # We'll use a simplified visualization
+        vis = cdl.visualize(
+            min=0,
+            max=255,
+            palette=[
+                '#ffd300', '#ff2626', '#00a8e2', '#ff9e0a', '#267000',
+                '#ffff00', '#70a500', '#00af49', '#dda50a', '#dda50a',
+                '#7cd3ff', '#e2007c', '#896054', '#d8b56b', '#a57000',
+                '#d69ebc', '#707000', '#aa007c', '#a05989', '#700049',
+                '#d69ebc', '#d1ff00', '#7c99ff', '#d6d600', '#d1ff00'
+            ]
+        )
+
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: Burn Severity (dNBR) ==========
+@app.route('/api/tiles/burn')
+def tiles_burn():
+    """
+    GET /api/tiles/burn?before_year=2019&after_year=2021&bbox=-119.6,37.0,-119.0,37.5
+    Returns XYZ tile URL for burn severity visualization using dNBR.
+    """
+    try:
+        before_year = request.args.get('before_year', '2019')
+        after_year = request.args.get('after_year', '2021')
+        bbox = request.args.get('bbox', '')
+
+        cache_key = _cache_key('burn', before_year, after_year, bbox)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # Get Sentinel-2 before and after fire
+        def get_s2_composite(year):
+            return ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') \
+                .filterDate(f'{year}-06-01', f'{year}-09-30') \
+                .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20)) \
+                .median()
+
+        before = get_s2_composite(before_year)
+        after = get_s2_composite(after_year)
+
+        # Calculate NBR = (NIR - SWIR) / (NIR + SWIR)
+        # Sentinel-2: NIR = B8, SWIR = B12
+        def calc_nbr(img):
+            return img.normalizedDifference(['B8', 'B12']).rename('NBR')
+
+        nbr_before = calc_nbr(before)
+        nbr_after = calc_nbr(after)
+
+        # dNBR = NBR_before - NBR_after (positive = burned)
+        dnbr = nbr_before.subtract(nbr_after).rename('dNBR')
+
+        # Visualize with burn severity palette
+        vis = dnbr.visualize(
+            min=-0.25,
+            max=0.66,
+            palette=['#2166ac', '#67a9cf', '#d1e5f0', '#f7f7f7', '#fddbc7', '#ef8a62', '#b2182b']
+        )
+
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Endpoint: Available Years ==========
 @app.route('/api/years')
 def available_years():

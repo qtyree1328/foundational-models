@@ -5,6 +5,7 @@ import ParadigmShift from './components/ParadigmShift';
 import ModelGallery from './components/ModelGallery';
 import CaseStudyMap from './components/CaseStudyMap';
 import LiveExplorer from './components/LiveExplorer';
+import FMExplorer from './components/FMExplorer';
 import EmbeddingViz from './components/EmbeddingViz';
 import DeepComparison from './components/DeepComparison';
 import Ecosystem from './components/Ecosystem';
@@ -35,9 +36,10 @@ const NAV_ITEMS = [
   { id: 'models', label: 'Models' },
   { id: 'deep-compare', label: 'Compare' },
   { id: 'ecosystem', label: 'Ecosystem' },
+  { id: 'fm-explorer', label: 'FM Explorer' },
   { id: 'explorer', label: 'Live Explorer' },
   { id: 'demo-classify', label: 'Demo' },
-  { id: 'map', label: 'Case Studies' },
+  { id: 'cases', label: 'Case Studies' },
   { id: 'insights', label: 'Expert' },
   { id: 'recommender', label: 'Recommender' },
   { id: 'sources', label: 'Sources' },
@@ -126,6 +128,7 @@ export default function App() {
       <ModelGallery />
       <DeepComparison />
       <Ecosystem />
+      <FMExplorer />
       <LiveExplorer />
       <LazySection><DemoClassification /></LazySection>
       <CaseStudyMap />
