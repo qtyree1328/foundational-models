@@ -20,6 +20,7 @@ const CITATIONS: Record<string, Citation> = {
   guo2024skysense: { id: 'guo2024skysense', text: 'Guo et al. "SkySense: A Multi-Modal Remote Sensing Foundation Model." CVPR 2024.', url: 'https://arxiv.org/abs/2312.10115' },
   xiong2024dofa: { id: 'xiong2024dofa', text: 'Xiong et al. "Neural Plasticity-Inspired Foundation Model for Observing the Earth Crossing Modalities." 2024.', url: 'https://arxiv.org/abs/2403.15356' },
   lacoste2023geobench: { id: 'lacoste2023geobench', text: 'Lacoste et al. "GEO-Bench: Toward Foundation Models for Earth Observation." NeurIPS 2023.', url: 'https://arxiv.org/abs/2306.03831' },
+  marsocci2024pangaea: { id: 'marsocci2024pangaea', text: 'Marsocci et al. "PANGAEA: A Global and Inclusive Benchmark for Geospatial Foundation Models." arXiv 2024.', url: 'https://arxiv.org/abs/2412.04204' },
   reed2023scalemae: { id: 'reed2023scalemae', text: 'Reed et al. "Scale-MAE: A Scale-Aware Masked Autoencoder for Multiscale Geospatial Representation Learning." ICCV 2023.', url: 'https://arxiv.org/abs/2212.14532' },
 };
 
@@ -757,6 +758,11 @@ function OpenQuestionsDeepDive() {
             Prithvi-EO 2.0 is the most extensively benchmarked model to date, reporting on 41 downstream tasks.
             But each paper still uses different evaluation protocols, making head-to-head comparison unreliable.
           </p>
+          <p>
+            <strong>Update (2025):</strong> PANGAEA benchmark <Cite ids={['marsocci2024pangaea']} /> addresses many of these limitations 
+            with global geographic coverage, multi-modal tasks, and standardized evaluation protocols. 
+            This comprehensive benchmark represents a significant step toward robust, inclusive evaluation of geospatial foundation models.
+          </p>
         </>
       ),
     },
@@ -797,6 +803,31 @@ function OpenQuestionsDeepDive() {
             For science that depends on reproducibility, proprietary models are fundamentally problematic —
             you can't verify, extend, or reproduce results built on undisclosed architectures. For
             operational deployment, proprietary models often win on quality and convenience.
+          </p>
+        </>
+      ),
+    },
+    {
+      title: 'Responsible AI for Earth Observation',
+      icon: '⚖️',
+      status: 'Emerging Focus',
+      statusColor: '#059669',
+      body: (
+        <>
+          <p>
+            As geospatial foundation models deploy at global scale, responsible AI considerations become critical.
+            The Nature Machine Intelligence perspective paper (2025) identifies key challenges:
+          </p>
+          <ul>
+            <li><strong>Geographic bias:</strong> Training data skewed toward developed regions with cloud-free imagery</li>
+            <li><strong>Privacy concerns:</strong> High-resolution models may inadvertently reveal sensitive locations</li>
+            <li><strong>Environmental justice:</strong> Model performance gaps between global North and South</li>
+            <li><strong>Dual-use implications:</strong> Civilian applications vs. potential military/surveillance use</li>
+          </ul>
+          <p>
+            The PANGAEA benchmark addresses some equity concerns through global sampling, but comprehensive 
+            frameworks for responsible GeoAI deployment are still developing. This parallels broader AI safety discussions 
+            but with unique Earth observation challenges.
           </p>
         </>
       ),

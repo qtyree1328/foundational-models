@@ -146,6 +146,24 @@ const modelSources: ModelSources[] = [
       { claim: 'Adopted in Esri ArcGIS Pro', source: 'Esri Documentation', url: 'https://www.esri.com/en-us/about/newsroom/announcements/esri-partners-with-ai-leaders-for-geospatial-foundation-models', accessed: '2026-02-04', verified: true },
       { claim: 'Open source with weights', source: 'GitHub Repository', url: 'https://github.com/zhu-xlab/DOFA', accessed: '2026-02-04', verified: true },
     ]
+  },
+  {
+    id: 'benchmarks',
+    name: 'Benchmark & Evaluation Studies',
+    primarySource: {
+      type: 'arXiv 2024',
+      url: 'https://arxiv.org/abs/2412.04204',
+      citation: 'Marsocci, V., et al. (2024). PANGAEA: A Global and Inclusive Benchmark for Geospatial Foundation Models. arXiv:2412.04204'
+    },
+    sources: [
+      { claim: 'PANGAEA benchmark covers diverse datasets, tasks, resolutions, and sensor modalities', source: 'arXiv Paper Abstract', url: 'https://arxiv.org/abs/2412.04204', accessed: '2026-02-06', verified: true },
+      { claim: 'Most existing benchmarks are geographically biased towards North America and Europe', source: 'PANGAEA Paper', url: 'https://arxiv.org/abs/2412.04204', accessed: '2026-02-06', verified: true },
+      { claim: 'GFMs do not consistently outperform supervised models', source: 'PANGAEA Paper', url: 'https://arxiv.org/abs/2412.04204', accessed: '2026-02-06', verified: true },
+      { claim: 'Foundation Models should be used when solving several problems jointly with high performance', source: 'Evaluation Paper', url: 'https://arxiv.org/abs/2406.18295', accessed: '2026-02-06', verified: true },
+      { claim: 'Foundation Models achieve improved performance with limited labeled data', source: 'Evaluation Paper', url: 'https://arxiv.org/abs/2406.18295', accessed: '2026-02-06', verified: true },
+      { claim: 'PANGAEA evaluation code available on GitHub', source: 'GitHub Repository', url: 'https://github.com/VMarsocci/pangaea-bench', accessed: '2026-02-06', verified: true },
+      { claim: 'Google Earth AI includes Planet-scale Imagery, Population, and Environment models', source: 'Earth AI Paper', url: 'https://arxiv.org/html/2510.18318v2', accessed: '2026-02-06', verified: true },
+    ]
   }
 ];
 
@@ -191,6 +209,36 @@ const generalSources = [
     source: 'Industry Standard',
     url: 'https://lgnd.ai',
     citation: 'Large Earth Observation Model (LEOM) — industry term for foundation models pre-trained on satellite imagery to produce geo-embeddings.'
+  },
+  {
+    topic: 'PANGAEA Benchmark (2024)',
+    source: 'arXiv 2024',
+    url: 'https://arxiv.org/abs/2412.04204',
+    citation: 'Marsocci, V., et al. (2024). PANGAEA: A Global and Inclusive Benchmark for Geospatial Foundation Models. arXiv:2412.04204'
+  },
+  {
+    topic: 'Geospatial Foundation Models Evaluation',
+    source: 'arXiv 2024',
+    url: 'https://arxiv.org/abs/2406.18295',
+    citation: 'Dionelis, N., et al. (2024). Evaluating and Benchmarking Foundation Models for Earth Observation and Geospatial AI. arXiv:2406.18295'
+  },
+  {
+    topic: 'Earth AI (Google Research 2025)',
+    source: 'arXiv 2025',
+    url: 'https://arxiv.org/html/2510.18318v2',
+    citation: 'Shekel, T., Shetty, S., et al. (2025). Earth AI: Unlocking Geospatial Insights with Foundation Models and Cross-Modal Reasoning. arXiv:2510.18318'
+  },
+  {
+    topic: 'GeoFM Review Paper (2025)',
+    source: 'International Journal of GIS',
+    url: 'https://www.tandfonline.com/doi/full/10.1080/13658816.2025.2543038',
+    citation: 'Unknown Authors (2025). GeoFM: how will geo-foundation models reshape spatial data science and GeoAI? International Journal of GIS.'
+  },
+  {
+    topic: 'Remote Sensing Foundation Models (Awesome List)',
+    source: 'GitHub',
+    url: 'https://github.com/Jack-bo1220/Awesome-Remote-Sensing-Foundation-Models',
+    citation: 'Jack-bo1220. (2024). Awesome Remote Sensing Foundation Models - Comprehensive collection of papers and resources.'
   }
 ];
 

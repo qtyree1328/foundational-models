@@ -47,6 +47,7 @@ const NAV_ITEMS = [
 
 function Nav({ activeSection }: { activeSection: string }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -54,26 +55,76 @@ function Nav({ activeSection }: { activeSection: string }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const scrollTo = (id: string) => {
     const el = document.querySelector(`[data-section="${id}"]`);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMobileMenuOpen(false);
   };
 
   return (
-    <nav className={`main-nav ${scrolled ? 'scrolled' : ''}`}>
-      <div className="nav-inner">
-        <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          <span>LEOM Explorer</span>
+    <>
+      <nav className={`main-nav ${scrolled ? 'scrolled' : ''}`}>
+        <div className="nav-inner">
+          <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>LEOM Explorer</span>
+          </div>
+          <div className="nav-links">
+            {NAV_ITEMS.map(item => (
+              <button
+                key={item.id}
+                className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
+                onClick={() => scrollTo(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <button 
+            className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
-        <div className="nav-links">
+      </nav>
+      
+      {/* Mobile Menu Overlay */}
+      <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-menu-header">
+          <span>Navigate</span>
+        </div>
+        <div className="mobile-menu-links">
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
-              className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
+              className={`mobile-menu-link ${activeSection === item.id ? 'active' : ''}`}
               onClick={() => scrollTo(item.id)}
             >
               {item.label}
@@ -81,7 +132,7 @@ function Nav({ activeSection }: { activeSection: string }) {
           ))}
         </div>
       </div>
-    </nav>
+    </>
   );
 }
 

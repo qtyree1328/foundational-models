@@ -75,7 +75,7 @@ export const models: Model[] = [
     name: 'AlphaEarth Foundations',
     org: 'Google DeepMind',
     tagline: '64-dimensional embeddings for the entire Earth at 10m resolution',
-    description: 'An embedding field model (not standard ViT MAE) that assimilates spatial, temporal, and measurement contexts from Sentinel-1 SAR, Sentinel-2 MSI, Landsat 8/9, GEDI LiDAR, climate simulations, NLCD, and USDA CDL into compact 64-dimensional unit-length vectors. Produces annual global embeddings at 10m resolution, available as 64-band images (A00–A63) through Google Earth Engine. 16× less storage than competing model outputs.',
+    description: 'An embedding field model (not standard ViT MAE) that assimilates spatial, temporal, and measurement contexts from Sentinel-1 SAR, Sentinel-2 MSI, Landsat 8/9, GEDI LiDAR, climate simulations, NLCD, and USDA CDL into compact 64-dimensional unit-length vectors. Produces annual global embeddings at 10m resolution, available as 64-band images (A00–A63) through Google Earth Engine and Google Cloud Storage as Cloud Optimized GeoTIFFs (Dec 2025). Dataset version 1.1 includes annual coverage from 2017-2024. 16× less storage than competing model outputs.',
     params: 'Undisclosed',
     paramsNum: 0,
     resolution: '10m',
@@ -132,6 +132,7 @@ export const models: Model[] = [
       { label: 'Earth Engine Catalog', url: 'https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL' },
       { label: 'GEE Code Editor', url: 'https://code.earthengine.google.com/cc4871f10c6f45271bbeae1b9565b944' },
       { label: 'Blog', url: 'https://deepmind.google/blog/alphaearth-foundations-helps-map-our-planet-in-unprecedented-detail/' },
+      { label: 'Cloud Storage Access (Dec 2025)', url: 'https://medium.com/google-earth/alphaearth-foundations-satellite-embeddings-now-available-on-google-cloud-storage-f9ab0f7252d6' },
     ],
     scores: { parameters: 5, resolution: 9, modalities: 10, temporal: 6, openness: 3, benchmarks: 8 },
     codeExample: `// Google Earth Engine — AlphaEarth Embeddings
