@@ -239,6 +239,36 @@ const generalSources = [
     source: 'GitHub',
     url: 'https://github.com/Jack-bo1220/Awesome-Remote-Sensing-Foundation-Models',
     citation: 'Jack-bo1220. (2024). Awesome Remote Sensing Foundation Models - Comprehensive collection of papers and resources.'
+  },
+  {
+    topic: 'Responsible Geospatial Foundation Models',
+    source: 'Nature Machine Intelligence (2025)',
+    url: 'https://www.nature.com/articles/s42256-025-01106-7',
+    citation: 'Editorial. (2025). Towards responsible geospatial foundation models. Nature Machine Intelligence. [Highlights 58 foundation models developed June 2021-June 2024]'
+  },
+  {
+    topic: 'Vision Foundation Models in Remote Sensing: Comprehensive Survey',
+    source: 'arXiv (2024)',
+    url: 'https://arxiv.org/html/2408.03464',
+    citation: 'Lu, S., Guo, J., Zimmer-Dauphinee, J.R., et al. (2024). Vision Foundation Models in Remote Sensing: A Survey. arXiv:2408.03464. [Comprehensive review of 58 models from June 2021 to June 2024]'
+  },
+  {
+    topic: 'Digital Applications for Environmental Monitoring',
+    source: 'Frontiers in Climate (2025)',
+    url: 'https://www.frontiersin.org/journals/climate/articles/10.3389/fclim.2025.1520242/full',
+    citation: 'Multiple Authors. (2025). Digital applications unlock remote sensing AI foundation models for scalable environmental monitoring. Frontiers in Climate.'
+  },
+  {
+    topic: 'Scalable Earth Observation Data Mining',
+    source: 'arXiv (2025)',
+    url: 'https://arxiv.org/html/2506.20174v1',
+    citation: 'Multiple Authors. (2025). Towards Scalable and Generalizable Earth Observation Data Mining via Foundation Model Composition. arXiv:2506.20174'
+  },
+  {
+    topic: 'Geospatial Foundation Models for Sustainable Development',
+    source: 'arXiv (2025)',
+    url: 'https://arxiv.org/html/2505.24528v2',
+    citation: 'Multiple Authors. (2025). Geospatial Foundation Models to Enable Progress on Sustainable Development Goals. arXiv:2505.24528'
   }
 ];
 

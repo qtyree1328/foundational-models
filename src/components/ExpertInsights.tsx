@@ -22,6 +22,9 @@ const CITATIONS: Record<string, Citation> = {
   lacoste2023geobench: { id: 'lacoste2023geobench', text: 'Lacoste et al. "GEO-Bench: Toward Foundation Models for Earth Observation." NeurIPS 2023.', url: 'https://arxiv.org/abs/2306.03831' },
   marsocci2024pangaea: { id: 'marsocci2024pangaea', text: 'Marsocci et al. "PANGAEA: A Global and Inclusive Benchmark for Geospatial Foundation Models." arXiv 2024.', url: 'https://arxiv.org/abs/2412.04204' },
   reed2023scalemae: { id: 'reed2023scalemae', text: 'Reed et al. "Scale-MAE: A Scale-Aware Masked Autoencoder for Multiscale Geospatial Representation Learning." ICCV 2023.', url: 'https://arxiv.org/abs/2212.14532' },
+  lu2024visionsurvey: { id: 'lu2024visionsurvey', text: 'Lu, S. et al. "Vision Foundation Models in Remote Sensing: A Survey." arXiv 2024.', url: 'https://arxiv.org/abs/2408.03464' },
+  nature2025responsible: { id: 'nature2025responsible', text: 'Nature Editorial. "Towards responsible geospatial foundation models." Nature Machine Intelligence 2025.', url: 'https://www.nature.com/articles/s42256-025-01106-7' },
+  blumenstiel2024peft: { id: 'blumenstiel2024peft', text: 'Blumenstiel et al. "Parameter-Efficient Fine-Tuning for Geospatial Foundation Models." arXiv 2024.', url: 'https://arxiv.org/abs/2504.17397' },
 };
 
 function Cite({ ids }: { ids: string[] }) {
@@ -231,6 +234,15 @@ function PretrainingDeepDive() {
               tokens — currently impractical for standard attention.
             </div>
           </div>
+          <div className="ei-callout">
+            <div className="ei-callout-icon">📊</div>
+            <div>
+              <strong>2024 Survey Findings:</strong> A comprehensive review of 58 foundation models (June 2021-2024)
+              found that temporal modeling remains one of the most challenging aspects <Cite ids={['lu2024visionsurvey']} />.
+              Most models still limit temporal sequences to 3-4 observations, with only a few exploring longer sequences
+              or novel architectures for efficient temporal attention.
+            </div>
+          </div>
         </div>
       </Collapsible>
 
@@ -297,6 +309,137 @@ function PretrainingDeepDive() {
             in nm <Cite ids={['xiong2024dofa']} />. This implicitly performs early fusion at the spectral level
             while remaining agnostic to which sensor captured the data.
           </p>
+        </div>
+      </Collapsible>
+
+      <Collapsible title="Parameter-Efficient Fine-Tuning: Adapting Without Breaking the Bank">
+        <div className="ei-prose">
+          <p>
+            Foundation models are massive — Clay v1.5 has 632M parameters, Prithvi-EO 2.0 reaches 600M. 
+            Full fine-tuning requires training all parameters, demanding enormous GPU memory and risking 
+            catastrophic forgetting of pre-trained features. Parameter-Efficient Fine-Tuning (PEFT) techniques 
+            solve this by training only a small subset of parameters while keeping the foundation model frozen.
+          </p>
+
+          <div className="ei-strategy-grid">
+            <div className="ei-strategy-card" style={{ '--sc': '#8b5cf6' } as React.CSSProperties}>
+              <div className="ei-strategy-header">
+                <span className="ei-strategy-badge">LoRA</span>
+                <span className="ei-strategy-label">Low-Rank Adaptation</span>
+              </div>
+              <p>
+                Decompose weight updates as W + ΔW = W + AB^T where A and B are low-rank matrices.
+                Instead of updating 1024×1024 = 1M parameters, train only r×1024 + r×1024 where r=16 
+                typically gives 128K trainable parameters — a 8× reduction.
+              </p>
+              <div className="ei-strategy-detail">
+                <strong>Memory savings:</strong> 90-95% reduction in trainable parameters
+              </div>
+              <div className="ei-strategy-detail">
+                <strong>Performance:</strong> Matches or exceeds full fine-tuning on most EO tasks
+              </div>
+            </div>
+
+            <div className="ei-strategy-card" style={{ '--sc': '#059669' } as React.CSSProperties}>
+              <div className="ei-strategy-header">
+                <span className="ei-strategy-badge">Adapter</span>
+                <span className="ei-strategy-label">Residual Adapters</span>
+              </div>
+              <p>
+                Insert small feedforward modules between transformer layers: x' = x + Adapter(x).
+                Each adapter has ~1-10M parameters compared to 600M+ in the full model. The residual 
+                connection ensures gradual feature adaptation without disrupting pre-trained representations.
+              </p>
+              <div className="ei-strategy-detail">
+                <strong>Flexibility:</strong> Can insert at any layer depth for targeted adaptation
+              </div>
+              <div className="ei-strategy-detail">
+                <strong>Interpretability:</strong> Easier to understand what each adapter learns
+              </div>
+            </div>
+
+            <div className="ei-strategy-card" style={{ '--sc': '#dc2626' } as React.CSSProperties}>
+              <div className="ei-strategy-header">
+                <span className="ei-strategy-badge">Prompt</span>
+                <span className="ei-strategy-label">Visual Prompting</span>
+              </div>
+              <p>
+                Append learnable prompt tokens to input patches, similar to text prompts in LLMs.
+                The model learns task-specific prompts that guide attention toward relevant features
+                without modifying the backbone weights at all.
+              </p>
+              <div className="ei-strategy-detail">
+                <strong>Minimal overhead:</strong> Only prompt tokens are trainable (~0.1% of parameters)
+              </div>
+              <div className="ei-strategy-detail">
+                <strong>Limitation:</strong> May not capture complex task-specific transformations
+              </div>
+            </div>
+          </div>
+
+          <div className="ei-callout">
+            <div className="ei-callout-icon">🧪</div>
+            <div>
+              <strong>2024 EO Benchmark Results:</strong> Comprehensive evaluation across 5 EO datasets 
+              found that LoRA adapters match full fine-tuning performance while using 95% fewer trainable 
+              parameters <Cite ids={['blumenstiel2024peft']} />. Crucially, PEFT methods also improved 
+              generalization to unseen geographic regions — suggesting that constraining adaptation 
+              prevents overfitting to local training distributions.
+            </div>
+          </div>
+
+          <div className="ei-callout warning">
+            <div className="ei-callout-icon">⚠️</div>
+            <div>
+              <strong>The adaptation paradox:</strong> Too little adaptation (very low rank r) fails to 
+              capture task-specific patterns. Too much adaptation approaches full fine-tuning cost and 
+              loses generalization benefits. The sweet spot is typically r=16-64 for LoRA, balancing 
+              expressivity with efficiency. UNet decoders paired with frozen foundation encoders 
+              emerge as the optimal configuration for dense prediction tasks.
+            </div>
+          </div>
+
+          <table className="ei-peft-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Trainable Params</th>
+                <th>GPU Memory</th>
+                <th>Performance</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Full Fine-tuning</strong></td>
+                <td>100% (~600M)</td>
+                <td>~40GB</td>
+                <td>Baseline</td>
+                <td>Unlimited compute</td>
+              </tr>
+              <tr>
+                <td><strong>LoRA (r=16)</strong></td>
+                <td>~5% (~30M)</td>
+                <td>~8GB</td>
+                <td>95-105% of full</td>
+                <td>Most EO tasks</td>
+              </tr>
+              <tr>
+                <td><strong>Adapters</strong></td>
+                <td>~10% (~60M)</td>
+                <td>~12GB</td>
+                <td>90-100% of full</td>
+                <td>Complex spatial tasks</td>
+              </tr>
+              <tr>
+                <td><strong>Visual Prompting</strong></td>
+                <td>~0.1% (~0.6M)</td>
+                <td>~4GB</td>
+                <td>70-90% of full</td>
+                <td>Simple classification</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </Collapsible>
     </div>

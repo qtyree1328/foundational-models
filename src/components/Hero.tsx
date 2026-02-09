@@ -198,7 +198,7 @@ export default function Hero() {
         </p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <span className="hero-stat-value">8</span>
+            <span className="hero-stat-value">9</span>
             <span className="hero-stat-label">Major Models</span>
           </div>
           <div className="hero-stat">

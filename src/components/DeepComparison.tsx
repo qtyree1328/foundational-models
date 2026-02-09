@@ -550,6 +550,190 @@ export default function DeepComparison() {
           {activeTab === 'training' && <TrainingDataViz />}
           {activeTab === 'arch' && <ArchitectureDiagrams />}
         </div>
+
+        {/* Benchmark Results Section */}
+        <div className="benchmark-results-section fade-in">
+          <h3 className="deep-subtitle">Latest Benchmark Results</h3>
+          <p className="deep-subtitle-desc">Performance comparisons from PhilEO Bench (2024), GEO-Bench-2 (2025), and recent standardized evaluations — the leading frameworks for LEOM assessment. Foundation models consistently outperform task-specific models when labeled data is limited.</p>
+          
+          <div className="benchmark-cards-grid">
+            {/* PhilEO Bench Results */}
+            <div className="benchmark-card">
+              <div className="benchmark-header">
+                <h4>PhilEO Bench (2024)</h4>
+                <span className="benchmark-badge">400GB Global Dataset</span>
+              </div>
+              <p className="benchmark-desc">
+                Comprehensive evaluation across building density, road segmentation, and land cover classification using stratified global Sentinel-2 data.
+              </p>
+              <div className="benchmark-results">
+                <div className="benchmark-task">
+                  <div className="task-name">Building Density (MSE)</div>
+                  <div className="task-results">
+                    <div className="result-item best">
+                      <span className="result-model">Prithvi</span>
+                      <span className="result-score">Lowest MSE</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">SatMAE</span>
+                      <span className="result-score">Higher MSE</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="benchmark-task">
+                  <div className="task-name">Land Cover Classification</div>
+                  <div className="task-results">
+                    <div className="result-item best">
+                      <span className="result-model">Prithvi</span>
+                      <span className="result-score">Superior accuracy</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">SeCo</span>
+                      <span className="result-score">Competitive</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="benchmark-citation">
+                Source: Fibaek et al. "PhilEO Bench: Evaluating Geo-Spatial Foundation Models" arXiv:2401.04464 (2024)
+              </div>
+            </div>
+
+            {/* GEO-Bench-2 Results */}
+            <div className="benchmark-card">
+              <div className="benchmark-header">
+                <h4>GEO-Bench-2 (2025)</h4>
+                <span className="benchmark-badge">15,000+ Experiments</span>
+              </div>
+              <p className="benchmark-desc">
+                Next-generation benchmark with 19 datasets across 9 capability subsets. Evaluates capability rather than just performance using TerraTorch framework.
+              </p>
+              <div className="benchmark-results">
+                <div className="benchmark-task">
+                  <div className="task-name">Cross-Dataset Generalization</div>
+                  <div className="task-results">
+                    <div className="result-item best">
+                      <span className="result-model">Prithvi-EO-2.0</span>
+                      <span className="result-score">8% improvement over v1.0</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">Clay</span>
+                      <span className="result-score">Strong multi-sensor capability</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="benchmark-task">
+                  <div className="task-name">Flood Mapping (Sen1Floods11)</div>
+                  <div className="task-results">
+                    <div className="result-item best">
+                      <span className="result-model">Prithvi</span>
+                      <span className="result-score">~4% better mIoU on unseen regions</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">SatMAE</span>
+                      <span className="result-score">Baseline comparison</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="benchmark-citation">
+                Sources: AI Alliance "GEO-Bench-2" (2025), EmergentMind LEOM Analysis (2025)
+              </div>
+            </div>
+
+            {/* Label Efficiency Research */}
+            <div className="benchmark-card">
+              <div className="benchmark-header">
+                <h4>Label Efficiency Study (2024)</h4>
+                <span className="benchmark-badge">Foundation vs Task-Specific</span>
+              </div>
+              <p className="benchmark-desc">
+                Comprehensive study evaluating foundation models against problem-specific models across land cover, crop mapping, flood segmentation, and building density tasks with limited labeled data.
+              </p>
+              <div className="benchmark-results">
+                <div className="benchmark-task">
+                  <div className="task-name">Limited Data Performance</div>
+                  <div className="task-results">
+                    <div className="result-item best">
+                      <span className="result-model">Foundation Models</span>
+                      <span className="result-score">Superior with limited labels</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">Task-Specific Models</span>
+                      <span className="result-score">Require more training data</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="benchmark-task">
+                  <div className="task-name">Key Applications Tested</div>
+                  <div className="task-results">
+                    <div className="result-item">
+                      <span className="result-model">Land Cover</span>
+                      <span className="result-score">✓ Label efficient</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">Crop Mapping</span>
+                      <span className="result-score">✓ Label efficient</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-model">Flood Detection</span>
+                      <span className="result-score">✓ Label efficient</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="benchmark-citation">
+                Source: Dionelis et al. "Evaluating and Benchmarking Foundation Models for Earth Observation" arXiv:2406.18295 (2024)
+              </div>
+            </div>
+
+            {/* Task-Specific Performance */}
+            <div className="benchmark-card full-width">
+              <div className="benchmark-header">
+                <h4>Task-Specific Performance Highlights</h4>
+                <span className="benchmark-badge">Validated Applications</span>
+              </div>
+              <div className="task-performance-grid">
+                <div className="performance-item">
+                  <div className="perf-icon">🚁</div>
+                  <div className="perf-task">Airport Detection</div>
+                  <div className="perf-model">AlphaEarth A26</div>
+                  <div className="perf-result">Validated on Philadelphia (Element 84)</div>
+                </div>
+                <div className="performance-item">
+                  <div className="perf-icon">🏭</div>
+                  <div className="perf-task">Industrial Areas</div>
+                  <div className="perf-model">AlphaEarth A51</div>
+                  <div className="perf-result">Dimension-specific encoding</div>
+                </div>
+                <div className="performance-item">
+                  <div className="perf-icon">🌊</div>
+                  <div className="perf-task">Flood Mapping</div>
+                  <div className="perf-model">Prithvi-EO-2.0</div>
+                  <div className="perf-result">95.5% accuracy (fine-tuned)</div>
+                </div>
+                <div className="performance-item">
+                  <div className="perf-icon">🏗️</div>
+                  <div className="perf-task">Infrastructure Change</div>
+                  <div className="perf-model">AlphaEarth</div>
+                  <div className="perf-result">Ethiopian Renaissance Dam tracking</div>
+                </div>
+                <div className="performance-item">
+                  <div className="perf-icon">🌴</div>
+                  <div className="perf-task">Palm Oil Detection</div>
+                  <div className="perf-model">General LEOMs</div>
+                  <div className="perf-result">Star-pattern recognition (RSPO certified)</div>
+                </div>
+                <div className="performance-item">
+                  <div className="perf-icon">🌾</div>
+                  <div className="perf-task">Crop Segmentation</div>
+                  <div className="perf-model">Clay Multi-sensor</div>
+                  <div className="perf-result">Dynamic band adaptation</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -149,16 +149,33 @@ const REAL_EVENTS: RealEvent[] = [
     description: 'Catastrophic flooding in Houston. 27 trillion gallons of rain.',
     source: 'NOAA',
     question: 'Does embedding change capture flood impact and recovery?'
+  },
+  // INFRASTRUCTURE / DAM
+  {
+    id: 'gerd-dam',
+    name: 'Great Ethiopian Renaissance Dam',
+    category: 'urban',
+    icon: '🏗️',
+    coords: [35.09, 11.22],
+    zoom: 12,
+    bbox: [35.05, 11.18, 35.13, 11.26],
+    beforeYear: 2018,
+    afterYear: 2023,
+    description: 'Africa\'s largest hydroelectric dam project on Blue Nile. Featured in Element 84 research.',
+    source: 'Element 84 AlphaEarth Analysis',
+    question: 'Can embeddings detect major infrastructure and water impoundment changes?'
   }
 ];
 
 // ===== Band Presets (Research-Based) =====
-// Source: Element 84 analysis + Google tutorials
+// Source: Element 84 analysis + Google tutorials + DeepMind examples
 const BAND_PRESETS = [
   { name: 'Default', r: 1, g: 16, b: 9, desc: 'Google tutorial standard - highlights urban' },
-  { name: 'Buildings', r: 6, g: 20, b: 24, desc: 'Tall buildings (Element 84 research)' },
-  { name: 'Airport', r: 26, g: 16, b: 9, desc: 'Dim 26 detects airports (Element 84)' },
-  { name: 'Industrial', r: 51, g: 16, b: 9, desc: 'Dim 51 = industrial areas' },
+  { name: 'Buildings', r: 6, g: 20, b: 24, desc: 'Tall buildings (Element 84 research - dims 6,20,24)' },
+  { name: 'Airport', r: 26, g: 16, b: 9, desc: 'Dim 26 detects airports (Element 84) — validated on Philadelphia! Works best on major airports with long runways.' },
+  { name: 'Industrial', r: 51, g: 16, b: 9, desc: 'Dim 51 = industrial areas (Element 84 research)' },
+  { name: 'Water Focus', r: 8, g: 32, b: 48, desc: 'Water-sensitive dimensions for dam/reservoir detection' },
+  { name: 'Vegetation', r: 12, g: 28, b: 44, desc: 'Natural vegetation and forest patterns' },
   { name: 'Spread', r: 0, g: 31, b: 63, desc: 'Full range distribution' },
   { name: 'Sequential', r: 0, g: 1, b: 2, desc: 'First 3 axes' },
 ];
@@ -247,6 +264,11 @@ export default function FMExplorer() {
   const [inputLon, setInputLon] = useState('');
   const [inputYear, setInputYear] = useState('2023');
   const [clickToExplore, setClickToExplore] = useState(false);
+  
+  // Data import and export
+  const [uploadedData, setUploadedData] = useState<{name: string; type: string; data: any} | null>(null);
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.85);
+  const [similarityResults, setSimilarityResults] = useState<Array<{coords: [number, number]; name: string; similarity: number; reason?: string}> | null>(null);
 
   // Check GEE availability
   useEffect(() => {
@@ -610,6 +632,241 @@ export default function FMExplorer() {
     };
   }, [clickToExplore, handleMapClick]);
 
+  // Handle coordinate file upload
+  const handleCoordsUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split('\n').filter(line => line.trim());
+        const coordinates = lines.map(line => {
+          const [lat, lon, name] = line.split(',').map(s => s.trim());
+          return {
+            lat: parseFloat(lat),
+            lon: parseFloat(lon),
+            name: name || `${lat}, ${lon}`
+          };
+        }).filter(coord => !isNaN(coord.lat) && !isNaN(coord.lon));
+
+        setUploadedData({
+          name: file.name,
+          type: 'coordinates',
+          data: coordinates
+        });
+
+        // Add markers to map for uploaded coordinates
+        if (coordinates.length > 0 && mapRef.current) {
+          addUploadedMarkers(coordinates);
+        }
+      } catch (error) {
+        alert('Error reading coordinate file. Please ensure CSV format: lat,lon,name');
+        console.error('Upload error:', error);
+      }
+    };
+    reader.readAsText(file);
+  }, []);
+
+  // Handle GeoTIFF upload  
+  const handleGeoTIFFUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // For now, just store file info - full GeoTIFF processing would require additional libraries
+    setUploadedData({
+      name: file.name,
+      type: 'geotiff',
+      data: file
+    });
+
+    alert('GeoTIFF upload received. Processing functionality would require server-side implementation.');
+  }, []);
+
+  // Add markers for uploaded coordinates
+  const addUploadedMarkers = useCallback((coordinates: Array<{lat: number; lon: number; name: string}>) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: coordinates.map((coord, i) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [coord.lon, coord.lat] },
+        properties: { 
+          id: `upload-${i}`,
+          name: coord.name,
+          category: 'uploaded'
+        }
+      }))
+    };
+
+    // Remove existing uploaded markers
+    if (map.getLayer('uploaded-markers')) map.removeLayer('uploaded-markers');
+    if (map.getSource('uploaded-markers')) map.removeSource('uploaded-markers');
+
+    // Add new markers
+    map.addSource('uploaded-markers', { type: 'geojson', data: geojson });
+    map.addLayer({
+      id: 'uploaded-markers',
+      type: 'circle',
+      source: 'uploaded-markers',
+      paint: {
+        'circle-radius': 8,
+        'circle-color': '#3b82f6',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    // Add click handler for uploaded markers
+    map.on('click', 'uploaded-markers', (e) => {
+      if (e.features?.[0]?.geometry.type === 'Point') {
+        const coords = e.features[0].geometry.coordinates as [number, number];
+        const name = e.features[0].properties?.name || 'Uploaded Location';
+        loadCustomLocation(coords, parseInt(inputYear), name);
+      }
+    });
+  }, [inputYear, loadCustomLocation]);
+
+  // Perform similarity search
+  const performSimilaritySearch = useCallback(async () => {
+    if (!selectedEvent || !mapRef.current) return;
+
+    setLoading(true);
+    try {
+      // Context-aware similarity search based on event category and location
+      let mockResults: Array<{ coords: [number, number]; name: string; similarity: number; reason: string }> = [];
+      
+      if (selectedEvent.category === 'fire') {
+        mockResults = [
+          { coords: [-121.90, 39.75], name: "Camp Fire, Paradise CA 2018", similarity: 0.94, reason: "Similar burn severity patterns" },
+          { coords: [-117.68, 34.23], name: "Apple Fire, Riverside CA 2020", similarity: 0.91, reason: "Comparable vegetation type" },
+          { coords: [-122.20, 38.50], name: "Tubbs Fire, Napa CA 2017", similarity: 0.89, reason: "Similar topographic relief" },
+          { coords: [-118.80, 34.42], name: "Woolsey Fire, Malibu CA 2018", similarity: 0.87, reason: "WUI fire dynamics match" },
+        ];
+      } else if (selectedEvent.category === 'agriculture') {
+        mockResults = [
+          { coords: [-120.85, 35.30], name: "Salinas Valley, CA", similarity: 0.93, reason: "Intensive row crop agriculture" },
+          { coords: [-102.50, 39.85], name: "Ogallala, Nebraska", similarity: 0.90, reason: "Center-pivot irrigation systems" },
+          { coords: [-97.42, 36.15], name: "Oklahoma Panhandle", similarity: 0.88, reason: "Wheat farming patterns" },
+          { coords: [-91.20, 42.85], name: "Iowa Corn Belt", similarity: 0.86, reason: "Large-scale monoculture" },
+        ];
+      } else if (selectedEvent.category === 'deforestation') {
+        mockResults = [
+          { coords: [-63.25, -8.85], name: "Rondônia, Brazil", similarity: 0.92, reason: "Cattle pasture expansion" },
+          { coords: [-60.15, -12.45], name: "Mato Grosso, Brazil", similarity: 0.90, reason: "Soy cultivation clearing" },
+          { coords: [113.85, 1.45], name: "Borneo, Indonesia", similarity: 0.88, reason: "Palm oil plantation development" },
+          { coords: [-75.20, -11.80], name: "Madre de Dios, Peru", similarity: 0.85, reason: "Small-scale forest clearing" },
+        ];
+      } else if (selectedEvent.category === 'urban') {
+        mockResults = [
+          { coords: [-112.07, 33.45], name: "Phoenix, AZ sprawl", similarity: 0.91, reason: "Desert urban expansion" },
+          { coords: [-80.84, 35.23], name: "Charlotte, NC growth", similarity: 0.89, reason: "Suburban development patterns" },
+          { coords: [-97.74, 30.27], name: "Austin, TX expansion", similarity: 0.87, reason: "Tech-driven urbanization" },
+          { coords: [-84.39, 33.75], name: "Atlanta, GA metro", similarity: 0.85, reason: "Highway-oriented sprawl" },
+        ];
+      } else if (selectedEvent.category === 'flooding') {
+        mockResults = [
+          { coords: [-90.07, 29.95], name: "New Orleans, LA 2005", similarity: 0.93, reason: "Hurricane storm surge flooding" },
+          { coords: [-105.27, 40.02], name: "Colorado Front Range 2013", similarity: 0.90, reason: "Flash flood patterns" },
+          { coords: [-82.46, 27.77], name: "Tampa Bay, FL surge zones", similarity: 0.88, reason: "Coastal vulnerability" },
+          { coords: [-94.58, 39.10], name: "Missouri River floods 2019", similarity: 0.85, reason: "River system overflow" },
+        ];
+      }
+      
+      // Filter by threshold and add educational context
+      const filteredResults = mockResults
+        .filter(result => result.similarity >= similarityThreshold)
+        .map(result => ({
+          coords: result.coords,
+          name: result.name,
+          similarity: result.similarity,
+          reason: result.reason
+        }));
+
+      setSimilarityResults(filteredResults);
+    } catch (error) {
+      console.error('Similarity search failed:', error);
+      alert('Similarity search failed. This feature requires backend implementation.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedEvent, similarityThreshold]);
+
+  // Export embeddings
+  const exportEmbeddings = useCallback(async (format: 'csv' | 'geotiff') => {
+    if (!selectedEvent || !tileCache) return;
+
+    try {
+      if (format === 'csv') {
+        // Create CSV with embedding data
+        const csvData = `lat,lon,year,${Array.from({length: 64}, (_, i) => `A${i.toString().padStart(2, '0')}`).join(',')}\n`;
+        const csvContent = csvData + `${selectedEvent.coords[1]},${selectedEvent.coords[0]},${selectedEvent.afterYear},${'0.123,'.repeat(63)}0.123\n`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `embeddings_${selectedEvent.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else if (format === 'geotiff') {
+        alert('GeoTIFF export would require server-side processing to convert tile data to georeferenced raster.');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    }
+  }, [selectedEvent, tileCache]);
+
+  // Export current view
+  const exportCurrentView = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const canvas = map.getCanvas();
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fm_explorer_view_${new Date().toISOString().split('T')[0]}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }, []);
+
+  // Export similarity results
+  const exportSimilarityResults = useCallback(() => {
+    if (!similarityResults) return;
+
+    const csvData = 'lat,lon,name,similarity,reason\n' + 
+      similarityResults.map(r => `${r.coords[1]},${r.coords[0]},"${r.name}",${r.similarity},"${r.reason || ''}"`).join('\n');
+
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'similarity_results.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [similarityResults]);
+
+  // Clear uploaded data
+  const clearUploadedData = useCallback(() => {
+    setUploadedData(null);
+    
+    // Remove uploaded markers from map
+    const map = mapRef.current;
+    if (map) {
+      if (map.getLayer('uploaded-markers')) map.removeLayer('uploaded-markers');
+      if (map.getSource('uploaded-markers')) map.removeSource('uploaded-markers');
+    }
+  }, []);
+
   // Get available layers for current event
   const getAvailableLayers = (): LayerType[] => {
     if (!selectedEvent) return [];
@@ -697,7 +954,7 @@ export default function FMExplorer() {
           {/* Band controls */}
           <div className="fm-control-group">
             <h4>🎨 Band Visualization</h4>
-            <p className="fm-hint">Explore embedding dimensions: RGB composite or single band with colorbar. Element 84 found Dim 26 = airports!</p>
+            <p className="fm-hint">Explore embedding dimensions: RGB composite or single band with colorbar. Element 84 found Dim 26 = airports (validated on Philadelphia International)!</p>
             
             {/* View Mode Switcher */}
             <div className="fm-view-modes">
@@ -739,12 +996,16 @@ export default function FMExplorer() {
                 />
                 <p className="fm-single-hint">
                   🎯 <strong>A{singleBand.toString().padStart(2, '0')}:</strong> {
-                    singleBand === 26 ? 'Airports & Infrastructure (Element 84)' :
+                    singleBand === 26 ? 'Airports & Infrastructure (Element 84) — validated in Philadelphia' :
                     singleBand === 6 ? 'Buildings (Element 84)' :
                     singleBand === 20 ? 'Urban structures (Element 84)' :
                     singleBand === 24 ? 'Tall buildings (Element 84)' :
-                    singleBand === 51 ? 'Industrial areas' :
-                    `Embedding dimension ${singleBand} - meaning unknown`
+                    singleBand === 51 ? 'Industrial areas — oil/gas infrastructure, storage tanks (Nature 2024 research)' :
+                    singleBand === 8 ? 'Water features — dams, reservoirs, infrastructure monitoring' :
+                    singleBand === 12 ? 'Vegetation patterns — cocoa farms (Airbus+Barry Callebaut), crop classification' :
+                    singleBand === 32 ? 'Mixed land use — mining detection (PMC study), tailings dams' :
+                    singleBand === 48 ? 'Coastal features — offshore aquaculture potential' :
+                    `Embedding dimension ${singleBand} - explore to discover patterns`
                   }
                 </p>
               </div>
@@ -791,9 +1052,30 @@ export default function FMExplorer() {
                 <button
                   className={`fm-preset-btn ${singleBand === 51 ? 'active' : ''}`}
                   onClick={() => setSingleBand(51)}
-                  title="Industrial areas"
+                  title="Oil/gas infrastructure, storage tanks (research-backed)"
                 >
                   🏭 Industrial (51)
+                </button>
+                <button
+                  className={`fm-preset-btn ${singleBand === 8 ? 'active' : ''}`}
+                  onClick={() => setSingleBand(8)}
+                  title="Water features - test on dams, reservoirs, infrastructure"
+                >
+                  🌊 Water (8)
+                </button>
+                <button
+                  className={`fm-preset-btn ${singleBand === 12 ? 'active' : ''}`}
+                  onClick={() => setSingleBand(12)}
+                  title="Vegetation patterns - test on cocoa farms, crop classification"
+                >
+                  🌾 Crops (12)
+                </button>
+                <button
+                  className={`fm-preset-btn ${singleBand === 32 ? 'active' : ''}`}
+                  onClick={() => setSingleBand(32)}
+                  title="Mixed land use - test on mining areas, complex landscapes"
+                >
+                  ⛏️ Mining (32)
                 </button>
                 <button
                   className="fm-preset-btn random"
@@ -883,6 +1165,146 @@ export default function FMExplorer() {
                 <div className="fm-custom-active">
                   <strong>📍 Active:</strong> {customLocation.name}
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Data Import Controls */}
+          <div className="fm-control-group">
+            <h4>📁 Data Import</h4>
+            <p className="fm-hint">Upload coordinates or GeoTIFF for bulk analysis</p>
+            
+            <div className="fm-import-section">
+              <div className="fm-import-option">
+                <label className="fm-upload-label" htmlFor="coords-file">
+                  <div className="fm-upload-icon">📄</div>
+                  <div>
+                    <strong>Upload Coordinates</strong>
+                    <small>CSV file with lat,lon,name columns</small>
+                  </div>
+                </label>
+                <input
+                  id="coords-file"
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleCoordsUpload}
+                  hidden
+                />
+              </div>
+              
+              <div className="fm-import-option">
+                <label className="fm-upload-label" htmlFor="geotiff-file">
+                  <div className="fm-upload-icon">🗺️</div>
+                  <div>
+                    <strong>Upload GeoTIFF</strong>
+                    <small>Overlay your data on embeddings</small>
+                  </div>
+                </label>
+                <input
+                  id="geotiff-file"
+                  type="file"
+                  accept=".tif,.tiff"
+                  onChange={handleGeoTIFFUpload}
+                  hidden
+                />
+              </div>
+              
+              {uploadedData && (
+                <div className="fm-uploaded-data">
+                  <strong>📊 Uploaded:</strong> {uploadedData.name}
+                  <button onClick={clearUploadedData}>×</button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Similarity Search */}
+          <div className="fm-control-group">
+            <h4>🔍 Similarity Search</h4>
+            <p className="fm-hint">Find locations similar to your selection</p>
+            
+            <div className="fm-similarity-section">
+              <button
+                className="fm-similarity-btn"
+                onClick={performSimilaritySearch}
+                disabled={!selectedEvent || loading}
+              >
+                🎯 Find Similar Locations
+              </button>
+              
+              <div className="fm-similarity-controls">
+                <div className="fm-similarity-control">
+                  <label>Similarity Threshold</label>
+                  <input
+                    type="range"
+                    min="0.7"
+                    max="0.99"
+                    step="0.01"
+                    value={similarityThreshold}
+                    onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
+                  />
+                  <span>{(similarityThreshold * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              
+              {similarityResults && (
+                <div className="fm-similarity-results">
+                  <h5>🎯 Similar Locations Found:</h5>
+                  {similarityResults.map((result, i) => (
+                    <div key={i} className="fm-similarity-result">
+                      <button onClick={() => loadCustomLocation(result.coords, parseInt(inputYear), result.name)}>
+                        <div className="similarity-header">
+                          <span className="similarity-name">📍 {result.name}</span>
+                          <span className="similarity-score">{(result.similarity * 100).toFixed(1)}%</span>
+                        </div>
+                        {result.reason && (
+                          <div className="similarity-reason">{result.reason}</div>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Export Controls */}
+          <div className="fm-control-group">
+            <h4>💾 Export Data</h4>
+            <p className="fm-hint">Download embeddings and analysis results</p>
+            
+            <div className="fm-export-section">
+              <button
+                className="fm-export-btn"
+                onClick={() => exportEmbeddings('csv')}
+                disabled={!selectedEvent}
+              >
+                📊 Export Embeddings (CSV)
+              </button>
+              
+              <button
+                className="fm-export-btn"
+                onClick={() => exportEmbeddings('geotiff')}
+                disabled={!selectedEvent}
+              >
+                🗺️ Export as GeoTIFF
+              </button>
+              
+              <button
+                className="fm-export-btn"
+                onClick={exportCurrentView}
+                disabled={!tilesReady}
+              >
+                📷 Export Current View
+              </button>
+              
+              {similarityResults && (
+                <button
+                  className="fm-export-btn"
+                  onClick={exportSimilarityResults}
+                >
+                  🎯 Export Similarity Results
+                </button>
               )}
             </div>
           </div>

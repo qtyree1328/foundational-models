@@ -69,6 +69,27 @@ export interface Model {
   };
 }
 
+/**
+ * LEOM Landscape 2024-2025: The field of Large Earth Observation Models has seen explosive growth.
+ * 
+ * Recent developments include:
+ * • NASA/IBM released Prithvi-EO-2.0 (Dec 2024): 300M/600M parameter models outperforming v1.0 by 8% across GEO-Bench
+ * • GeoBench ecosystem expansion (2025): GEO-Bench-2 with 19 datasets and GeoCrossBench for cross-satellite evaluation
+ * • Label efficiency research (Dionelis et al. 2024): Foundation models consistently outperform task-specific models with limited labeled data
+ * • LGND secured $9M seed funding (Sep 2025) led by Javelin Venture Partners for geo-embeddings infrastructure
+ * • NGA announced $700M initiative for AI-powered data labeling and foundational models
+ * • Clay Foundation continues development with enhanced multi-sensor capabilities via Development Seed partnership
+ * • Microsoft and NASA partnership expanding accessible satellite data through AI
+ * • Google DeepMind's AlphaEarth Foundations now available on Cloud Storage (Dec 2025) for production use
+ * • Academic advances: DEFLECT parameter-efficient adaptation achieving <1% additional parameters for multispectral tasks
+ * 
+ * The transition from pixel-level classification to geo-embeddings represents a fundamental
+ * paradigm shift in how we process Earth observation data - similar to the evolution from 
+ * keyword-based to language model embeddings in NLP.
+ * 
+ * Sources: Prithvi-EO-2.0 arXiv:2412.02732 (Dec 2024), LGND MCJ Newsletter (Sep 2025), TerraWatch Space Newsletter (Feb 2025), 
+ * Development Seed blog posts (2024), NASA NTRS (2024), EmergentMind LEOM tracking (2025)
+ */
 export const models: Model[] = [
   {
     id: 'alphaearth',
@@ -176,7 +197,7 @@ Map.addLayer(clusters.randomVisualizer(),
     name: 'Clay v1.5',
     org: 'Clay Foundation / Radiant Earth',
     tagline: 'Open-source ViT-Large MAE with DINOv2 teacher for any sensor',
-    description: 'A 632M-parameter Vision Transformer pre-trained with masked autoencoder + 5% DINOv2 representation loss on 70M globally distributed chips (256×256). Features a dynamic embedding block that handles any number of input bands/wavelengths. Position encoding scales by GSD, enabling cross-sensor generalization. Encoder: dim=1024, depth=24, 16 heads. Decoder: dim=512, depth=4. Fully open source (Apache-2.0) with weights on HuggingFace. The Clay team (Dan Hammer, Bruno Sánchez-Andrade Nuño) also founded LGND — the infrastructure company building the "Standard Oil for geo-embeddings" layer that makes Clay and other LEOM outputs accessible at scale.',
+    description: 'A 632M-parameter Vision Transformer pre-trained with masked autoencoder + 5% DINOv2 representation loss on 70M globally distributed chips (256×256). Clay v1.5 (Nov 2024) introduces four key architectural components: (1) Dynamic Embedding Block that generates patches from arbitrary band counts and wavelengths, (2) Position Encoding that scales by Ground Sampling Distance and integrates lat/lon + temporal data, (3) ViT-based MAE reconstruction (95% of loss), and (4) DINOv2 teacher for representation learning (5% of loss). Supports variable input sizes, resolutions, and spectral band combinations across Sentinel-2, Landsat, Sentinel-1 SAR, NAIP, LINZ, and MODIS sensors. Encoder: dim=1024, depth=24, 16 heads. Decoder: dim=512, depth=4. Fully open source (Apache-2.0) with weights on HuggingFace. The Clay team (Dan Hammer, Bruno Sánchez-Andrade Nuño) also founded LGND — the geospatial intelligence company that raised $9M seed funding (Sep 2025, led by Javelin Venture Partners) to build queryable Earth infrastructure.',
     params: '632M (Encoder: 311M + Decoder: 15M + DINOv2: 304M)',
     paramsNum: 632,
     resolution: 'Variable (GSD-aware)',
@@ -201,27 +222,31 @@ Map.addLayer(clusters.randomVisualizer(),
       inputSize: '256×256',
       decoderDim: 512,
       decoderDepth: 4,
-      pretrainingStrategy: 'Masked Autoencoder (75% mask ratio) + 5% DINOv2 teacher representation loss. Dynamic embedding block handles variable bands/wavelengths.',
+      pretrainingStrategy: 'Masked Autoencoder (75% mask ratio) + 5% DINOv2 teacher representation loss. Clay v1.5 (Nov 2024) uses: (1) Dynamic embedding block generating wavelength-specific patches, (2) GSD-scaled position encoding with lat/lon/temporal metadata, (3) ViT-based MAE reconstruction loss (95%), (4) DINOv2-small teacher for representation learning (5%). Supports arbitrary input sizes, resolutions, and band combinations.',
     },
     training: {
-      dataset: 'Global chips sampled by LULC statistics',
-      samples: '70M chips (256×256)',
-      sensors: ['Sentinel-2', 'Landsat 8/9', 'Sentinel-1', 'NAIP', 'LINZ', 'MODIS'],
-      computeDetails: '20 AWS g6.48xlarge (160 L4 GPUs), ~100 epochs, ~800 GPU-hours/epoch',
+      dataset: 'Global chips sampled by LULC statistics (v1.5 multi-sensor)',
+      samples: '70M chips (256×256) with variable bands/resolutions',
+      sensors: ['Sentinel-2 (10 bands)', 'Landsat 8/9 (6 bands)', 'Sentinel-1 SAR (2 bands)', 'NAIP (4 bands)', 'LINZ (3 bands)', 'MODIS (7 bands)'],
+      computeDetails: '20 AWS g6.48xlarge (160 L4 GPUs), ~100 epochs, ~800 GPU-hours/epoch. Metadata: wavelengths, GSD, lat/lon, time step (week/hour)',
       epochs: 100,
-      geoCoverage: 'Global (land/coastal)',
-      temporalRange: 'Max 6 timestamps per location',
+      geoCoverage: 'Global (land/coastal, multi-sensor fusion)',
+      temporalRange: 'Max 6 timestamps per location with temporal encoding',
     },
     benchmarks: [
       { task: 'Training convergence', dataset: 'Internal', metric: 'Loss', value: 0.165, unit: 'train/val loss', citation: 'clay-foundation.github.io' },
+      { task: 'Label efficiency', dataset: 'EO Foundation Model benchmark', metric: 'Performance advantage', value: 1, unit: 'Superior with limited labels', citation: 'Dionelis et al. arXiv:2406.18295 (2024)' },
+      { task: 'Cross-sensor generalization', dataset: 'Multi-sensor tasks', metric: 'GSD-aware encoding', value: 1, unit: 'Variable resolution support', citation: 'Clay v1.5 technical documentation (2024)' },
     ],
     pros: [
       'Fully open source (Apache-2.0) — weights, code, and data',
       'Handles ANY sensor via dynamic embedding block (wavelength-aware)',
       'DINOv2 teacher improves representation quality beyond pure reconstruction',
       '1024-dim embeddings capture rich feature representations',
+      'GSD-aware position encoding enables true cross-sensor generalization',
+      'v1.5 supports variable input sizes and band combinations seamlessly',
       'Pre-computed embeddings available on Source Cooperative',
-      'Active community and documentation',
+      'Active community with comprehensive documentation and tutorials',
     ],
     cons: [
       'Land/coastal only — no ocean or atmosphere coverage',
@@ -273,6 +298,76 @@ with torch.no_grad():
 # source.coop/clay/clay-model-v1-embeddings`,
   },
   {
+    id: 'nasa-ibm-hls',
+    name: 'HLS Geospatial Foundation Model',
+    org: 'NASA / IBM',
+    tagline: 'First open-source geospatial AI foundation model from NASA',
+    description: 'NASA and IBM Research\'s collaborative milestone: the first open-source geospatial AI foundation model built on NASA\'s Harmonized Landsat Sentinel-2 (HLS) dataset. Developed by NASA\'s IMPACT team at Marshall Space Flight Center in partnership with IBM Research, this model represents institutional adoption of foundation models for Earth science. Designed for land use tracking, natural disaster monitoring, and crop yield prediction with wide-ranging applications in climate change research.',
+    params: 'Undisclosed',
+    paramsNum: 0, // Unknown parameter count
+    resolution: '30m (HLS native)',
+    modalities: ['Landsat 8/9', 'Sentinel-2 (harmonized to HLS)'],
+    license: 'Apache-2.0',
+    dataSource: 'NASA HLS (Harmonized Landsat Sentinel-2)',
+    keyStrength: 'NASA institutional backing, HLS data pipeline, open-source milestone',
+    color: '#1e40af',
+    icon: '🚀',
+    paperYear: 2023,
+    paperVenue: 'NASA Earthdata',
+    temporal: true,
+    openWeights: true,
+    architecture: {
+      type: 'Foundation Model (architecture undisclosed)',
+      encoder: 'Unknown',
+      embeddingDim: 0, // Not specified
+      pretrainingStrategy: 'Trained on NASA HLS dataset for multi-application generalization',
+    },
+    training: {
+      dataset: 'NASA Harmonized Landsat Sentinel-2 (HLS)',
+      samples: 'Large-scale (exact count undisclosed)',
+      sensors: ['Landsat 8/9', 'Sentinel-2'],
+      geoCoverage: 'Global',
+      temporalRange: 'HLS archive (2013-present)',
+    },
+    benchmarks: [
+      { task: 'Foundation milestone', dataset: 'Institutional', metric: 'First NASA open-source', value: 1, unit: 'foundational release', citation: 'NASA Earthdata, August 2023' },
+    ],
+    pros: [
+      'NASA institutional backing and validation',
+      'First open-source geospatial FM from a space agency',
+      'Built on proven HLS data pipeline (Landsat + Sentinel-2)',
+      'Wide application scope: land use, disasters, agriculture',
+      'Available on Hugging Face for community access',
+      'Establishes precedent for open geospatial AI from institutions',
+    ],
+    cons: [
+      'Limited technical details released',
+      'Architecture and parameter count undisclosed',
+      '30m resolution limitations for detailed analysis',
+      'Optical-only (no SAR or other sensor modalities)',
+      'Limited benchmarking results published',
+    ],
+    useCases: [
+      'Land use change tracking and classification',
+      'Natural disaster monitoring and response',
+      'Crop yield prediction and agricultural monitoring',
+      'Climate change research applications',
+      'Environmental impact assessment',
+    ],
+    links: [
+      { label: 'NASA Announcement', url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data' },
+      { label: 'Hugging Face', url: 'https://huggingface.co/ibm-nasa-geospatial' },
+    ],
+    scores: {
+      parameters: 0, // Unknown
+      resolution: 6, // 30m is mid-range
+      modalities: 4, // Landsat + Sentinel-2 harmonized
+      temporal: 8, // Strong temporal with HLS archive
+      openness: 9, // Fully open-source
+      benchmarks: 3, // Limited published benchmarks
+    },
+  },
+  {
     id: 'prithvi',
     name: 'Prithvi-EO 2.0',
     org: 'NASA / IBM',
@@ -312,6 +407,7 @@ with torch.no_grad():
       { task: 'GEO-Bench improvement', dataset: 'GEO-Bench', metric: 'Improvement over v1.0', value: 8, unit: '% average improvement', citation: 'arxiv.org/abs/2412.02732' },
       { task: 'Cross-resolution transfer', dataset: 'Multi-resolution tasks', metric: 'Competitive at', value: 0.1, unit: 'm to 15m resolution', citation: 'arxiv.org/abs/2412.02732' },
       { task: 'Flood mapping', dataset: 'Sen1Floods11', metric: 'Accuracy', value: 95.5, unit: '% (fine-tuned)', citation: 'arxiv.org/abs/2412.02732' },
+      { task: 'Foundation vs task-specific', dataset: 'Limited label scenarios', metric: 'Superior performance', value: 1, unit: 'with limited training data', citation: 'Dionelis et al. arXiv:2406.18295 (2024)' },
     ],
     pros: [
       'True multi-temporal: 3D attention across 4 timestamps captures change',

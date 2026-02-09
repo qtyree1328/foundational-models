@@ -104,6 +104,36 @@ export default function Pipeline() {
             </React.Fragment>
           ))}
         </div>
+
+        <div className="pipeline-advances fade-in">
+          <div className="advances-header">
+            <h3>Latest Developments in LEOM Evaluation</h3>
+            <p>Standardized benchmarking protocols and institutional adoption are accelerating the field</p>
+          </div>
+          <div className="advances-grid">
+            <div className="advance-card">
+              <div className="advance-icon">🏛️</div>
+              <div className="advance-content">
+                <h4>Institutional Adoption</h4>
+                <p>NASA and IBM Research released the first open-source geospatial AI foundation model (August 2023), establishing precedent for institutional LEOM development and validation.</p>
+              </div>
+            </div>
+            <div className="advance-card">
+              <div className="advance-icon">📊</div>
+              <div className="advance-content">
+                <h4>Standardized Benchmarking</h4>
+                <p>The GeoBench ecosystem (GEO-Bench, GEO-Bench-2, GeoCrossBench) provides standardized evaluation frameworks for cross-satellite generalization and capability assessment.</p>
+              </div>
+            </div>
+            <div className="advance-card">
+              <div className="advance-icon">✅</div>
+              <div className="advance-content">
+                <h4>Label Efficiency Proven</h4>
+                <p>Recent research (Dionelis et al. 2024) demonstrates foundation models consistently outperform task-specific models when labeled training data is limited.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

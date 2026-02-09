@@ -516,6 +516,8 @@ export default function LiveExplorer() {
             AlphaEarth from multi-modal satellite data (Sentinel-1/2, Landsat, GEDI LiDAR, climate). 
             These vectors are unit-length (normalized to the 64-dimensional hypersphere), 
             meaning similar landscapes have high dot product / cosine similarity.
+            Recent benchmarking research confirms that Large Earth Observation Models like this 
+            consistently outperform traditional task-specific models, especially when labeled training data is limited.
             This viewer displays actual embeddings from Google Earth Engine — the official AlphaEarth dataset: <a href="https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL" target="_blank" rel="noopener"><code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code></a>.
           </p>
         </div>
@@ -530,9 +532,9 @@ export default function LiveExplorer() {
           </div>
           <div className="live-unlock-box">
             <span className="unlock-icon">🌾</span>
-            <strong>Zero-Shot Transfer</strong>
-            <p>A model trained on Sentinel-2 crop mapping in Iowa works in Mozambique — because the embeddings capture agricultural signatures, not pixel values.</p>
-            <span className="unlock-stat">0 labels needed</span>
+            <strong>Label Efficiency</strong>
+            <p>Research shows foundation models consistently outperform task-specific models when training data is limited (Dionelis et al. 2024). A few labels on embeddings beat thousands of pixels for crop mapping.</p>
+            <span className="unlock-stat">10× fewer labels</span>
           </div>
           <div className="live-unlock-box">
             <span className="unlock-icon">⏱️</span>

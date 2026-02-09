@@ -26,6 +26,7 @@ const APPLICATIONS = [
   { task: 'Similarity Search', method: 'Nearest-neighbor in vector DB', effort: 'Milliseconds', traditional: 'Manual feature engineering per query' },
   { task: 'Crop Type Mapping', method: 'Few-shot fine-tune (10 labels)', effort: 'Hours', traditional: 'Thousands of field-verified labels' },
   { task: 'Flood Extent', method: 'Threshold embedding shift from baseline', effort: 'Seconds', traditional: 'Water index + DEM + manual validation' },
+  { task: 'Building Density', method: 'Label-efficient fine-tuning', effort: 'Hours', traditional: 'Extensive manual annotation campaigns' },
 ];
 
 // ─── Preset locations for comparison ───
@@ -193,7 +194,10 @@ export default function ParadigmShift() {
           <p className="paradigm-unlock-desc">
             The magic of geo-embeddings: compute them once, use them everywhere. The same 64-dim vector 
             that classifies land cover also detects floods, finds anomalies, and enables planetary-scale 
-            similarity search — with no additional training.
+            similarity search — with no additional training. Recent research (Dionelis et al. 2024) 
+            confirms that Large Earth Observation Models consistently outperform task-specific models 
+            when labeled training data is limited, validating the label efficiency advantage of 
+            foundation model approaches.
           </p>
           
           <div className="applications-table">

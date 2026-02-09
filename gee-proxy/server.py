@@ -639,6 +639,85 @@ def band_info():
     })
 
 
+# ========== Endpoint: Sample Embeddings ==========
+@app.route('/api/sample')
+def sample_embeddings():
+    """
+    GET /api/sample?year=2023&bbox=-94,41,-93,42&numPoints=500
+    Samples embedding vectors from a bounding box for UMAP visualization.
+    Returns array of {lat, lng, embedding[64]} objects.
+    """
+    try:
+        year = request.args.get('year', '2023')
+        bbox_str = request.args.get('bbox', '-94,41,-93,42')
+        num_points = int(request.args.get('numPoints', '500'))
+        
+        # Parse bbox
+        bbox = [float(x) for x in bbox_str.split(',')]
+        if len(bbox) != 4:
+            return jsonify({'error': 'bbox must have 4 values: west,south,east,north'}), 400
+        
+        west, south, east, north = bbox
+        
+        # Limit sample size to prevent timeouts
+        num_points = min(num_points, 1000)
+        
+        mosaic = get_embedding_mosaic(year)
+        all_bands = [f'A{i:02d}' for i in range(64)]
+        emb_image = mosaic.select(all_bands)
+        
+        # Create region
+        region = ee.Geometry.Rectangle([west, south, east, north])
+        
+        # Sample points - use stratifiedSample for better coverage
+        samples = emb_image.sample(
+            region=region,
+            scale=1000,  # 1km spacing to get reasonable coverage
+            numPixels=num_points,
+            seed=42,
+            geometries=True
+        )
+        
+        # Get the sampled features
+        sample_list = samples.toList(num_points)
+        
+        # Extract features (limit to prevent timeout)
+        results = []
+        actual_count = min(sample_list.size().getInfo(), num_points)
+        
+        for i in range(actual_count):
+            try:
+                feature = ee.Feature(sample_list.get(i))
+                props = feature.toDictionary().getInfo()
+                geom = feature.geometry().coordinates().getInfo()
+                
+                # Extract embedding values
+                embedding = [props.get(b, 0) or 0 for b in all_bands]
+                
+                # Skip if all zeros (no data)
+                if all(v == 0 for v in embedding):
+                    continue
+                
+                results.append({
+                    'lng': geom[0],
+                    'lat': geom[1],
+                    'embedding': embedding
+                })
+            except:
+                continue
+        
+        return jsonify({
+            'samples': results,
+            'count': len(results),
+            'year': year,
+            'bbox': bbox
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     print('🌍 GEE Tile Proxy starting on port 3013...')

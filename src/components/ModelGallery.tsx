@@ -6,6 +6,7 @@ const BASE = import.meta.env.BASE_URL;
 const MODEL_IMAGES: Record<string, { src: string; alt: string }> = {
   alphaearth: { src: `${BASE}imagery/alphaearth-composite.jpg`, alt: 'AlphaEarth 64-dim embedding false-color composite across 3 regions' },
   clay: { src: `${BASE}imagery/clay-embedding-viz.jpg`, alt: 'Clay Foundation model embedding visualization' },
+  'nasa-ibm-hls': { src: `${BASE}imagery/nasa-ibm-hls.jpg`, alt: 'NASA-IBM HLS Geospatial Foundation Model architecture and applications' },
   prithvi: { src: `${BASE}imagery/prithvi-flood-mapping.png`, alt: 'Prithvi-EO flood mapping results on Sen1Floods11' },
   satmae: { src: `${BASE}imagery/satmae-teaser.png`, alt: 'SatMAE temporal-spectral masked autoencoder approach' },
   spectralgpt: { src: `${BASE}imagery/spectralgpt-workflow.jpg`, alt: 'SpectralGPT 3D spectral masking workflow' },

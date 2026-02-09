@@ -7,12 +7,13 @@ const GEE_PROXY_URL = import.meta.env.PROD
   ? 'https://gee-proxy-787413290356.us-east1.run.app'
   : '/gee';
 
-type ViewMode = 'before' | 'after' | 'alphaearth';
+type ViewMode = 'before' | 'after' | 'alphaearth' | 'cdl';
 
 interface TileCache {
   before: string | null;
   after: string | null;
   alphaearth: string | null;
+  cdl: string | null;
 }
 
 const APPLICATION_LABELS: Record<string, string> = {
@@ -22,20 +23,148 @@ const APPLICATION_LABELS: Record<string, string> = {
   'disaster': 'Disaster Response'
 };
 
-// ===== Study Panel Component =====
-function StudyPanel({
+// ===== Study Panel for Change Detection (before/after) =====
+function ChangeDetectionPanel({
   study,
   viewMode,
   setViewMode,
-  loading,
-  onClose
+  loading
 }: {
   study: CaseStudy;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   loading: boolean;
-  onClose: () => void;
 }) {
+  return (
+    <div className="case-panel-legend">
+      <div className="legend-buttons-compact">
+        <button
+          className={`legend-btn-sm ${viewMode === 'before' ? 'active' : ''}`}
+          onClick={() => setViewMode('before')}
+          disabled={loading}
+        >
+          {study.beforeYear}
+        </button>
+        <button
+          className={`legend-btn-sm ${viewMode === 'after' ? 'active' : ''}`}
+          onClick={() => setViewMode('after')}
+          disabled={loading}
+        >
+          {study.afterYear}
+        </button>
+        <button
+          className={`legend-btn-sm alpha ${viewMode === 'alphaearth' ? 'active' : ''}`}
+          onClick={() => setViewMode('alphaearth')}
+          disabled={loading}
+        >
+          LEOM
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ===== Study Panel for Classification (year selector + CDL/AlphaEarth slider) =====
+function ClassificationPanel({
+  study,
+  sliderValue,
+  setSliderValue,
+  selectedYear,
+  setSelectedYear,
+  loading,
+  onYearChange
+}: {
+  study: CaseStudy;
+  sliderValue: number;
+  setSliderValue: (val: number) => void;
+  selectedYear: number;
+  setSelectedYear: (year: number) => void;
+  loading: boolean;
+  onYearChange: (year: number) => void;
+}) {
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const year = parseInt(e.target.value);
+    setSelectedYear(year);
+    onYearChange(year);
+  };
+
+  return (
+    <div className="case-panel-legend">
+      <div className="year-selector-row">
+        <label>Year:</label>
+        <select 
+          value={selectedYear} 
+          onChange={handleYearChange}
+          disabled={loading}
+          className="year-select"
+        >
+          {study.availableYears?.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </div>
+      <div className="comparison-slider-container">
+        <span className="slider-label-left">CDL</span>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={sliderValue}
+          onChange={(e) => setSliderValue(parseInt(e.target.value))}
+          disabled={loading}
+          className="comparison-slider"
+        />
+        <span className="slider-label-right">LEOM</span>
+      </div>
+    </div>
+  );
+}
+
+// ===== Study Panel Component =====
+function StudyPanel({
+  study,
+  viewMode,
+  setViewMode,
+  sliderValue,
+  setSliderValue,
+  selectedYear,
+  setSelectedYear,
+  loading,
+  onClose,
+  onYearChange
+}: {
+  study: CaseStudy;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  sliderValue: number;
+  setSliderValue: (val: number) => void;
+  selectedYear: number;
+  setSelectedYear: (year: number) => void;
+  loading: boolean;
+  onClose: () => void;
+  onYearChange: (year: number) => void;
+}) {
+  const getHintText = () => {
+    if (study.yearSelectable) {
+      if (sliderValue <= 25) {
+        return `USDA Cropland Data Layer ${selectedYear} — supervised classification of crop types.`;
+      } else if (sliderValue >= 75) {
+        return `AlphaEarth embeddings ${selectedYear} — unsupervised clustering reveals crop patterns.`;
+      } else {
+        return `Blending CDL (${100 - sliderValue}%) with AlphaEarth embeddings (${sliderValue}%).`;
+      }
+    }
+    const beforeLabel = study.beforeMonth 
+      ? `${getMonthName(study.beforeMonth)} ${study.beforeYear}` 
+      : study.beforeYear;
+    const afterLabel = study.afterMonth 
+      ? `${getMonthName(study.afterMonth)} ${study.afterYear}` 
+      : study.afterYear;
+    return viewMode === 'alphaearth' 
+      ? `AlphaEarth embeddings — similar colors indicate similar land types.`
+      : `Sentinel-2 imagery, ${viewMode === 'before' ? beforeLabel : afterLabel}`;
+  };
+
   return (
     <div className="case-study-panel">
       <div className="case-panel-header">
@@ -57,40 +186,34 @@ function StudyPanel({
         </a>
       </div>
 
-      <div className="case-panel-legend">
-        <div className="legend-buttons-compact">
-          <button
-            className={`legend-btn-sm ${viewMode === 'before' ? 'active' : ''}`}
-            onClick={() => setViewMode('before')}
-            disabled={loading}
-          >
-            {study.beforeYear}
-          </button>
-          <button
-            className={`legend-btn-sm ${viewMode === 'after' ? 'active' : ''}`}
-            onClick={() => setViewMode('after')}
-            disabled={loading}
-          >
-            {study.afterYear}
-          </button>
-          <button
-            className={`legend-btn-sm alpha ${viewMode === 'alphaearth' ? 'active' : ''}`}
-            onClick={() => setViewMode('alphaearth')}
-            disabled={loading}
-          >
-            LEOM
-          </button>
-        </div>
-      </div>
+      {study.yearSelectable ? (
+        <ClassificationPanel
+          study={study}
+          sliderValue={sliderValue}
+          setSliderValue={setSliderValue}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          loading={loading}
+          onYearChange={onYearChange}
+        />
+      ) : (
+        <ChangeDetectionPanel
+          study={study}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          loading={loading}
+        />
+      )}
       
-      <p className="case-panel-hint">
-        {viewMode === 'alphaearth' 
-          ? 'AlphaEarth embeddings — similar colors indicate similar land types.'
-          : `Sentinel-2 imagery, ${viewMode === 'before' ? study.beforeYear : study.afterYear}`
-        }
-      </p>
+      <p className="case-panel-hint">{getHintText()}</p>
     </div>
   );
+}
+
+// Helper function for month names
+function getMonthName(month: number): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return months[month - 1] || '';
 }
 
 // ===== Main Component =====
@@ -100,10 +223,13 @@ export default function CaseStudyMap() {
   
   const [selectedStudy, setSelectedStudy] = useState<CaseStudy | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('before');
+  const [selectedYear, setSelectedYear] = useState<number>(2022);
+  const [sliderValue, setSliderValue] = useState<number>(0); // 0 = CDL, 100 = AlphaEarth
   const [loading, setLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [tileCache, setTileCache] = useState<TileCache>({ before: null, after: null, alphaearth: null });
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+  const [tileCache, setTileCache] = useState<TileCache>({ before: null, after: null, alphaearth: null, cdl: null });
+  const [activeLayerIds, setActiveLayerIds] = useState<string[]>([]);
+  const [allTilesPreloaded, setAllTilesPreloaded] = useState(false);
 
   // Central America centered, more zoomed out
   const INITIAL_CENTER: [number, number] = [-85, 12];
@@ -196,92 +322,234 @@ export default function CaseStudyMap() {
     };
   }, []);
 
-  // Pre-load ALL 3 tile URLs when a study is selected
-  const preloadAllLayers = useCallback(async (study: CaseStudy) => {
+  // Pre-load ALL layers based on study type, keep loading until all are ready
+  const preloadLayers = useCallback(async (study: CaseStudy, year?: number) => {
+    const map = mapRef.current;
+    if (!map) return;
+
     setLoading(true);
+    setAllTilesPreloaded(false);
 
     try {
-      // Fetch all 3 tile URLs in parallel
-      const [beforeResp, afterResp, alphaResp] = await Promise.all([
-        fetch(`${GEE_PROXY_URL}/api/tiles/optical?year=${study.beforeYear}&bbox=${study.bbox.join(',')}`),
-        fetch(`${GEE_PROXY_URL}/api/tiles/optical?year=${study.afterYear}&bbox=${study.bbox.join(',')}`),
-        fetch(`${GEE_PROXY_URL}/api/tiles/embeddings?year=${study.afterYear}&bands=A01,A16,A09&min=-0.3&max=0.3`)
-      ]);
+      let cache: TileCache = { before: null, after: null, alphaearth: null, cdl: null };
 
-      const [beforeData, afterData, alphaData] = await Promise.all([
-        beforeResp.json(),
-        afterResp.json(),
-        alphaResp.json()
-      ]);
+      if (study.yearSelectable) {
+        // Classification study: load CDL and AlphaEarth for selected year
+        const targetYear = year || study.availableYears?.[study.availableYears.length - 1] || 2022;
+        
+        const [cdlResp, alphaResp] = await Promise.all([
+          fetch(`${GEE_PROXY_URL}/api/tiles/cdl?year=${targetYear}&bbox=${study.bbox.join(',')}`),
+          fetch(`${GEE_PROXY_URL}/api/tiles/embeddings?year=${targetYear}&bands=A01,A16,A09&min=-0.3&max=0.3`)
+        ]);
 
-      const cache: TileCache = {
-        before: beforeData.tileUrl || null,
-        after: afterData.tileUrl || null,
-        alphaearth: alphaData.tileUrl || null
-      };
+        const [cdlData, alphaData] = await Promise.all([
+          cdlResp.json(),
+          alphaResp.json()
+        ]);
 
-      setTileCache(cache);
+        cache = {
+          before: null,
+          after: null,
+          cdl: cdlData.tileUrl || null,
+          alphaearth: alphaData.tileUrl || null
+        };
 
-      // Now add the initial layer (before) to map
-      if (cache.before) {
-        showLayer('before', cache);
+        setTileCache(cache);
+        
+        // Add BOTH layers and wait for them to load
+        await addBothClassificationLayers(map, cache);
+        
+      } else {
+        // Change detection study: load before/after/alphaearth with optional month params
+        const beforeParams = new URLSearchParams({
+          year: study.beforeYear.toString(),
+          bbox: study.bbox.join(','),
+          ...(study.beforeMonth && { month: study.beforeMonth.toString() })
+        });
+        const afterParams = new URLSearchParams({
+          year: study.afterYear.toString(),
+          bbox: study.bbox.join(','),
+          ...(study.afterMonth && { month: study.afterMonth.toString() })
+        });
+
+        const [beforeResp, afterResp, alphaResp] = await Promise.all([
+          fetch(`${GEE_PROXY_URL}/api/tiles/optical?${beforeParams}`),
+          fetch(`${GEE_PROXY_URL}/api/tiles/optical?${afterParams}`),
+          fetch(`${GEE_PROXY_URL}/api/tiles/embeddings?year=${study.afterYear}&bands=A01,A16,A09&min=-0.3&max=0.3`)
+        ]);
+
+        const [beforeData, afterData, alphaData] = await Promise.all([
+          beforeResp.json(),
+          afterResp.json(),
+          alphaResp.json()
+        ]);
+
+        cache = {
+          before: beforeData.tileUrl || null,
+          after: afterData.tileUrl || null,
+          alphaearth: alphaData.tileUrl || null,
+          cdl: null
+        };
+
+        setTileCache(cache);
+        
+        // Add ALL three layers and wait for them to load
+        await addAllChangeDetectionLayers(map, cache);
       }
-
-      setLoading(false);
     } catch (err) {
       console.error('Failed to preload layers:', err);
       setLoading(false);
     }
   }, []);
 
-  // Show a specific layer from cache (instant swap)
-  const showLayer = useCallback((mode: ViewMode, cache?: TileCache) => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    const tiles = cache || tileCache;
-    const tileUrl = tiles[mode];
-    if (!tileUrl) return;
-
-    // Remove existing layer
-    if (activeLayerId) {
-      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
-      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
-    }
-
-    const layerId = `layer-${mode}-${Date.now()}`;
-
-    map.addSource(layerId, {
-      type: 'raster',
-      tiles: [tileUrl],
-      tileSize: 256
+  // Add both CDL and AlphaEarth layers, return promise when both are loaded
+  const addBothClassificationLayers = async (map: maplibregl.Map, cache: TileCache) => {
+    // Clean up existing layers
+    activeLayerIds.forEach(id => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
     });
 
-    map.addLayer({
-      id: layerId,
-      type: 'raster',
-      source: layerId,
-      paint: { 'raster-opacity': 0.9 }
-    }, 'case-markers-glow');
+    const newLayerIds: string[] = [];
+    const timestamp = Date.now();
 
-    setActiveLayerId(layerId);
-  }, [activeLayerId, tileCache]);
+    // Add CDL layer (visible, bottom)
+    if (cache.cdl) {
+      const cdlId = `layer-cdl-${timestamp}`;
+      map.addSource(cdlId, { type: 'raster', tiles: [cache.cdl], tileSize: 256 });
+      map.addLayer({ id: cdlId, type: 'raster', source: cdlId, paint: { 'raster-opacity': 1 } }, 'case-markers-glow');
+      newLayerIds.push(cdlId);
+    }
+
+    // Add AlphaEarth layer (hidden, on top)
+    if (cache.alphaearth) {
+      const alphaId = `layer-alphaearth-${timestamp}`;
+      map.addSource(alphaId, { type: 'raster', tiles: [cache.alphaearth], tileSize: 256 });
+      map.addLayer({ id: alphaId, type: 'raster', source: alphaId, paint: { 'raster-opacity': 0 } }, 'case-markers-glow');
+      newLayerIds.push(alphaId);
+    }
+
+    setActiveLayerIds(newLayerIds);
+    setSliderValue(0); // Start with CDL
+
+    // Wait for map to be idle (all tiles loaded)
+    return new Promise<void>((resolve) => {
+      map.once('idle', () => {
+        setLoading(false);
+        setAllTilesPreloaded(true);
+        resolve();
+      });
+    });
+  };
+
+  // Add all three change detection layers, return promise when all are loaded
+  const addAllChangeDetectionLayers = async (map: maplibregl.Map, cache: TileCache) => {
+    // Clean up existing layers
+    activeLayerIds.forEach(id => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
+    });
+
+    const newLayerIds: string[] = [];
+    const timestamp = Date.now();
+
+    // Add before layer (visible)
+    if (cache.before) {
+      const beforeId = `layer-before-${timestamp}`;
+      map.addSource(beforeId, { type: 'raster', tiles: [cache.before], tileSize: 256 });
+      map.addLayer({ id: beforeId, type: 'raster', source: beforeId, paint: { 'raster-opacity': 0.9 } }, 'case-markers-glow');
+      newLayerIds.push(beforeId);
+    }
+
+    // Add after layer (hidden)
+    if (cache.after) {
+      const afterId = `layer-after-${timestamp}`;
+      map.addSource(afterId, { type: 'raster', tiles: [cache.after], tileSize: 256 });
+      map.addLayer({ id: afterId, type: 'raster', source: afterId, paint: { 'raster-opacity': 0 } }, 'case-markers-glow');
+      newLayerIds.push(afterId);
+    }
+
+    // Add alphaearth layer (hidden)
+    if (cache.alphaearth) {
+      const alphaId = `layer-alphaearth-${timestamp}`;
+      map.addSource(alphaId, { type: 'raster', tiles: [cache.alphaearth], tileSize: 256 });
+      map.addLayer({ id: alphaId, type: 'raster', source: alphaId, paint: { 'raster-opacity': 0 } }, 'case-markers-glow');
+      newLayerIds.push(alphaId);
+    }
+
+    setActiveLayerIds(newLayerIds);
+    setViewMode('before');
+
+    // Wait for map to be idle (all tiles loaded)
+    return new Promise<void>((resolve) => {
+      map.once('idle', () => {
+        setLoading(false);
+        setAllTilesPreloaded(true);
+        resolve();
+      });
+    });
+  };
+
+  // Update layer opacities for classification slider (instant, no loading)
+  const updateSliderOpacities = useCallback((value: number) => {
+    const map = mapRef.current;
+    if (!map || !allTilesPreloaded) return;
+
+    // value: 0 = 100% CDL, 100 = 100% AlphaEarth
+    const cdlOpacity = 1 - (value / 100);
+    const alphaOpacity = value / 100;
+
+    activeLayerIds.forEach(id => {
+      if (id.includes('cdl') && map.getLayer(id)) {
+        map.setPaintProperty(id, 'raster-opacity', cdlOpacity);
+      }
+      if (id.includes('alphaearth') && map.getLayer(id)) {
+        map.setPaintProperty(id, 'raster-opacity', alphaOpacity);
+      }
+    });
+  }, [activeLayerIds, allTilesPreloaded]);
+
+  // Update layer opacities for change detection toggle (instant, no loading)
+  const updateChangeDetectionOpacities = useCallback((mode: ViewMode) => {
+    const map = mapRef.current;
+    if (!map || !allTilesPreloaded) return;
+
+    activeLayerIds.forEach(id => {
+      if (map.getLayer(id)) {
+        let opacity = 0;
+        if (mode === 'before' && id.includes('before')) opacity = 0.9;
+        if (mode === 'after' && id.includes('after')) opacity = 0.9;
+        if (mode === 'alphaearth' && id.includes('alphaearth')) opacity = 0.9;
+        map.setPaintProperty(id, 'raster-opacity', opacity);
+      }
+    });
+  }, [activeLayerIds, allTilesPreloaded]);
 
   // Handle study selection
   const selectStudy = useCallback((study: CaseStudy) => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Clear previous layer
-    if (activeLayerId) {
-      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
-      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
-      setActiveLayerId(null);
-    }
+    // Clear previous layers
+    activeLayerIds.forEach(id => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
+    });
+    setActiveLayerIds([]);
 
     setSelectedStudy(study);
-    setViewMode('before');
-    setTileCache({ before: null, after: null, alphaearth: null });
+    setTileCache({ before: null, after: null, alphaearth: null, cdl: null });
+    setAllTilesPreloaded(false);
+
+    // Set initial view mode based on study type
+    if (study.yearSelectable) {
+      setViewMode('cdl');
+      setSliderValue(0);
+      const defaultYear = study.availableYears?.[study.availableYears.length - 1] || 2022;
+      setSelectedYear(defaultYear);
+    } else {
+      setViewMode('before');
+    }
 
     // Zoom to study area
     map.flyTo({
@@ -290,37 +558,55 @@ export default function CaseStudyMap() {
       duration: 1500
     });
 
-    // Pre-load all 3 layers
-    preloadAllLayers(study);
-  }, [activeLayerId, preloadAllLayers]);
+    // Pre-load ALL layers (loading will stay until all are ready)
+    preloadLayers(study);
+  }, [activeLayerIds, preloadLayers]);
 
-  // Switch layer when view mode changes (instant, no loading)
+  // Handle year change for classification studies
+  const handleYearChange = useCallback((year: number) => {
+    if (!selectedStudy || !selectedStudy.yearSelectable) return;
+    
+    // Clear cache and reload all layers
+    setTileCache({ before: null, after: null, alphaearth: null, cdl: null });
+    setAllTilesPreloaded(false);
+    preloadLayers(selectedStudy, year);
+  }, [selectedStudy, preloadLayers]);
+
+  // Instantly update opacity when slider changes (no loading, tiles already cached)
   useEffect(() => {
-    if (selectedStudy && !loading && tileCache[viewMode]) {
-      showLayer(viewMode);
+    if (selectedStudy?.yearSelectable && allTilesPreloaded) {
+      updateSliderOpacities(sliderValue);
     }
-  }, [viewMode]);
+  }, [sliderValue, updateSliderOpacities, selectedStudy, allTilesPreloaded]);
+
+  // Instantly switch layer visibility when view mode changes (no loading, tiles already cached)
+  useEffect(() => {
+    if (selectedStudy && !selectedStudy.yearSelectable && allTilesPreloaded) {
+      updateChangeDetectionOpacities(viewMode);
+    }
+  }, [viewMode, updateChangeDetectionOpacities, selectedStudy, allTilesPreloaded]);
 
   // Close panel and zoom out
   const handleClose = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    if (activeLayerId) {
-      if (map.getLayer(activeLayerId)) map.removeLayer(activeLayerId);
-      if (map.getSource(activeLayerId)) map.removeSource(activeLayerId);
-    }
+    activeLayerIds.forEach(id => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
+    });
 
-    setActiveLayerId(null);
+    setActiveLayerIds([]);
     setSelectedStudy(null);
-    setTileCache({ before: null, after: null, alphaearth: null });
+    setTileCache({ before: null, after: null, alphaearth: null, cdl: null });
+    setAllTilesPreloaded(false);
 
     map.flyTo({
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
       duration: 1200
     });
-  }, [activeLayerId]);
+  }, [activeLayerIds]);
 
   return (
     <section className="section case-study-section" data-section="cases">
@@ -329,7 +615,7 @@ export default function CaseStudyMap() {
           <span className="section-label">Real Applications</span>
           <h2>Case Studies</h2>
           <p className="section-subtitle">
-            Click a marker to explore real-world LEOM applications with before/after imagery.
+            Click a marker to explore real-world LEOM applications with satellite imagery comparisons.
           </p>
         </div>
 
@@ -337,7 +623,7 @@ export default function CaseStudyMap() {
           {loading && (
             <div className="case-loading-overlay">
               <div className="case-loading-spinner"></div>
-              <span>Loading all imagery layers...</span>
+              <span>Loading imagery...</span>
             </div>
           )}
 
@@ -348,8 +634,13 @@ export default function CaseStudyMap() {
               study={selectedStudy}
               viewMode={viewMode}
               setViewMode={setViewMode}
-              loading={loading}
+              sliderValue={sliderValue}
+              setSliderValue={setSliderValue}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+              loading={loading || !allTilesPreloaded}
               onClose={handleClose}
+              onYearChange={handleYearChange}
             />
           )}
 
