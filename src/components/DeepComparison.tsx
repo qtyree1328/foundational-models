@@ -184,6 +184,12 @@ function BestForGuide() {
           </button>
         ))}
       </div>
+      {matrix.benchmarks && (
+        <div className="benchmark-context">
+          <h4>📊 Performance Benchmarks</h4>
+          <p>{matrix.benchmarks}</p>
+        </div>
+      )}
       <div className="best-for-grid">
         <div className="best-for-col best">
           <div className="best-for-header">🏆 Best Choice</div>

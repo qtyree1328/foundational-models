@@ -74,21 +74,24 @@ export interface Model {
  * 
  * Recent developments include:
  * • NASA/IBM released Prithvi-EO-2.0 (Dec 2024): 300M/600M parameter models outperforming v1.0 by 8% across GEO-Bench
- * • GeoBench ecosystem expansion (2025): GEO-Bench-2 with 19 datasets and GeoCrossBench for cross-satellite evaluation
+ * • GeoBench ecosystem expansion (2025): GEO-Bench-2 with 19 datasets, GEO-Bench-VLM for vision-language models, and GeoCrossBench for cross-satellite evaluation
+ * • Oak Ridge National Lab's OReole-FM (Oct 2024): Billion-parameter models for high-resolution satellite imagery with emergent abilities research
  * • Label efficiency research (Dionelis et al. 2024): Foundation models consistently outperform task-specific models with limited labeled data
- * • LGND secured $9M seed funding (Sep 2025) led by Javelin Venture Partners for geo-embeddings infrastructure
- * • NGA announced $700M initiative for AI-powered data labeling and foundational models
+ * • LGND secured $9M seed funding (July 2025) led by Javelin Venture Partners - founded by Clay creators Dan Hammer & Bruno Sánchez-Andrade Nuño
+ • NASA ROSES-2025 program: $700M+ initiative for user-centered applications with Large Earth Foundation Models (Prithvi-EO focus)
  * • Clay Foundation continues development with enhanced multi-sensor capabilities via Development Seed partnership
  * • Microsoft and NASA partnership expanding accessible satellite data through AI
  * • Google DeepMind's AlphaEarth Foundations now available on Cloud Storage (Dec 2025) for production use
  * • Academic advances: DEFLECT parameter-efficient adaptation achieving <1% additional parameters for multispectral tasks
+ * • Multimodal Remote Sensing Foundation Models survey (Oct 2025): Comprehensive review of 2022-2024 developments
  * 
  * The transition from pixel-level classification to geo-embeddings represents a fundamental
  * paradigm shift in how we process Earth observation data - similar to the evolution from 
  * keyword-based to language model embeddings in NLP.
  * 
- * Sources: Prithvi-EO-2.0 arXiv:2412.02732 (Dec 2024), LGND MCJ Newsletter (Sep 2025), TerraWatch Space Newsletter (Feb 2025), 
- * Development Seed blog posts (2024), NASA NTRS (2024), EmergentMind LEOM tracking (2025)
+ * Sources: Prithvi-EO-2.0 arXiv:2412.02732 (Dec 2024), OReole-FM arXiv:2410.19965 (Oct 2024), 
+ * LGND funding PRNewswire (July 10, 2025), GEO-Bench-VLM GitHub (2025), MDPI Remote Sensing survey (Oct 2025),
+ * NASA ROSES-2025 solicitation, EmergentMind LEOM tracking (2025)
  */
 export const models: Model[] = [
   {
@@ -404,10 +407,12 @@ with torch.no_grad():
       temporalRange: '2014–2023, sequences of 4 timestamps (1-6 month gaps)',
     },
     benchmarks: [
-      { task: 'GEO-Bench improvement', dataset: 'GEO-Bench', metric: 'Improvement over v1.0', value: 8, unit: '% average improvement', citation: 'arxiv.org/abs/2412.02732' },
-      { task: 'Cross-resolution transfer', dataset: 'Multi-resolution tasks', metric: 'Competitive at', value: 0.1, unit: 'm to 15m resolution', citation: 'arxiv.org/abs/2412.02732' },
-      { task: 'Flood mapping', dataset: 'Sen1Floods11', metric: 'Accuracy', value: 95.5, unit: '% (fine-tuned)', citation: 'arxiv.org/abs/2412.02732' },
+      { task: 'GEO-Bench improvement', dataset: 'GEO-Bench', metric: 'Improvement over v1.0', value: 8, unit: '% average improvement', citation: 'arXiv:2412.02732 (Dec 2024)' },
+      { task: 'Cross-resolution transfer', dataset: 'Multi-resolution tasks', metric: 'Competitive at', value: 0.1, unit: 'm to 15m resolution', citation: 'arXiv:2412.02732' },
+      { task: 'Flood mapping (v1.0)', dataset: 'Sen1Floods11', metric: 'mIoU', value: 88.68, unit: '% mIoU (97.25% accuracy)', citation: 'HuggingFace model card, Dataloop evaluation' },
+      { task: 'Flood mapping (v2.0)', dataset: 'Sen1Floods11', metric: 'Accuracy', value: 95.5, unit: '% (fine-tuned v2.0)', citation: 'arXiv:2412.02732' },
       { task: 'Foundation vs task-specific', dataset: 'Limited label scenarios', metric: 'Superior performance', value: 1, unit: 'with limited training data', citation: 'Dionelis et al. arXiv:2406.18295 (2024)' },
+      { task: 'Outperforms GFMs', dataset: 'GEO-Bench comparative', metric: 'Better than', value: 6, unit: 'other geospatial foundation models', citation: 'arXiv:2412.02732 (Dec 2024)' },
     ],
     pros: [
       'True multi-temporal: 3D attention across 4 timestamps captures change',
@@ -918,46 +923,66 @@ dsm_emb = model(dsm_patch, wavelengths=[0])`,
 
 export const getModelById = (id: string) => models.find(m => m.id === id);
 
-// Helper for task-based recommendations
-export const taskModelMatrix: Record<string, { best: string[]; good: string[]; limited: string[] }> = {
+// Helper for task-based recommendations with performance benchmarks
+export const taskModelMatrix: Record<string, { best: string[]; good: string[]; limited: string[]; benchmarks?: string }> = {
   'Crop Mapping': {
     best: ['alphaearth', 'prithvi'],
     good: ['clay', 'satmae', 'dofa'],
     limited: ['croma', 'spectralgpt', 'skysense'],
+    benchmarks: 'AlphaEarth: Global crop type mapping via K-means clustering. Prithvi: Multi-temporal crop segmentation with 3D attention.',
   },
   'Flood Detection': {
     best: ['prithvi'],
     good: ['clay', 'alphaearth', 'croma'],
     limited: ['satmae', 'spectralgpt', 'skysense', 'dofa'],
+    benchmarks: 'Prithvi v1.0: 88.68% mIoU on Sen1Floods11 (97.25% accuracy). Prithvi v2.0: 95.5% accuracy. SOTA performance.',
   },
   'Change Detection': {
     best: ['alphaearth', 'prithvi', 'skysense'],
     good: ['clay', 'satmae'],
     limited: ['croma', 'spectralgpt', 'dofa'],
+    benchmarks: 'AlphaEarth: Cosine similarity via dot product between years. Prithvi: 4-timestamp 3D attention captures change. SkySense: 2.06B params with temporal contrastive learning.',
   },
   'SAR Analysis': {
     best: ['croma'],
     good: ['alphaearth', 'skysense', 'dofa'],
     limited: ['clay', 'prithvi', 'satmae', 'spectralgpt'],
+    benchmarks: 'CROMA: 90% top-k retrieval accuracy on Sentinel-1/2 cross-modal pairs. Only model designed specifically for SAR-optical alignment.',
   },
   'Hyperspectral': {
     best: ['spectralgpt'],
     good: ['dofa'],
     limited: ['clay', 'alphaearth', 'prithvi', 'satmae', 'croma', 'skysense'],
+    benchmarks: 'SpectralGPT: 95% accuracy on multiple HSI classification benchmarks. 3D spectral-spatial masking strategy.',
   },
   'Land Cover Classification': {
     best: ['alphaearth', 'clay', 'prithvi'],
     good: ['satmae', 'dofa', 'skysense'],
     limited: ['croma', 'spectralgpt'],
+    benchmarks: 'AlphaEarth: Global 10m classification with 64D embeddings. Clay: Label efficiency superior to task-specific models. Prithvi: Outperforms 6 GFMs on GEO-Bench.',
   },
   'Object Detection': {
     best: ['skysense'],
     good: ['clay', 'dofa'],
     limited: ['alphaearth', 'prithvi', 'satmae', 'croma', 'spectralgpt'],
+    benchmarks: 'SkySense: SOTA on 6+ RS benchmarks (CVPR 2024). 2.06B parameter multi-modal architecture with factorized encoders.',
   },
   'Similarity Search': {
     best: ['alphaearth', 'clay'],
     good: ['croma'],
     limited: ['prithvi', 'satmae', 'spectralgpt', 'skysense', 'dofa'],
+    benchmarks: 'AlphaEarth: Production-ready embeddings in GEE catalog for global similarity search. Clay: 768D embeddings with excellent representation quality.',
+  },
+  'Multi-Sensor Fusion': {
+    best: ['clay', 'dofa'],
+    good: ['alphaearth', 'skysense'],
+    limited: ['prithvi', 'satmae', 'croma', 'spectralgpt'],
+    benchmarks: 'Clay: Dynamic embedding block handles any sensor via wavelength-aware encoding. DOFA: Hypernetwork generates weights for arbitrary band combinations.',
+  },
+  'Production Deployment': {
+    best: ['alphaearth'],
+    good: ['clay', 'prithvi'],
+    limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa'],
+    benchmarks: 'AlphaEarth: Pre-computed global tiles in GEE/GCS. 16× less storage than competitors. Clay: Open source with HuggingFace integration.',
   },
 };

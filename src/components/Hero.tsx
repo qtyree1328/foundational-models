@@ -62,10 +62,10 @@ export default function Hero() {
         }
       }
 
-      // Longitude lines rotating
+      // Longitude lines rotating (slower)
       ctx.strokeStyle = 'rgba(255,255,255,0.06)';
       for (let i = 0; i < 6; i++) {
-        const angle = (i / 6) * Math.PI + time * 0.3;
+        const angle = (i / 6) * Math.PI + time * 0.15;
         const scaleX = Math.cos(angle);
         ctx.beginPath();
         ctx.ellipse(cx, cy, Math.abs(scaleX) * r, r, 0, 0, Math.PI * 2);
@@ -82,7 +82,7 @@ export default function Hero() {
         { x: 0.25, y: 0.25, size: 0.12 },
       ];
       patches.forEach(p => {
-        const px = cx + (p.x + Math.sin(time * 0.3) * 0.05) * r * 2;
+        const px = cx + (p.x + Math.sin(time * 0.15) * 0.05) * r * 2;
         const py = cy + p.y * r * 2;
         const dx = px - cx;
         const dy = py - cy;
@@ -97,29 +97,33 @@ export default function Hero() {
       });
       ctx.globalAlpha = 1;
 
-      // Satellite orbits
+      // Satellite orbits (slower speeds, more satellites)
       const satellites = [
-        { speed: 0.5, tilt: 0.3, size: 3, color: '#c67b2e' },
-        { speed: -0.35, tilt: -0.2, size: 2.5, color: '#1a73e8' },
-        { speed: 0.7, tilt: 0.5, size: 2, color: '#059669' },
+        { speed: 0.2, tilt: 0.3, size: 3, color: '#c67b2e', orbitMult: 1.25 },
+        { speed: -0.15, tilt: -0.2, size: 2.5, color: '#1a73e8', orbitMult: 1.35 },
+        { speed: 0.25, tilt: 0.5, size: 2, color: '#059669', orbitMult: 1.2 },
+        { speed: -0.18, tilt: 0.1, size: 2.5, color: '#8b5cf6', orbitMult: 1.45 },
+        { speed: 0.12, tilt: -0.4, size: 2, color: '#ef4444', orbitMult: 1.3 },
       ];
 
       satellites.forEach(sat => {
         const angle = time * sat.speed;
-        const orbitR = r * 1.25;
+        const orbitR = r * sat.orbitMult;
 
-        // Orbit path
+        // Orbit path (dashed for variety)
         ctx.beginPath();
-        ctx.strokeStyle = `${sat.color}15`;
+        ctx.strokeStyle = `${sat.color}18`;
         ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(sat.tilt);
         ctx.ellipse(0, 0, orbitR, orbitR * 0.4, 0, 0, Math.PI * 2);
         ctx.restore();
         ctx.stroke();
+        ctx.setLineDash([]);
 
-        // Satellite dot
+        // Satellite position
         const sx = Math.cos(angle) * orbitR;
         const sy = Math.sin(angle) * orbitR * 0.4;
         const rotX = sx * Math.cos(sat.tilt) - sy * Math.sin(sat.tilt);
@@ -127,37 +131,78 @@ export default function Hero() {
 
         // Only draw if "in front" of globe
         if (Math.sin(angle) > -0.3 || Math.sqrt(rotX * rotX + rotY * rotY) > r) {
+          const satX = cx + rotX;
+          const satY = cy + rotY;
+          
+          // Solar panels (rectangles on sides)
+          ctx.fillStyle = '#2563eb40';
+          ctx.fillRect(satX - sat.size * 4, satY - sat.size * 0.5, sat.size * 2.5, sat.size);
+          ctx.fillRect(satX + sat.size * 1.5, satY - sat.size * 0.5, sat.size * 2.5, sat.size);
+          
+          // Panel grid lines
+          ctx.strokeStyle = '#3b82f650';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(satX - sat.size * 4, satY - sat.size * 0.5, sat.size * 2.5, sat.size);
+          ctx.strokeRect(satX + sat.size * 1.5, satY - sat.size * 0.5, sat.size * 2.5, sat.size);
+          
+          // Satellite body
           ctx.beginPath();
-          ctx.arc(cx + rotX, cy + rotY, sat.size, 0, Math.PI * 2);
+          ctx.arc(satX, satY, sat.size, 0, Math.PI * 2);
           ctx.fillStyle = sat.color;
           ctx.fill();
-
-          // Scan line from satellite
+          
+          // Satellite highlight
           ctx.beginPath();
-          ctx.strokeStyle = `${sat.color}30`;
-          ctx.lineWidth = 1;
-          ctx.moveTo(cx + rotX, cy + rotY);
-          const scanX = cx + rotX * 0.4;
-          const scanY = cy + rotY * 0.4;
-          ctx.lineTo(scanX, scanY);
-          ctx.stroke();
-
-          // Scan point on surface
-          ctx.beginPath();
-          ctx.arc(scanX, scanY, 2, 0, Math.PI * 2);
-          ctx.fillStyle = `${sat.color}60`;
+          ctx.arc(satX - sat.size * 0.3, satY - sat.size * 0.3, sat.size * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
           ctx.fill();
+
+          // Data transmission beam (cone shape)
+          ctx.beginPath();
+          const scanX = cx + rotX * 0.35;
+          const scanY = cy + rotY * 0.35;
+          ctx.moveTo(satX, satY);
+          ctx.lineTo(scanX - 8, scanY - 4);
+          ctx.lineTo(scanX + 8, scanY + 4);
+          ctx.closePath();
+          const beamGrad = ctx.createLinearGradient(satX, satY, scanX, scanY);
+          beamGrad.addColorStop(0, `${sat.color}40`);
+          beamGrad.addColorStop(1, `${sat.color}05`);
+          ctx.fillStyle = beamGrad;
+          ctx.fill();
+
+          // Scan footprint on surface
+          ctx.beginPath();
+          ctx.ellipse(scanX, scanY, 6, 3, rotX > 0 ? 0.3 : -0.3, 0, Math.PI * 2);
+          ctx.fillStyle = `${sat.color}25`;
+          ctx.fill();
+          ctx.strokeStyle = `${sat.color}40`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
         }
       });
+      
+      // Data uplink pulses (occasional flashes between satellites)
+      if (Math.sin(time * 2) > 0.95) {
+        const flashAlpha = (Math.sin(time * 2) - 0.95) * 20;
+        ctx.strokeStyle = `rgba(59, 130, 246, ${flashAlpha * 0.3})`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath();
+        ctx.moveTo(cx + r * 0.8, cy - r * 0.3);
+        ctx.lineTo(cx - r * 0.5, cy + r * 0.4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
 
-      // Embedding data points floating around
+      // Embedding data points floating around (slower)
       ctx.globalAlpha = 0.6;
       for (let i = 0; i < 30; i++) {
-        const a = (i / 30) * Math.PI * 2 + time * 0.2;
-        const dist2 = r * 1.4 + Math.sin(a * 3 + time) * 15;
+        const a = (i / 30) * Math.PI * 2 + time * 0.08;
+        const dist2 = r * 1.4 + Math.sin(a * 3 + time * 0.5) * 15;
         const px2 = cx + Math.cos(a) * dist2;
         const py2 = cy + Math.sin(a) * dist2 * 0.6;
-        const sz = 1 + Math.sin(a + time * 2) * 0.5;
+        const sz = 1 + Math.sin(a + time * 0.8) * 0.5;
         ctx.beginPath();
         ctx.arc(px2, py2, sz, 0, Math.PI * 2);
         ctx.fillStyle = i % 3 === 0 ? '#1a73e8' : i % 3 === 1 ? '#059669' : '#c67b2e';
@@ -172,7 +217,7 @@ export default function Hero() {
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      time += 0.008;
+      time += 0.004;
       animFrame = requestAnimationFrame(draw);
     };
 

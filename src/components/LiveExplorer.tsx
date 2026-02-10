@@ -2,10 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 
 // ===== GEE Proxy Config =====
-// Production: Cloud Run. Dev: proxied through Vite /gee → localhost:3013
-const GEE_PROXY_URL = import.meta.env.PROD
-  ? 'https://gee-proxy-787413290356.us-east1.run.app'
-  : '/gee';
+// Cloud Run GEE proxy - always use this (works from anywhere)
+const GEE_PROXY_URL = 'https://gee-proxy-787413290356.us-east1.run.app';
 
 type VizMode = 'embeddings' | 'clustering' | 'change' | 'similarity';
 

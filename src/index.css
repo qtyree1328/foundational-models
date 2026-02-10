@@ -171,10 +171,10 @@ body {
 }
 .hero h1 {
   font-family: var(--font-heading);
-  font-size: clamp(28px, 5vmin, 56px);
+  font-size: clamp(24px, 4vmin, 42px);
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -1.5px;
+  line-height: 1.1;
+  letter-spacing: -1px;
   margin-bottom: 16px;
 }
 .hero-tagline {
@@ -2907,6 +2907,24 @@ body {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
+}
+.benchmark-context {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--primary-faint);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+.benchmark-context h4 {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+.benchmark-context p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
 }
 .best-for-grid {
   display: grid;

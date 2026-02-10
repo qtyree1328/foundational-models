@@ -58,6 +58,23 @@ const modelSources: ModelSources[] = [
     ]
   },
   {
+    id: 'nasa-ibm-hls',
+    name: 'NASA-IBM HLS Geospatial Foundation Model',
+    primarySource: {
+      type: 'NASA Earthdata',
+      url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data',
+      citation: 'NASA Earthdata. (2023). NASA and IBM Openly Release Geospatial AI Foundation Model for NASA Earth Observation Data. NASA Earthdata, August 3, 2023.'
+    },
+    sources: [
+      { claim: 'First open-source geospatial AI foundation model from NASA', source: 'NASA Announcement', url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data', accessed: '2026-02-06', verified: true },
+      { claim: 'Built on NASA HLS (Harmonized Landsat Sentinel-2) data', source: 'NASA Announcement', url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data', accessed: '2026-02-06', verified: true },
+      { claim: 'Collaboration between NASA IMPACT and IBM Research', source: 'NASA Announcement', url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data', accessed: '2026-02-06', verified: true },
+      { claim: 'Applications: land use tracking, disaster monitoring, crop yield prediction', source: 'NASA Announcement', url: 'https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data', accessed: '2026-02-06', verified: true },
+      { claim: 'Available on Hugging Face', source: 'HuggingFace Repository', url: 'https://huggingface.co/ibm-nasa-geospatial', accessed: '2026-02-06', verified: true },
+      { claim: 'Apache-2.0 license', source: 'HuggingFace Model Card', url: 'https://huggingface.co/ibm-nasa-geospatial', accessed: '2026-02-06', verified: true },
+    ]
+  },
+  {
     id: 'prithvi',
     name: 'Prithvi-EO 2.0',
     primarySource: {
@@ -303,9 +320,10 @@ export default function Sources() {
           <div className="disclaimer-content">
             <h4>Accuracy Notice</h4>
             <p>
-              This dashboard synthesizes information from multiple sources. While we strive for accuracy, 
+              This dashboard synthesizes information from multiple sources, including recent research on 
+              label efficiency and foundation model benchmarking (Dionelis et al. 2024). While we strive for accuracy, 
               model specifications change frequently. Always verify critical details against the primary 
-              sources linked below. Last comprehensive review: February 2026.
+              sources linked below. Last comprehensive review: February 2026, updated with latest LEOM research.
             </p>
           </div>
         </div>

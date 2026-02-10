@@ -26,9 +26,15 @@ ee.Initialize(credentials, project=creds_data['project_id'])
 # ========== Flask App ==========
 app = Flask(__name__)
 CORS(app, origins=[
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    'http://100.68.227.27:3000',
     'http://127.0.0.1:3003',
     'http://localhost:3003',
     'http://100.68.227.27:3003',
+    'http://127.0.0.1:3006',
+    'http://localhost:3006',
+    'http://100.68.227.27:3006',
 ])
 
 # ========== Tile URL Cache ==========

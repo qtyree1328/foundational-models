@@ -25,6 +25,7 @@ const CITATIONS: Record<string, Citation> = {
   lu2024visionsurvey: { id: 'lu2024visionsurvey', text: 'Lu, S. et al. "Vision Foundation Models in Remote Sensing: A Survey." arXiv 2024.', url: 'https://arxiv.org/abs/2408.03464' },
   nature2025responsible: { id: 'nature2025responsible', text: 'Nature Editorial. "Towards responsible geospatial foundation models." Nature Machine Intelligence 2025.', url: 'https://www.nature.com/articles/s42256-025-01106-7' },
   blumenstiel2024peft: { id: 'blumenstiel2024peft', text: 'Blumenstiel et al. "Parameter-Efficient Fine-Tuning for Geospatial Foundation Models." arXiv 2024.', url: 'https://arxiv.org/abs/2504.17397' },
+  dionelis2024eval: { id: 'dionelis2024eval', text: 'Dionelis et al. "Evaluating and Benchmarking Foundation Models for Earth Observation and Geospatial AI." arXiv 2024.', url: 'https://arxiv.org/abs/2406.18295' },
 };
 
 function Cite({ ids }: { ids: string[] }) {
@@ -382,9 +383,12 @@ function PretrainingDeepDive() {
             <div>
               <strong>2024 EO Benchmark Results:</strong> Comprehensive evaluation across 5 EO datasets 
               found that LoRA adapters match full fine-tuning performance while using 95% fewer trainable 
-              parameters <Cite ids={['blumenstiel2024peft']} />. Crucially, PEFT methods also improved 
-              generalization to unseen geographic regions — suggesting that constraining adaptation 
-              prevents overfitting to local training distributions.
+              parameters <Cite ids={['blumenstiel2024peft']} />. Recent benchmarking research confirms 
+              a key foundation model advantage: when labeled training data is limited, foundation models 
+              consistently outperform task-specific models across land cover classification, crop type 
+              mapping, flood segmentation, and building density estimation tasks <Cite ids={['dionelis2024eval']} />. 
+              Crucially, PEFT methods also improved generalization to unseen geographic regions — suggesting 
+              that constraining adaptation prevents overfitting to local training distributions.
             </div>
           </div>
 

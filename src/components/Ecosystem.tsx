@@ -73,6 +73,36 @@ export default function Ecosystem() {
             applications (Pinecone, Weaviate for vector search), geo-embeddings need their own infrastructure layer. 
             LGND — founded by the Clay team (Dan Hammer, Bruno Sánchez-Andrade Nuño) — is building this: 
             the "Standard Oil for geo-embeddings" that makes LEOM outputs queryable, composable, and production-ready.
+            Recent research validates the ecosystem approach: foundation models consistently outperform task-specific 
+            models when labeled training data is limited, making the infrastructure investment worthwhile for 
+            applications ranging from precision agriculture to disaster response.
+          </div>
+        </div>
+
+        <div className="ecosystem-trends fade-in">
+          <h3>2024-2025 Ecosystem Developments</h3>
+          <div className="trend-cards">
+            <div className="trend-card">
+              <span className="trend-icon">🏛️</span>
+              <div>
+                <strong>Institutional Adoption</strong>
+                <p>NASA and IBM's collaboration established the first open-source geospatial foundation model, signaling institutional validation of the LEOM approach.</p>
+              </div>
+            </div>
+            <div className="trend-card">
+              <span className="trend-icon">📊</span>
+              <div>
+                <strong>Standardized Benchmarking</strong>
+                <p>GeoBench ecosystem expansion (GEO-Bench-2, GeoCrossBench) provides standardized evaluation frameworks for cross-satellite and multi-modal performance assessment.</p>
+              </div>
+            </div>
+            <div className="trend-card">
+              <span className="trend-icon">💰</span>
+              <div>
+                <strong>Commercial Validation</strong>
+                <p>LGND's $9M seed funding (2025) and partnerships with major agricultural companies demonstrate commercial viability of geo-embedding infrastructure.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
