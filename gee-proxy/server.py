@@ -124,21 +124,38 @@ def tiles_embeddings():
 @app.route('/api/tiles/optical')
 def tiles_optical():
     """
-    GET /api/tiles/optical?year=2023&bbox=-94,41,-93,42
+    GET /api/tiles/optical?year=2023&month=10&bbox=-94,41,-93,42
     Returns XYZ tile URL for Sentinel-2 true color visualization.
+    Month is optional - if provided, uses a 2-month window centered on that month.
     """
     try:
         year = request.args.get('year', '2023')
+        month = request.args.get('month', '')  # Optional month (1-12)
         bbox = request.args.get('bbox', '')
         
-        cache_key = _cache_key('optical', year, bbox)
+        cache_key = _cache_key('optical', year, month, bbox)
         cached = _get_cached(cache_key)
         if cached:
             return jsonify({'tileUrl': cached, 'cached': True})
 
-        # Get Sentinel-2 Surface Reflectance
-        start = f'{year}-01-01'
-        end = f'{int(year) + 1}-01-01'
+        # Calculate date range based on whether month is specified
+        if month:
+            month_int = int(month)
+            # Use a 2-month window to get enough cloud-free imagery
+            # E.g., month=10 -> Sept 1 to Nov 30
+            start_month = max(1, month_int - 1)
+            end_month = min(12, month_int + 1)
+            
+            start = f'{year}-{start_month:02d}-01'
+            # Handle end date - if month+1 would be 13, use Dec 31
+            if end_month == 12:
+                end = f'{year}-12-31'
+            else:
+                end = f'{year}-{end_month + 1:02d}-01'
+        else:
+            # Full year composite
+            start = f'{year}-01-01'
+            end = f'{int(year) + 1}-01-01'
         
         s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') \
             .filterDate(start, end) \
@@ -150,7 +167,11 @@ def tiles_optical():
         tile_url = get_tile_url(vis)
 
         _set_cached(cache_key, tile_url)
-        return jsonify({'tileUrl': tile_url, 'cached': False})
+        return jsonify({
+            'tileUrl': tile_url, 
+            'cached': False,
+            'dateRange': {'start': start, 'end': end}
+        })
 
     except Exception as e:
         traceback.print_exc()

@@ -130,6 +130,458 @@ def tiles_embeddings():
         return jsonify({'error': str(e)}), 500
 
 
+# ========== Endpoint: Optical Tiles (Sentinel-2) ==========
+@app.route('/api/tiles/optical')
+def tiles_optical():
+    """
+    GET /api/tiles/optical?year=2023&bbox=-94,41,-93,42
+    Returns XYZ tile URL for Sentinel-2 true color visualization.
+    """
+    try:
+        year = request.args.get('year', '2023')
+        bbox = request.args.get('bbox', '')
+        
+        cache_key = _cache_key('optical', year, bbox)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # Get Sentinel-2 Surface Reflectance
+        start = f'{year}-01-01'
+        end = f'{int(year) + 1}-01-01'
+        
+        s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') \
+            .filterDate(start, end) \
+            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20)) \
+            .median()
+        
+        # True color RGB
+        vis = s2.select(['B4', 'B3', 'B2']).visualize(min=0, max=3000)
+        tile_url = get_tile_url(vis)
+
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: List Images (for timelapse preview) ==========
+@app.route('/api/images/list')
+def list_images():
+    """
+    GET /api/images/list - List images matching filters with metadata
+    
+    Required params:
+      - dataset: GEE collection ID
+      - bbox: bounds (west,south,east,north)
+      - startDate: start date (YYYY-MM-DD)
+      - endDate: end date (YYYY-MM-DD)
+      
+    Optional params:
+      - maxCloud: max cloud percentage (default 20)
+      - minAreaCoverage: minimum area coverage percentage (default 95)
+      - limit: max images to return (default 100)
+    
+    Returns list of qualifying images with:
+      - date, cloudCover, areaCoverage, thumbnailUrl
+    """
+    try:
+        dataset = request.args.get('dataset', 'COPERNICUS/S2_SR_HARMONIZED')
+        bbox = request.args.get('bbox', '')
+        start_date = request.args.get('startDate', '2023-01-01')
+        end_date = request.args.get('endDate', '2024-01-01')
+        max_cloud = float(request.args.get('maxCloud', 20))
+        min_area_coverage = float(request.args.get('minAreaCoverage', 95))
+        limit = int(request.args.get('limit', 100))
+        
+        if not bbox:
+            return jsonify({'error': 'bbox parameter required'}), 400
+        
+        coords = [float(x) for x in bbox.split(',')]
+        bounds = ee.Geometry.Rectangle(coords)
+        bounds_area = bounds.area().getInfo()
+        
+        # Get collection
+        collection = ee.ImageCollection(dataset) \
+            .filterDate(start_date, end_date) \
+            .filterBounds(bounds)
+        
+        # Apply cloud filter for known collections
+        cloud_property = None
+        if 'S2' in dataset or 'COPERNICUS' in dataset:
+            cloud_property = 'CLOUDY_PIXEL_PERCENTAGE'
+            collection = collection.filter(ee.Filter.lte(cloud_property, max_cloud))
+        elif 'LANDSAT' in dataset:
+            cloud_property = 'CLOUD_COVER'
+            collection = collection.filter(ee.Filter.lte(cloud_property, max_cloud))
+        
+        # Get image list with metadata
+        def get_image_info(image):
+            # Get date
+            date = ee.Date(image.get('system:time_start')).format('YYYY-MM-dd')
+            
+            # Get cloud cover
+            cloud = image.get(cloud_property) if cloud_property else 0
+            
+            # Calculate area coverage (intersection with bounds)
+            footprint = image.geometry()
+            intersection = footprint.intersection(bounds, ee.ErrorMargin(100))
+            coverage = intersection.area().divide(bounds_area).multiply(100)
+            
+            return ee.Feature(None, {
+                'id': image.get('system:index'),
+                'date': date,
+                'cloudCover': cloud,
+                'areaCoverage': coverage,
+                'system_id': image.get('system:id')
+            })
+        
+        # Map and filter by area coverage
+        image_list = collection.map(get_image_info)
+        
+        # Filter by minimum area coverage
+        image_list = image_list.filter(ee.Filter.gte('areaCoverage', min_area_coverage))
+        
+        # Sort by date and limit
+        image_list = image_list.sort('date').limit(limit)
+        
+        # Get info
+        features = image_list.getInfo()['features']
+        
+        images = []
+        for f in features:
+            props = f['properties']
+            images.append({
+                'id': props.get('id'),
+                'date': props.get('date'),
+                'cloudCover': round(props.get('cloudCover', 0), 1),
+                'areaCoverage': round(props.get('areaCoverage', 0), 1),
+            })
+        
+        return jsonify({
+            'dataset': dataset,
+            'bbox': bbox,
+            'dateRange': [start_date, end_date],
+            'filters': {
+                'maxCloud': max_cloud,
+                'minAreaCoverage': min_area_coverage
+            },
+            'count': len(images),
+            'images': images
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: Generate Timelapse Frames ==========
+@app.route('/api/timelapse/frames')
+def timelapse_frames():
+    """
+    GET /api/timelapse/frames - Get tile URLs for specific image IDs
+    
+    Required params:
+      - dataset: GEE collection ID
+      - imageIds: comma-separated image IDs (from /api/images/list)
+      
+    Optional params:
+      - bands: visualization bands (default: true color for dataset)
+      - min/max: visualization range
+      - index: spectral index (ndvi, ndwi, ndbi, evi, savi)
+      - palette: color palette for indices
+    """
+    try:
+        dataset = request.args.get('dataset', 'COPERNICUS/S2_SR_HARMONIZED')
+        image_ids = request.args.get('imageIds', '').split(',')
+        bands = request.args.get('bands', '')
+        vis_min = float(request.args.get('min', 0))
+        vis_max = float(request.args.get('max', 3000))
+        index = request.args.get('index', '')
+        palette = request.args.get('palette', '')
+        
+        if not image_ids or not image_ids[0]:
+            return jsonify({'error': 'imageIds parameter required'}), 400
+        
+        # Spectral index definitions
+        indices = {
+            'ndvi': {'formula': '(NIR - RED) / (NIR + RED)', 'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']},
+            'ndwi': {'formula': '(GREEN - NIR) / (GREEN + NIR)', 'min': -0.5, 'max': 0.5, 'palette': ['brown', 'white', 'blue']},
+            'ndbi': {'formula': '(SWIR - NIR) / (SWIR + NIR)', 'min': -0.5, 'max': 0.5, 'palette': ['green', 'white', 'red']},
+            'evi': {'formula': '2.5 * (NIR - RED) / (NIR + 6*RED - 7.5*BLUE + 1)', 'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']},
+            'savi': {'formula': '1.5 * (NIR - RED) / (NIR + RED + 0.5)', 'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']},
+        }
+        
+        # Band mappings for different sensors
+        band_mapping = {
+            'COPERNICUS/S2': {'RED': 'B4', 'GREEN': 'B3', 'BLUE': 'B2', 'NIR': 'B8', 'SWIR': 'B11'},
+            'LANDSAT/LC08': {'RED': 'SR_B4', 'GREEN': 'SR_B3', 'BLUE': 'SR_B2', 'NIR': 'SR_B5', 'SWIR': 'SR_B6'},
+            'LANDSAT/LC09': {'RED': 'SR_B4', 'GREEN': 'SR_B3', 'BLUE': 'SR_B2', 'NIR': 'SR_B5', 'SWIR': 'SR_B6'},
+        }
+        
+        # Get band mapping for dataset
+        mapping = None
+        for key in band_mapping:
+            if key in dataset:
+                mapping = band_mapping[key]
+                break
+        
+        frames = []
+        
+        for image_id in image_ids:
+            try:
+                # Construct full asset ID
+                full_id = f"{dataset}/{image_id}"
+                image = ee.Image(full_id)
+                
+                # Get date for frame
+                date = ee.Date(image.get('system:time_start')).format('YYYY-MM-dd').getInfo()
+                
+                # Apply spectral index if specified
+                if index and index.lower() in indices and mapping:
+                    idx_config = indices[index.lower()]
+                    
+                    if index.lower() == 'ndvi':
+                        calc_image = image.normalizedDifference([mapping['NIR'], mapping['RED']])
+                    elif index.lower() == 'ndwi':
+                        calc_image = image.normalizedDifference([mapping['GREEN'], mapping['NIR']])
+                    elif index.lower() == 'ndbi':
+                        calc_image = image.normalizedDifference([mapping['SWIR'], mapping['NIR']])
+                    elif index.lower() == 'evi':
+                        nir = image.select(mapping['NIR'])
+                        red = image.select(mapping['RED'])
+                        blue = image.select(mapping['BLUE'])
+                        calc_image = nir.subtract(red).multiply(2.5).divide(
+                            nir.add(red.multiply(6)).subtract(blue.multiply(7.5)).add(1)
+                        )
+                    elif index.lower() == 'savi':
+                        nir = image.select(mapping['NIR'])
+                        red = image.select(mapping['RED'])
+                        calc_image = nir.subtract(red).multiply(1.5).divide(nir.add(red).add(0.5))
+                    
+                    vis_params = {
+                        'min': idx_config['min'],
+                        'max': idx_config['max'],
+                        'palette': idx_config['palette']
+                    }
+                    vis = calc_image.visualize(**vis_params)
+                else:
+                    # Standard RGB visualization
+                    if bands:
+                        band_list = bands.split(',')
+                    elif mapping:
+                        band_list = [mapping['RED'], mapping['GREEN'], mapping['BLUE']]
+                    else:
+                        band_list = ['B4', 'B3', 'B2']  # Default S2
+                    
+                    vis_params = {'min': vis_min, 'max': vis_max}
+                    vis = image.select(band_list).visualize(**vis_params)
+                
+                tile_url = get_tile_url(vis)
+                
+                frames.append({
+                    'imageId': image_id,
+                    'date': date,
+                    'tileUrl': tile_url,
+                    'index': index if index else 'rgb'
+                })
+                
+            except Exception as img_error:
+                frames.append({
+                    'imageId': image_id,
+                    'error': str(img_error)
+                })
+        
+        return jsonify({
+            'dataset': dataset,
+            'frameCount': len(frames),
+            'frames': frames
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: Generic Dataset Tiles ==========
+@app.route('/api/tiles/dataset')
+def tiles_dataset():
+    """
+    GET /api/tiles/dataset - Flexible endpoint for any GEE ImageCollection
+    
+    Required params:
+      - dataset: GEE collection ID (e.g., 'COPERNICUS/S2_SR_HARMONIZED')
+      
+    Optional params:
+      - bands: comma-separated band names for RGB (e.g., 'B4,B3,B2')
+      - min: visualization min (default 0)
+      - max: visualization max (default 3000)
+      - startDate: filter start (default: year-01-01)
+      - endDate: filter end (default: year+1-01-01)
+      - year: shorthand for startDate/endDate (default 2023)
+      - cloudFilter: max cloud % for Sentinel/Landsat (default 20)
+      - reducer: median|mean|mosaic|min|max (default median)
+      - bbox: optional bounds filter (west,south,east,north)
+      - palette: for single-band viz (e.g., 'viridis' or 'FF0000,00FF00,0000FF')
+    
+    Examples:
+      Sentinel-2 RGB: ?dataset=COPERNICUS/S2_SR_HARMONIZED&bands=B4,B3,B2&max=3000
+      Landsat 8: ?dataset=LANDSAT/LC08/C02/T1_L2&bands=SR_B4,SR_B3,SR_B2&min=7000&max=20000
+      MODIS NDVI: ?dataset=MODIS/061/MOD13A1&bands=NDVI&min=0&max=9000&palette=brown,yellow,green
+      DEM: ?dataset=USGS/SRTMGL1_003&bands=elevation&min=0&max=4000&palette=terrain
+    """
+    try:
+        dataset = request.args.get('dataset')
+        if not dataset:
+            return jsonify({'error': 'dataset parameter required'}), 400
+        
+        # Parse parameters
+        bands = request.args.get('bands', '').split(',') if request.args.get('bands') else None
+        vis_min = float(request.args.get('min', 0))
+        vis_max = float(request.args.get('max', 3000))
+        year = request.args.get('year', '2023')
+        start_date = request.args.get('startDate', f'{year}-01-01')
+        end_date = request.args.get('endDate', f'{int(year) + 1}-01-01')
+        cloud_filter = float(request.args.get('cloudFilter', 20))
+        reducer = request.args.get('reducer', 'median')
+        bbox = request.args.get('bbox', '')
+        palette = request.args.get('palette', '')
+        
+        # Cache key
+        cache_key = _cache_key('dataset', dataset, str(bands), vis_min, vis_max, 
+                               start_date, end_date, cloud_filter, reducer, bbox, palette)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+        
+        # Check if it's an Image or ImageCollection
+        # Known single-image datasets
+        single_image_datasets = [
+            'USGS/SRTMGL1_003', 'NASA/NASADEM_HGT/001', 'CGIAR/SRTM90_V4',
+            'WWF/HydroSHEDS', 'MERIT/DEM/v1_0_3', 'JAXA/ALOS/AW3D30/V3_2'
+        ]
+        
+        is_single_image = any(d in dataset for d in single_image_datasets)
+        
+        if is_single_image:
+            # Handle as single Image
+            image = ee.Image(dataset)
+        else:
+            # Handle as ImageCollection
+            collection = ee.ImageCollection(dataset)
+            
+            # Apply date filter
+            collection = collection.filterDate(start_date, end_date)
+            
+            # Apply bbox filter if provided
+            if bbox:
+                coords = [float(x) for x in bbox.split(',')]
+                bounds = ee.Geometry.Rectangle(coords)
+                collection = collection.filterBounds(bounds)
+            
+            # Apply cloud filter for known collections
+            if 'S2' in dataset or 'COPERNICUS' in dataset:
+                collection = collection.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', cloud_filter))
+            elif 'LANDSAT' in dataset:
+                collection = collection.filter(ee.Filter.lt('CLOUD_COVER', cloud_filter))
+            
+            # Apply reducer
+            if reducer == 'median':
+                image = collection.median()
+            elif reducer == 'mean':
+                image = collection.mean()
+            elif reducer == 'min':
+                image = collection.min()
+            elif reducer == 'max':
+                image = collection.max()
+            elif reducer == 'mosaic':
+                image = collection.mosaic()
+            else:
+                image = collection.median()
+        
+        # Build visualization params
+        vis_params = {'min': vis_min, 'max': vis_max}
+        
+        if bands and bands[0]:
+            image = image.select(bands)
+            if len(bands) == 1 and palette:
+                # Single band with palette
+                if ',' in palette:
+                    vis_params['palette'] = palette.split(',')
+                else:
+                    # Named palettes
+                    palettes = {
+                        'viridis': ['440154', '414487', '2a788e', '22a884', '7ad151', 'fde725'],
+                        'terrain': ['006600', '90EE90', 'FFFF00', 'FFA500', 'FF0000', 'FFFFFF'],
+                        'ndvi': ['CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901', '66A000', '529400', '3E8601', '207401', '056201'],
+                        'temperature': ['0000FF', '00FFFF', '00FF00', 'FFFF00', 'FF0000'],
+                    }
+                    vis_params['palette'] = palettes.get(palette, palette.split(','))
+        
+        vis = image.visualize(**vis_params)
+        tile_url = get_tile_url(vis)
+        
+        _set_cached(cache_key, tile_url)
+        return jsonify({
+            'tileUrl': tile_url, 
+            'cached': False,
+            'dataset': dataset,
+            'bands': bands,
+            'dateRange': [start_date, end_date]
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: List Available Datasets ==========
+@app.route('/api/datasets')
+def list_datasets():
+    """Returns commonly used GEE datasets with example parameters"""
+    datasets = [
+        {
+            'id': 'COPERNICUS/S2_SR_HARMONIZED',
+            'name': 'Sentinel-2 Surface Reflectance',
+            'example': '?dataset=COPERNICUS/S2_SR_HARMONIZED&bands=B4,B3,B2&max=3000',
+            'bands': ['B2', 'B3', 'B4', 'B8', 'B11', 'B12'],
+        },
+        {
+            'id': 'LANDSAT/LC08/C02/T1_L2',
+            'name': 'Landsat 8 Collection 2',
+            'example': '?dataset=LANDSAT/LC08/C02/T1_L2&bands=SR_B4,SR_B3,SR_B2&min=7000&max=20000',
+            'bands': ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'],
+        },
+        {
+            'id': 'MODIS/061/MOD13A1',
+            'name': 'MODIS Vegetation Indices',
+            'example': '?dataset=MODIS/061/MOD13A1&bands=NDVI&min=0&max=9000&palette=ndvi',
+            'bands': ['NDVI', 'EVI'],
+        },
+        {
+            'id': 'USGS/SRTMGL1_003',
+            'name': 'SRTM Digital Elevation',
+            'example': '?dataset=USGS/SRTMGL1_003&bands=elevation&min=0&max=4000&palette=terrain',
+            'bands': ['elevation'],
+        },
+        {
+            'id': 'NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG',
+            'name': 'VIIRS Nighttime Lights',
+            'example': '?dataset=NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG&bands=avg_rad&min=0&max=60',
+            'bands': ['avg_rad'],
+        },
+        {
+            'id': 'NASA/NASADEM_HGT/001',
+            'name': 'NASADEM Elevation',
+            'example': '?dataset=NASA/NASADEM_HGT/001&bands=elevation&min=0&max=3000&palette=terrain',
+            'bands': ['elevation'],
+        },
+    ]
+    return jsonify({'datasets': datasets})
+
+
 # ========== Endpoint: Clustering Tiles ==========
 @app.route('/api/tiles/clustering')
 def tiles_clustering():
