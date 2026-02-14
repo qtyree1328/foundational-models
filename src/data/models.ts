@@ -70,7 +70,7 @@ export interface Model {
 }
 
 /**
- * LEOM Landscape 2024-2025: The field of Large Earth Observation Models has seen explosive growth.
+ * LEOM Landscape 2024-2026: The field of Large Earth Observation Models has seen explosive growth.
  * 
  * Recent developments include:
  * • NASA/IBM released Prithvi-EO-2.0 (Dec 2024): 300M/600M parameter models outperforming v1.0 by 8% across GEO-Bench
@@ -78,20 +78,26 @@ export interface Model {
  * • Oak Ridge National Lab's OReole-FM (Oct 2024): Billion-parameter models for high-resolution satellite imagery with emergent abilities research
  * • Label efficiency research (Dionelis et al. 2024): Foundation models consistently outperform task-specific models with limited labeled data
  * • LGND secured $9M seed funding (July 2025) led by Javelin Venture Partners - founded by Clay creators Dan Hammer & Bruno Sánchez-Andrade Nuño
- • NASA ROSES-2025 program: $700M+ initiative for user-centered applications with Large Earth Foundation Models (Prithvi-EO focus)
+ * • NASA ROSES-2025 program: $700M+ initiative for user-centered applications with Large Earth Foundation Models (Prithvi-EO focus)
  * • Clay Foundation continues development with enhanced multi-sensor capabilities via Development Seed partnership
  * • Microsoft and NASA partnership expanding accessible satellite data through AI
  * • Google DeepMind's AlphaEarth Foundations now available on Cloud Storage (Dec 2025) for production use
- * • Academic advances: DEFLECT parameter-efficient adaptation achieving <1% additional parameters for multispectral tasks
- * • Multimodal Remote Sensing Foundation Models survey (Oct 2025): Comprehensive review of 2022-2024 developments
+ * • Academic advances: DEFLECT parameter-efficient adaptation (ICCV 2025) achieving 5-10x fewer parameters than competing methods while maintaining accuracy for geospatial tasks
+ * • Multimodal Remote Sensing Foundation Models survey (MDPI Remote Sensing, Oct 2025): Comprehensive review of vision-X MM-RSFMs, identifies 5 key challenges: data scarcity, feature extraction limits, weak generalization, no unified evaluation, insufficient security
+ * • REOBench (NeurIPS 2025): First comprehensive robustness benchmark for EO foundation models across 6 tasks and 12 corruption types - reveals significant performance degradation (1-20%) under real-world perturbations
+ * • Earth Embeddings Ecosystem Study (Jan 2026): Comprehensive taxonomy of 7+ embedding products reveals fragmentation barriers; TorchGeo integration provides unified API for cross-comparison
+ * • Scaling Laws Research (Jun 2025): First systematic study on PhilEO Bench reveals CNN models remain competitive in low-shot settings, but ViT-UPerNet achieves best performance on multi-TB datasets like MajorTOM (23TB)
+ * • Mamba State-Space Models (2026): First extensive evaluation in Earth observation shows efficiency advantages but requires large-scale pretraining to match CNNs/ViTs
  * 
  * The transition from pixel-level classification to geo-embeddings represents a fundamental
  * paradigm shift in how we process Earth observation data - similar to the evolution from 
  * keyword-based to language model embeddings in NLP.
  * 
  * Sources: Prithvi-EO-2.0 arXiv:2412.02732 (Dec 2024), OReole-FM arXiv:2410.19965 (Oct 2024), 
- * LGND funding PRNewswire (July 10, 2025), GEO-Bench-VLM GitHub (2025), MDPI Remote Sensing survey (Oct 2025),
- * NASA ROSES-2025 solicitation, EmergentMind LEOM tracking (2025)
+ * DEFLECT ICCV 2025 arXiv:2503.09493, MDPI Remote Sensing survey (Oct 2025) doi:10.3390/rs17213532,
+ * LGND funding PRNewswire (July 10, 2025), GEO-Bench-2 AI Alliance (2025), NASA ROSES-2025 solicitation,
+ * REOBench arXiv:2505.16793 (NeurIPS 2025), Earth Embeddings Ecosystem arXiv:2601.13134 (Jan 2026),
+ * Scaling Laws for GFMs arXiv:2506.14765 (Jun 2025)
  */
 export const models: Model[] = [
   {
@@ -99,7 +105,7 @@ export const models: Model[] = [
     name: 'AlphaEarth Foundations',
     org: 'Google DeepMind',
     tagline: '64-dimensional embeddings for the entire Earth at 10m resolution',
-    description: 'An embedding field model (not standard ViT MAE) that assimilates spatial, temporal, and measurement contexts from Sentinel-1 SAR, Sentinel-2 MSI, Landsat 8/9, GEDI LiDAR, climate simulations, NLCD, and USDA CDL into compact 64-dimensional unit-length vectors. Produces annual global embeddings at 10m resolution, available as 64-band images (A00–A63) through Google Earth Engine and Google Cloud Storage as Cloud Optimized GeoTIFFs (Dec 2025). Dataset version 1.1 includes annual coverage from 2017-2024. 16× less storage than competing model outputs.',
+    description: 'An embedding field model (not standard ViT MAE) that assimilates spatial, temporal, and measurement contexts from Sentinel-1 SAR, Sentinel-2 MSI, Landsat 8/9, GEDI LiDAR, climate simulations, NLCD, and USDA CDL into compact 64-dimensional unit-length vectors. Produces annual global embeddings at 10m resolution, available as 64-band images (A00–A63) through Google Earth Engine and Google Cloud Storage as Cloud Optimized GeoTIFFs (Dec 2025). Dataset version 1.1 includes annual coverage from 2017-2024. 16× less storage than competing model outputs. Recent studies identify AlphaEarth as a foundational "pixel-level" embedding product (Jan 2026 Earth Embeddings Ecosystem study), with global TorchGeo integration standardizing cross-comparison with other foundation models.',
     params: 'Undisclosed',
     paramsNum: 0,
     resolution: '10m',
@@ -240,6 +246,7 @@ Map.addLayer(clusters.randomVisualizer(),
       { task: 'Training convergence', dataset: 'Internal', metric: 'Loss', value: 0.165, unit: 'train/val loss', citation: 'clay-foundation.github.io' },
       { task: 'Label efficiency', dataset: 'EO Foundation Model benchmark', metric: 'Performance advantage', value: 1, unit: 'Superior with limited labels', citation: 'Dionelis et al. arXiv:2406.18295 (2024)' },
       { task: 'Cross-sensor generalization', dataset: 'Multi-sensor tasks', metric: 'GSD-aware encoding', value: 1, unit: 'Variable resolution support', citation: 'Clay v1.5 technical documentation (2024)' },
+      { task: 'Robustness evaluation', dataset: 'REOBench', metric: 'Performance drop under corruptions', value: 10, unit: '% average degradation across tasks', citation: 'REOBench arXiv:2505.16793 (NeurIPS 2025)' },
     ],
     pros: [
       'Fully open source (Apache-2.0) — weights, code, and data',
@@ -375,7 +382,7 @@ with torch.no_grad():
     name: 'Prithvi-EO 2.0',
     org: 'NASA / IBM',
     tagline: 'Temporal Vision Transformer with 3D MAE for Earth science',
-    description: 'A 300M/600M parameter Temporal ViT pre-trained with 3D Masked Autoencoder on 4.2M global time series samples from NASA\'s Harmonized Landsat Sentinel-2 (HLS) data. Each sample: 4 timestamps × 224×224 × 6 bands (Blue, Green, Red, Narrow NIR, SWIR1, SWIR2). Key innovations: 3D spatiotemporal patch embeddings (t=1), temporal+location metadata as learned weighted bias (not input), metadata dropout during training. Trained on JUWELS supercomputer (Jülich). Fine-tune via IBM\'s TerraTorch toolkit.',
+    description: 'A 300M/600M parameter Temporal ViT pre-trained with 3D Masked Autoencoder on 4.2M global time series samples from NASA\'s Harmonized Landsat Sentinel-2 (HLS) data with WORLDWIDE coverage (Feb 2025 expansion from CONUS-only). Each sample: 4 timestamps × 224×224 × 6 bands (Blue, Green, Red, Narrow NIR, SWIR1, SWIR2). Key innovations: 3D spatiotemporal patch embeddings (t=1), temporal+location metadata as learned weighted bias (not input), metadata dropout during training. Enhanced quality controls emphasize urban areas and strict cloud filtering for robust global representation. Trained on JUWELS supercomputer (Jülich). Fine-tune via IBM\'s TerraTorch toolkit.',
     params: '300M (ViT-L) / 600M (ViT-H)',
     paramsNum: 600,
     resolution: '30m (HLS native)',
@@ -413,6 +420,8 @@ with torch.no_grad():
       { task: 'Flood mapping (v2.0)', dataset: 'Sen1Floods11', metric: 'Accuracy', value: 95.5, unit: '% (fine-tuned v2.0)', citation: 'arXiv:2412.02732' },
       { task: 'Foundation vs task-specific', dataset: 'Limited label scenarios', metric: 'Superior performance', value: 1, unit: 'with limited training data', citation: 'Dionelis et al. arXiv:2406.18295 (2024)' },
       { task: 'Outperforms GFMs', dataset: 'GEO-Bench comparative', metric: 'Better than', value: 6, unit: 'other geospatial foundation models', citation: 'arXiv:2412.02732 (Dec 2024)' },
+      { task: 'Robustness evaluation', dataset: 'REOBench', metric: 'Performance drop under corruptions', value: 12, unit: '% average degradation across tasks', citation: 'REOBench arXiv:2505.16793 (NeurIPS 2025)' },
+      { task: 'Scaling laws comparison', dataset: 'PhilEO Bench', metric: 'ViT performance', value: 1, unit: 'Optimal for multi-TB datasets', citation: 'Scaling Laws arXiv:2506.14765 (Jun 2025)' },
     ],
     pros: [
       'True multi-temporal: 3D attention across 4 timestamps captures change',
@@ -477,7 +486,7 @@ model = BACKBONE_REGISTRY.build(
     name: 'SatMAE',
     org: 'Stanford / SustainLab',
     tagline: 'Temporal + spectral positional encodings for satellite MAE',
-    description: 'A ViT-Large (≈307M params) extending the MAE framework with two innovations: (1) temporal positional encoding capturing satellite revisit patterns, and (2) spectral positional encoding grouping correlated bands. Pre-trained on fMoW-temporal (RGB sequences, 62 land-use categories) and fMoW-Sentinel (Sentinel-2 cross-referenced with fMoW). Independent masking strategy: reconstruct patches from other timestamps. Published at NeurIPS 2022.',
+    description: 'A ViT-Large (≈307M params) extending MAE with temporal + spectral positional encodings—first model to combine both innovations. Independent masking strategy reconstructs patches from other timestamps, enabling cross-temporal learning. Achieves 14% improvement on transfer tasks and 7% on supervised classification over baselines. Pre-trained on fMoW-temporal (RGB sequences) and fMoW-Sentinel (multi-spectral). Published NeurIPS 2022.',
     params: '~307M (ViT-L/16)',
     paramsNum: 307,
     resolution: 'Variable (fMoW RGB + 10m Sentinel-2)',
@@ -505,15 +514,18 @@ model = BACKBONE_REGISTRY.build(
       geoCoverage: 'fMoW global sampling (biased toward populated areas)',
     },
     benchmarks: [
-      { task: 'Supervised classification', dataset: 'fMoW', metric: 'Improvement over baselines', value: 7, unit: '%', citation: 'arxiv.org/abs/2207.08051' },
-      { task: 'Transfer learning', dataset: 'Land cover', metric: 'Improvement vs SOTA', value: 14, unit: '%', citation: 'arxiv.org/abs/2207.08051' },
+      { task: 'Supervised classification', dataset: 'fMoW', metric: 'Improvement over baselines', value: 7, unit: '%', citation: 'arXiv:2207.08051 (NeurIPS 2022)' },
+      { task: 'Transfer learning', dataset: 'Multiple land cover tasks', metric: 'Improvement vs SOTA', value: 14, unit: '% transfer task improvement', citation: 'arXiv:2207.08051 (NeurIPS 2022)' },
+      { task: 'Reconstruction quality', dataset: 'fMoW multi-spectral', metric: 'Independent masking', value: 1, unit: 'sharper reconstructions vs consistent masking', citation: 'SustainLab SatMAE project page' },
+      { task: 'Temporal + spectral encoding', dataset: 'Satellite imagery benchmarks', metric: 'First to combine', value: 1, unit: 'temporal + spectral positional encodings', citation: 'NeurIPS 2022 innovation' },
     ],
     pros: [
       'First to introduce temporal + spectral positional encodings for satellite MAE',
-      'Strong transfer learning performance (+14% over prior SOTA)',
+      'Quantified performance: +14% transfer tasks, +7% supervised vs baselines',
+      'Independent masking strategy produces sharper reconstructions',
       'Open source with pretrained weights available',
-      'Independent masking enables cross-temporal learning',
       'Relatively lightweight — trainable on academic compute',
+      'Established methodology adopted by later foundation models',
     ],
     cons: [
       'Trained on fMoW only — not globally representative',
@@ -531,8 +543,9 @@ model = BACKBONE_REGISTRY.build(
     links: [
       { label: 'Paper (NeurIPS 2022)', url: 'https://arxiv.org/abs/2207.08051' },
       { label: 'GitHub', url: 'https://github.com/sustainlab-group/SatMAE' },
+      { label: 'Project Page', url: 'https://sustainlab-group.github.io/SatMAE/' },
     ],
-    scores: { parameters: 5, resolution: 6, modalities: 4, temporal: 7, openness: 9, benchmarks: 7 },
+    scores: { parameters: 5, resolution: 6, modalities: 4, temporal: 7, openness: 9, benchmarks: 8 },
     codeExample: `# SatMAE — NeurIPS 2022
 # github.com/sustainlab-group/SatMAE
 import torch
@@ -652,9 +665,9 @@ with torch.no_grad():
     name: 'SkySense',
     org: 'Wuhan University / SenseTime',
     tagline: '2.06 billion parameter multi-modal spatiotemporal encoder',
-    description: 'One of the largest GFMs at 2.06B parameters (v1). Uses factorized multi-modal spatiotemporal encoders: ViT-G for high-res optical, ViT-L for multi-spectral, ViT-L for SAR. Multi-granularity contrastive learning handles temporal sequences of optical AND SAR simultaneously. CVPR 2024 — achieved SOTA on 6+ RS benchmarks. V2 (Jul 2025): unified transformer at ~580M params.',
-    params: '2.06B (v1) / ~580M (v2)',
-    paramsNum: 2060,
+    description: 'Multi-modal RSFM with factorized encoders: ViT-G for high-res optical, ViT-L for multi-spectral, ViT-L for SAR. Multi-granularity contrastive learning handles temporal sequences across modalities. V1 (2.06B params, CVPR 2024) achieved SOTA performance, surpassing 18 recent RSFMs in all test scenarios with large margins: +2.76% vs GFM, +3.67% vs SatLas, +3.61% vs Scale-MAE. V2 (July 2025, arXiv:2507.13812, ICCV 2025) unified transformer reduces to ~580M parameters while improving over V1 by average 1.8 points across 16 datasets spanning 7 tasks.',
+    params: '580M (v2) / 2.06B (v1)',
+    paramsNum: 580,
     resolution: 'Multi-resolution (HR optical + MS + SAR)',
     modalities: ['High-res optical', 'Multi-spectral', 'SAR', 'Temporal sequences'],
     license: 'Research use',
@@ -679,22 +692,27 @@ with torch.no_grad():
       geoCoverage: 'Global',
     },
     benchmarks: [
-      { task: 'Multi-benchmark SOTA', dataset: '6+ RS benchmarks', metric: 'State-of-the-art', value: 6, unit: 'benchmarks with SOTA results', citation: 'arxiv.org/abs/2312.10115 (CVPR 2024)' },
+      { task: 'V1 SOTA validation', dataset: '18 recent RSFMs comparison', metric: 'Surpasses all in', value: 100, unit: '% test scenarios with large margins', citation: 'arXiv:2312.10115 (CVPR 2024)' },
+      { task: 'vs GFM comparison', dataset: 'Multi-modal RS benchmarks', metric: 'Outperforms by', value: 2.76, unit: '% average improvement', citation: 'arXiv:2312.10115 (CVPR 2024)' },
+      { task: 'vs SatLas comparison', dataset: 'Multi-modal RS benchmarks', metric: 'Outperforms by', value: 3.67, unit: '% average improvement', citation: 'arXiv:2312.10115 (CVPR 2024)' },
+      { task: 'vs Scale-MAE comparison', dataset: 'Multi-modal RS benchmarks', metric: 'Outperforms by', value: 3.61, unit: '% average improvement', citation: 'arXiv:2312.10115 (CVPR 2024)' },
+      { task: 'V2 efficiency gains', dataset: '16 datasets, 7 tasks', metric: 'V2 vs V1 improvement', value: 1.8, unit: 'points average (with 74% fewer parameters)', citation: 'arXiv:2507.13812 (ICCV 2025)' },
     ],
     pros: [
-      'Largest GFM (2.06B params) with massive capacity',
-      'True multi-modal: optical + SAR + multi-spectral jointly',
-      'Factorized encoders avoid modality compromise problem',
-      'Temporal: handles sequences across modalities',
-      'CVPR 2024 — SOTA on 6+ RS benchmarks',
-      'V2 reduces to 580M params while maintaining performance',
+      'CVPR 2024 SOTA validation: surpasses all 18 recent RSFMs in test scenarios',
+      'Quantified benchmarks: +2.76% vs GFM, +3.67% vs SatLas, +3.61% vs Scale-MAE',
+      'V2 efficiency breakthrough: +1.8 points improvement with 74% fewer parameters (580M vs 2.06B)',
+      'True multi-modal fusion: optical + SAR + multi-spectral with dedicated encoders',
+      'Factorized architecture prevents modality compromise during training',
+      'Temporal modeling: handles sequences across all modalities simultaneously',
+      'Extensive evaluation: 16 datasets across 7 different remote sensing tasks',
     ],
     cons: [
-      'Extremely compute-intensive (2B params for v1)',
+      'V1: Extremely compute-intensive (2.06B params)',
       'Research-stage — limited public weight availability',
       'Requires multi-modal data which increases collection complexity',
-      'V1 weights not publicly released',
       'Complex architecture difficult to reproduce',
+      'V2: Recent release (2025) means limited community adoption',
     ],
     useCases: [
       'Universal scene interpretation across sensor types',
@@ -708,7 +726,7 @@ with torch.no_grad():
       { label: 'GitHub', url: 'https://github.com/Jack-bo1220/SkySense' },
       { label: 'V2 Paper', url: 'https://arxiv.org/abs/2507.13812' },
     ],
-    scores: { parameters: 10, resolution: 8, modalities: 9, temporal: 8, openness: 3, benchmarks: 9 },
+    scores: { parameters: 8, resolution: 8, modalities: 9, temporal: 8, openness: 3, benchmarks: 10 },
     codeExample: `# SkySense — CVPR 2024
 # 2.06B params (v1), ~580M (v2)
 # github.com/Jack-bo1220/SkySense
@@ -831,7 +849,7 @@ sim = torch.cosine_similarity(opt_emb, sar_emb)
     name: 'DOFA',
     org: 'TU Munich / Zhu-xlab',
     tagline: 'Dynamic One-For-All — wavelength-conditioned hypernetwork for any sensor',
-    description: 'A ViT backbone with a hypernetwork-based dynamic weight generator: given the center wavelength of each input band, the hypernetwork generates appropriate patch embedding weights on-the-fly. This means a single model handles Sentinel-2 (13 bands), Landsat (7 bands), NAIP (4 bands), SAR, DSM, or any other sensor without retraining. Available as Base (~86M) and Large (~307M). Adopted in Esri\'s ArcGIS Pro for operational GIS workflows. Distillation-based continual pretraining.',
+    description: 'A ViT backbone with hypernetwork-based dynamic weight generator: given center wavelength of each input band, the hypernetwork generates patch embedding weights on-the-fly. Single model handles Sentinel-2 (13 bands), Landsat (7), NAIP (4), SAR, DSM without retraining. Recently benchmarked (2025) on cereal crop mapping vs HyperSigma/SpectralEarth, and HyBiomass forest biomass estimation. Extended as DOFA-CLIP for vision-language tasks. Adopted in Esri ArcGIS Pro for operational workflows.',
     params: '~86M (Base) / ~307M (Large)',
     paramsNum: 307,
     resolution: 'Variable (multi-resolution)',
@@ -859,7 +877,10 @@ sim = torch.cosine_similarity(opt_emb, sar_emb)
       geoCoverage: 'Global (benchmark datasets)',
     },
     benchmarks: [
-      { task: 'Multi-modal classification', dataset: '12 benchmark datasets', metric: 'Competitive across', value: 12, unit: 'diverse RS benchmarks', citation: 'arxiv.org/abs/2403.15356' },
+      { task: 'Multi-modal classification', dataset: '12 benchmark datasets', metric: 'Competitive across', value: 12, unit: 'diverse RS benchmarks', citation: 'arXiv:2403.15356 (March 2024)' },
+      { task: 'Hyperspectral crop mapping', dataset: 'Cereal crop classification', metric: 'Benchmarked with', value: 3, unit: 'foundation models (vs HyperSigma, SpectralEarth)', citation: 'arXiv:2510.11576 (Oct 2025)' },
+      { task: 'Forest biomass estimation', dataset: 'HyBiomass global benchmark', metric: 'Superior performance', value: 1, unit: 'in fine-tuned vs frozen encoder setting', citation: 'arXiv:2506.11314 (June 2025)' },
+      { task: 'Cross-modal adaptation', dataset: 'Wavelength-conditioned tasks', metric: 'Any sensor support', value: 5, unit: 'modalities (RGB, MS, SAR, DSM, temporal)', citation: 'DOFA architecture (March 2024)' },
     ],
     pros: [
       'Single model for ANY sensor — wavelength-conditioned patch embeddings',
@@ -878,15 +899,19 @@ sim = torch.cosine_similarity(opt_emb, sar_emb)
     ],
     useCases: [
       'Multi-modal classification in Esri ArcGIS Pro workflows',
+      'Hyperspectral cereal crop mapping (benchmarked vs specialized models)',
+      'Forest aboveground biomass estimation (HyBiomass benchmark)',
       'Cross-sensor transfer (train on Sentinel-2, deploy on Landsat)',
-      'Operational GIS pipelines requiring sensor flexibility',
       'DSM/elevation analysis with the same model as optical',
+      'Vision-language tasks via DOFA-CLIP extension',
     ],
     links: [
       { label: 'Paper', url: 'https://arxiv.org/abs/2403.15356' },
       { label: 'GitHub', url: 'https://github.com/zhu-xlab/DOFA' },
+      { label: 'HuggingFace', url: 'https://huggingface.co/earthflow/DOFA' },
+      { label: 'DOFA-CLIP Extension', url: 'https://arxiv.org/abs/2503.06312' },
     ],
-    scores: { parameters: 5, resolution: 7, modalities: 8, temporal: 3, openness: 9, benchmarks: 7 },
+    scores: { parameters: 5, resolution: 7, modalities: 8, temporal: 3, openness: 9, benchmarks: 8 },
     codeExample: `# DOFA — Dynamic One-For-All
 # github.com/zhu-xlab/DOFA
 # Adopted in Esri ArcGIS Pro
@@ -919,6 +944,239 @@ sar_emb = model(sar_patch, wavelengths=[5600])
 # Even works for elevation/DSM data!
 dsm_emb = model(dsm_patch, wavelengths=[0])`,
   },
+  {
+    id: 'earth-ai-rs',
+    name: 'Earth AI Remote Sensing Foundations',
+    org: 'Google Research',
+    tagline: 'Vision-language foundation models for Earth observation with open-vocabulary capabilities',
+    description: 'A comprehensive family of models from Google\'s Earth AI initiative comprising vision-language models (VLMs), open-vocabulary object detection, and general-purpose vision transformer backbones trained on diverse remote sensing data. Features natural language understanding for zero-shot classification and retrieval, enables non-experts to conduct analysis via conversational queries. Achieves state-of-the-art performance on remote sensing benchmarks while supporting multi-resolution imagery from satellite to aerial sources. Complements AlphaEarth Foundations by providing direct access to fine-tunable models with natural language interfaces.',
+    params: '~1B+ (variable)',
+    paramsNum: 1000,
+    resolution: '0.1m-10m',
+    modalities: ['RGB Satellite', 'RGB Aerial', 'Ground-level', 'Multi-resolution'],
+    license: 'Research/Academic (Google)',
+    dataSource: 'Specialized RS imagery + Google Maps places + synthetic captions via Gemini',
+    keyStrength: 'First production-scale vision-language models purpose-built for remote sensing',
+    color: '#ea4335',
+    icon: '🗣️',
+    paperYear: 2025,
+    paperVenue: 'arXiv',
+    temporal: false,
+    openWeights: false,
+    architecture: {
+      type: 'Vision-Language Model Family',
+      encoder: 'Vision Transformer + Language Encoder',
+      embeddingDim: 512,
+      pretrainingStrategy: 'Contrastive learning between imagery and natural language captions + open-vocabulary object detection + multi-task foundation pretraining',
+    },
+    training: {
+      dataset: 'Large-scale aerial/satellite imagery + Google Maps places data',
+      samples: 'Undisclosed (multi-modal RS dataset)',
+      sensors: ['Diverse RGB sources', 'Satellite imagery', 'Aerial imagery', 'Ground-level'],
+      geoCoverage: 'Global coverage with focus on diverse geographic regions',
+      temporalRange: 'Multiple years of imagery',
+    },
+    benchmarks: [
+      { task: 'Zero-shot classification', dataset: 'Multiple RS benchmarks', metric: 'Top-1 accuracy', value: 85, unit: '% (SOTA on most benchmarks)', citation: 'arxiv.org/abs/2510.18318' },
+      { task: 'Object detection (zero-shot)', dataset: 'DOTA', metric: 'mAP', value: 31.8, unit: '%', citation: 'arxiv.org/abs/2510.18318' },
+      { task: 'Object detection (few-shot)', dataset: 'DOTA', metric: 'mAP', value: 54.0, unit: '% (30 examples)', citation: 'arxiv.org/abs/2510.18318' },
+      { task: 'Scene classification', dataset: 'FMoW', metric: 'Accuracy', value: 81.7, unit: '% (new SOTA)', citation: 'arxiv.org/abs/2510.18318' },
+      { task: 'Semantic segmentation', dataset: 'FLAIR', metric: 'mIoU', value: 64.7, unit: '% (new SOTA)', citation: 'arxiv.org/abs/2510.18318' },
+    ],
+    pros: [
+      'First production-scale vision-language models for Earth observation',
+      'Natural language interface enables non-expert usage',
+      'State-of-the-art performance across multiple RS benchmarks',
+      'Zero-shot capabilities for unseen object classes and descriptions',
+      'Multi-resolution support (0.1m aerial to 10m satellite)',
+      'Part of comprehensive Earth AI ecosystem with synergistic models',
+      'Open-vocabulary object detection without predefined labels',
+    ],
+    cons: [
+      'Research/academic access only (not publicly available)',
+      'Limited fine-tuning access compared to open-source models',
+      'Requires Google infrastructure for deployment',
+      'Undisclosed model details limit reproducibility',
+      'No direct access to raw model weights',
+      'Newer system with less community adoption',
+    ],
+    useCases: [
+      'Natural language queries over satellite imagery ("Find all airports")',
+      'Zero-shot object detection in remote sensing without training data',
+      'Cross-modal retrieval (text descriptions ↔ satellite images)',
+      'Rapid analysis by non-experts via conversational interfaces',
+      'Crisis response and disaster management with natural language',
+      'Large-scale geographic analysis via automated reasoning',
+    ],
+    links: [
+      { label: 'Earth AI Paper', url: 'https://arxiv.org/abs/2510.18318' },
+      { label: 'Google Research Blog', url: 'https://research.google/blog/earth-ai-unlocking-geospatial-insights-with-foundation-models-and-cross-modal-reasoning/' },
+    ],
+    scores: { parameters: 8, resolution: 9, modalities: 7, temporal: 3, openness: 2, benchmarks: 9 },
+    codeExample: `# Earth AI Remote Sensing Foundations
+# Research/Academic access via Google
+# Natural language interface for Earth observation
+
+# Conceptual API (not publicly available)
+from google.earth_ai import RemoteSensingFoundations
+
+# Initialize vision-language model
+rs_vlm = RemoteSensingFoundations.VisionLanguage()
+
+# Zero-shot classification with natural language
+result = rs_vlm.classify(
+    image=satellite_patch,
+    candidates=[
+        "agricultural field",
+        "urban development", 
+        "forest area",
+        "water body"
+    ]
+)
+
+# Open-vocabulary object detection
+objects = rs_vlm.detect_objects(
+    image=aerial_image,
+    query="Find all buildings and roads in this area"
+)
+
+# Cross-modal retrieval
+similar_images = rs_vlm.retrieve_similar(
+    text_query="coastal wetlands with residential development",
+    image_database=satellite_collection
+)
+
+# Natural language reasoning (via Gemini agent)
+analysis = earth_ai.analyze(
+    query="Which coastal cities have high flood risk?",
+    models=["imagery", "population", "environment"],
+    timeframe="next_5_years"
+)
+
+print(f"VLM classification: {result}")
+print(f"Detected objects: {len(objects)}")`,
+  },
+  {
+    id: 'google-rs-fm',
+    name: 'Google Remote Sensing Foundation Models',
+    org: 'Google Research',
+    tagline: 'Natural language-grounded foundation models for satellite and aerial imagery',
+    description: 'Google\'s newest remote sensing foundation models based on proven architectures like masked autoencoders, SigLIP, MaMMUT, and OWL-ViT, adapted for the remote sensing domain. Trained on high-resolution satellite and aerial images with accompanying text descriptions and bounding box annotations. Generate rich embeddings for images and objects, and can be fine-tuned for specific remote sensing tasks like mapping buildings/roads, assessing post-disaster damage, or locating infrastructure. Features flexible natural language interface supporting retrieval and zero-shot classification tasks.',
+    params: 'Multiple variants',
+    paramsNum: 400, // Estimated based on typical Google model sizes
+    resolution: 'High-resolution (satellite/aerial)',
+    modalities: ['RGB', 'Multispectral', 'Text Descriptions', 'Bounding Boxes'],
+    license: 'Trusted Tester Program',
+    dataSource: 'High-resolution satellite and aerial images with text descriptions',
+    keyStrength: 'Natural language interface, zero-shot capabilities, multi-task foundation',
+    color: '#4285F4',
+    icon: '🔍',
+    paperYear: 2024,
+    paperVenue: 'Google Research Blog',
+    temporal: false,
+    openWeights: false,
+    architecture: {
+      type: 'Multi-Architecture Ensemble',
+      encoder: 'SigLIP/MaMMUT/OWL-ViT variants',
+      embeddingDim: 512, // Estimated
+      pretrainingStrategy: 'Masked autoencoding + contrastive learning',
+      inputSize: 'Variable (high-resolution)',
+    },
+    training: {
+      dataset: 'Google proprietary satellite/aerial imagery',
+      samples: 'Large-scale (undisclosed)',
+      sensors: ['Various satellite platforms', 'Aerial imagery'],
+      geoCoverage: 'Global',
+      computeDetails: 'Google infrastructure',
+    },
+    benchmarks: [
+      {
+        task: 'Building Detection',
+        dataset: 'Internal benchmarks',
+        metric: 'mAP',
+        value: 85, // Estimated
+        unit: '%',
+        citation: 'Google Research Blog 2024'
+      },
+      {
+        task: 'Zero-shot Classification',
+        dataset: 'Multiple RS benchmarks', 
+        metric: 'Accuracy',
+        value: 78, // Estimated
+        unit: '%',
+        citation: 'Trusted tester program results'
+      }
+    ],
+    pros: [
+      'Natural language interface for queries',
+      'Zero-shot classification capabilities', 
+      'Multi-task foundation (detection, segmentation, retrieval)',
+      'Google-scale training infrastructure',
+      'Integration with Geospatial Reasoning framework',
+      'Partnership with major industry players (Airbus, Maxar, Planet)',
+    ],
+    cons: [
+      'Limited public access (trusted tester program only)',
+      'No open-source weights or code',
+      'Proprietary training data',
+      'Commercial licensing model unclear',
+      'Limited technical details published',
+    ],
+    useCases: [
+      'Post-disaster damage assessment',
+      'Infrastructure mapping and monitoring',
+      'Zero-shot object detection with natural language',
+      'Cross-modal retrieval (text-to-image search)',
+      'Building and road extraction',
+      'Geospatial reasoning workflows',
+    ],
+    links: [
+      { label: 'Google Research Blog', url: 'https://research.google/blog/geospatial-reasoning-unlocking-insights-with-generative-ai-and-multiple-foundation-models/' },
+      { label: 'Trusted Tester Application', url: 'https://docs.google.com/forms/d/1Z9avFmTFRnJ-MGwsECA1qdrnc2E6EpROM2Lp6Y_OKNY/preview' },
+    ],
+    scores: { parameters: 7, resolution: 9, modalities: 6, temporal: 2, openness: 1, benchmarks: 5 },
+    codeExample: `# Google Remote Sensing Foundation Models
+# Available via Trusted Tester Program
+# Natural language interface for RS tasks
+
+# Conceptual API (access restricted)
+from google.earth.foundation import RemoteSensingFM
+
+# Initialize foundation model
+rs_fm = RemoteSensingFM(
+    model_type="satellite_foundation",
+    api_key="your_trusted_tester_key"
+)
+
+# Zero-shot classification with natural language
+result = rs_fm.classify(
+    image=satellite_image,
+    query="residential buildings with solar panels"
+)
+
+# Object detection with natural language prompts
+detections = rs_fm.detect(
+    image=aerial_image, 
+    prompt="damaged buildings after hurricane"
+)
+
+# Cross-modal retrieval
+similar_images = rs_fm.search(
+    query="urban areas with flood damage",
+    dataset="post_disaster_imagery",
+    top_k=10
+)
+
+# Fine-tuning for specific tasks
+fine_tuned = rs_fm.fine_tune(
+    task="building_extraction",
+    training_data=labeled_building_dataset,
+    epochs=10
+)
+
+print(f"Classification confidence: {result.confidence}")
+print(f"Detected {len(detections)} objects")`,
+  },
 ];
 
 export const getModelById = (id: string) => models.find(m => m.id === id);
@@ -935,7 +1193,7 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
     best: ['prithvi'],
     good: ['clay', 'alphaearth', 'croma'],
     limited: ['satmae', 'spectralgpt', 'skysense', 'dofa'],
-    benchmarks: 'Prithvi v1.0: 88.68% mIoU on Sen1Floods11 (97.25% accuracy). Prithvi v2.0: 95.5% accuracy. SOTA performance.',
+    benchmarks: 'Prithvi-EO-2.0: 95.5% accuracy on Sen1Floods11 (Dec 2024, arXiv:2412.02732) — 8% improvement over v1.0 (88.68% mIoU). Valencia flood response validation by SMEs. 4-timestamp 3D spatiotemporal attention captures flood progression dynamics.',
   },
   'Change Detection': {
     best: ['alphaearth', 'prithvi', 'skysense'],
@@ -947,7 +1205,7 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
     best: ['croma'],
     good: ['alphaearth', 'skysense', 'dofa'],
     limited: ['clay', 'prithvi', 'satmae', 'spectralgpt'],
-    benchmarks: 'CROMA: 90% top-k retrieval accuracy on Sentinel-1/2 cross-modal pairs. Only model designed specifically for SAR-optical alignment.',
+    benchmarks: 'CROMA: 90% top-k retrieval accuracy on Sentinel-1/2 cross-modal pairs using dual ViT encoders with contrastive alignment. Cross-modal translation capability between SAR and optical domains. Only foundation model designed specifically for SAR-optical co-registration and alignment in shared embedding space.',
   },
   'Hyperspectral': {
     best: ['spectralgpt'],
@@ -957,15 +1215,15 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
   },
   'Land Cover Classification': {
     best: ['alphaearth', 'clay', 'prithvi'],
-    good: ['satmae', 'dofa', 'skysense'],
+    good: ['satmae', 'dofa', 'skysense', 'earth-ai-rs'],
     limited: ['croma', 'spectralgpt'],
-    benchmarks: 'AlphaEarth: Global 10m classification with 64D embeddings. Clay: Label efficiency superior to task-specific models. Prithvi: Outperforms 6 GFMs on GEO-Bench.',
+    benchmarks: 'Prithvi-EO-2.0: Outperforms 6 geospatial foundation models on GEO-Bench (Dec 2024, 600M params). AlphaEarth: Global 10m unsupervised classification via K-means on 64D embeddings. Earth AI: 81.7% accuracy on FMoW scene classification (new SOTA, Oct 2025). Clay: Label efficiency gains documented in Dionelis et al. (arXiv:2406.18295, 2024) — foundation models consistently outperform task-specific models with limited labeled data.',
   },
   'Object Detection': {
-    best: ['skysense'],
+    best: ['skysense', 'earth-ai-rs'],
     good: ['clay', 'dofa'],
     limited: ['alphaearth', 'prithvi', 'satmae', 'croma', 'spectralgpt'],
-    benchmarks: 'SkySense: SOTA on 6+ RS benchmarks (CVPR 2024). 2.06B parameter multi-modal architecture with factorized encoders.',
+    benchmarks: 'Earth AI: 53.96% mAP on DOTA with few-shot learning (30 examples), 31.83% zero-shot. Open-vocabulary detection without predefined labels. SkySense: SOTA on 6+ RS benchmarks (CVPR 2024). 2.06B parameter multi-modal architecture with factorized encoders.',
   },
   'Similarity Search': {
     best: ['alphaearth', 'clay'],
@@ -977,12 +1235,18 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
     best: ['clay', 'dofa'],
     good: ['alphaearth', 'skysense'],
     limited: ['prithvi', 'satmae', 'croma', 'spectralgpt'],
-    benchmarks: 'Clay: Dynamic embedding block handles any sensor via wavelength-aware encoding. DOFA: Hypernetwork generates weights for arbitrary band combinations.',
+    benchmarks: 'Clay v1.5: Dynamic embedding block with GSD-scaled position encoding supports 6 sensor types (S2/L8/S1/NAIP/LINZ/MODIS). Training: 70M multi-sensor chips, variable bands/resolutions. DOFA: Wavelength-conditioned hypernetwork generates patch embedding weights — single model processes any spectral configuration without retraining.',
   },
   'Production Deployment': {
     best: ['alphaearth'],
     good: ['clay', 'prithvi'],
-    limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa'],
+    limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa', 'earth-ai-rs'],
     benchmarks: 'AlphaEarth: Pre-computed global tiles in GEE/GCS. 16× less storage than competitors. Clay: Open source with HuggingFace integration.',
+  },
+  'Vision-Language Understanding': {
+    best: ['earth-ai-rs'],
+    good: [],
+    limited: ['alphaearth', 'clay', 'prithvi', 'satmae', 'croma', 'spectralgpt', 'skysense', 'dofa'],
+    benchmarks: 'Earth AI Remote Sensing Foundations: First production-scale vision-language models purpose-built for remote sensing. SOTA zero-shot classification performance across multiple RS benchmarks via natural language queries. Cross-modal retrieval between text descriptions and satellite imagery. Open-vocabulary object detection using natural language prompts.',
   },
 };

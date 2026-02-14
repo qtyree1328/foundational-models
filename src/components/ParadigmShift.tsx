@@ -5,28 +5,29 @@ const BASE = import.meta.env.BASE_URL;
 // ─── Before/After comparison for text search vs earth search ───
 const PARADIGM_COMPARISON = [
   {
-    era: 'Text Search',
+    era: 'Text Search Evolution',
     icon: '📝',
-    before: 'Keyword matching — "apple" returns every document with that string, whether about fruit, companies, or orchards',
-    after: 'Word embeddings (Word2Vec → BERT) — "apple" near "fruit" vs "apple" near "iPhone" map to different vectors. Meaning is encoded.',
+    before: 'Keyword matching — "apple" returns every document with that string, whether about fruit, companies, or orchards. No understanding of context or meaning.',
+    after: 'Language embeddings (Word2Vec → BERT → GPT) — "apple" near "fruit" vs "apple" near "iPhone" map to different high-dimensional vectors. Semantic similarity enables "find documents like this one" without keyword matching.',
   },
   {
-    era: 'Earth Search',
+    era: 'Earth Observation Revolution',
     icon: '🛰️',
-    before: 'Pixel classification — train a model per task, per sensor, per region. Every new question requires a new model.',
-    after: 'Geo-embeddings (LEOMs) — compress satellite imagery into universal vectors. Ask any question of any place without retraining. "Find places like this" becomes a vector similarity search.',
+    before: 'Task-specific pixel classification — train separate models per sensor (Landsat vs Sentinel-2), per region (tropics vs arctic), per application (crops vs buildings). Every new question requires new labeled training data.',
+    after: 'Large Earth Observation Models (LEOMs) — AlphaEarth compresses petabytes of multi-sensor data into 64-dimensional unit vectors on a hypersphere. "Find places similar to this hospital in terms of local food access" becomes embedding similarity search across global coverage.',
   },
 ];
 
 // ─── Applications table ───
 const APPLICATIONS = [
-  { task: 'Land Cover Classification', method: 'Linear probe on embeddings', effort: 'Minutes', traditional: 'Weeks of labeled training data' },
-  { task: 'Change Detection', method: 'Cosine distance between time steps', effort: 'Seconds', traditional: 'Bi-temporal model + thresholding' },
-  { task: 'Anomaly Detection', method: 'Statistical outliers in embedding space', effort: 'Minutes', traditional: 'Domain-specific rule engineering' },
-  { task: 'Similarity Search', method: 'Nearest-neighbor in vector DB', effort: 'Milliseconds', traditional: 'Manual feature engineering per query' },
-  { task: 'Crop Type Mapping', method: 'Few-shot fine-tune (10 labels)', effort: 'Hours', traditional: 'Thousands of field-verified labels' },
-  { task: 'Flood Extent', method: 'Threshold embedding shift from baseline', effort: 'Seconds', traditional: 'Water index + DEM + manual validation' },
-  { task: 'Building Density', method: 'Label-efficient fine-tuning', effort: 'Hours', traditional: 'Extensive manual annotation campaigns' },
+  { task: 'Land Cover Classification', method: 'K-means clustering on 64D AlphaEarth embeddings', effort: 'Minutes', traditional: 'Weeks of labeled training data + per-region models' },
+  { task: 'Change Detection', method: 'Dot product stability maps (AlphaEarth annual)', effort: 'Seconds', traditional: 'Bi-temporal NDVI differencing + manual thresholding' },
+  { task: 'Flood Mapping', method: 'Fine-tune 300M Prithvi-EO-2.0 (95.5% accuracy)', effort: '2-4 hours', traditional: 'Sen1Floods11 baseline methods (88% accuracy)' },
+  { task: 'Similarity Search', method: 'Cosine similarity in embedding space', effort: 'Milliseconds', traditional: 'Manual spectral index combinations per query type' },
+  { task: 'Crop Type Mapping', method: 'Few-shot learning (Dionelis et al. 2024: superior with limited labels)', effort: 'Hours', traditional: 'Thousands of field-verified training samples' },
+  { task: 'Airport Detection', method: 'Single band visualization (A26 dimension)', effort: 'Instant', traditional: 'Manual feature engineering + validation flights' },
+  { task: 'Cross-Sensor Fusion', method: 'Clay dynamic embedding: any sensor combination', effort: 'Minutes', traditional: 'Separate models per sensor + manual co-registration' },
+  { task: 'Industrial Infrastructure', method: 'AlphaEarth A51 dimension (oil/gas facilities)', effort: 'Seconds', traditional: 'Specialized spectral signatures + ground truth verification' },
 ];
 
 // ─── Preset locations for comparison ───

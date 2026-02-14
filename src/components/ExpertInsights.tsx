@@ -26,6 +26,11 @@ const CITATIONS: Record<string, Citation> = {
   nature2025responsible: { id: 'nature2025responsible', text: 'Nature Editorial. "Towards responsible geospatial foundation models." Nature Machine Intelligence 2025.', url: 'https://www.nature.com/articles/s42256-025-01106-7' },
   blumenstiel2024peft: { id: 'blumenstiel2024peft', text: 'Blumenstiel et al. "Parameter-Efficient Fine-Tuning for Geospatial Foundation Models." arXiv 2024.', url: 'https://arxiv.org/abs/2504.17397' },
   dionelis2024eval: { id: 'dionelis2024eval', text: 'Dionelis et al. "Evaluating and Benchmarking Foundation Models for Earth Observation and Geospatial AI." arXiv 2024.', url: 'https://arxiv.org/abs/2406.18295' },
+  // 2026 Research Updates
+  earth_foundations2026: { id: 'earth_foundations2026', text: 'On the foundations of Earth foundation models. Nature Communications Earth & Environment 2026.', url: 'https://www.nature.com/articles/s43247-025-03127-x' },
+  scaling_laws2026: { id: 'scaling_laws2026', text: 'Dionelis et al. "Scaling Laws for Geospatial Foundation Models: A case study on PhilEO Bench." arXiv 2026.', url: 'https://arxiv.org/abs/2506.14765' },
+  reobench2025: { id: 'reobench2025', text: 'Li et al. "REOBench: Benchmarking Robustness of Earth Observation Foundation Models." arXiv 2025.', url: 'https://arxiv.org/abs/2505.16793' },
+  rsfm_survey2025: { id: 'rsfm_survey2025', text: 'Xiao et al. "Foundation Models for Remote Sensing and Earth Observation: A Survey." IEEE GRSM 2025.', url: 'https://arxiv.org/abs/2410.16602' },
 };
 
 function Cite({ ids }: { ids: string[] }) {
@@ -885,12 +890,24 @@ function OpenQuestionsDeepDive() {
       ),
     },
     {
-      title: 'Benchmark Standardization — GEO-Bench Limitations',
+      title: 'Benchmark Standardization — Recent Progress & Limitations',
       icon: '📏',
-      status: 'Improving',
-      statusColor: '#f59e0b',
+      status: 'Major progress',
+      statusColor: '#059669',
       body: (
         <>
+          <p>
+            <strong>REOBench (2025):</strong> The first comprehensive robustness evaluation reveals concerning
+            vulnerabilities in current LEOMs <Cite ids={['reobench2025']} />. Models fail dramatically under
+            real-world corruptions — weather conditions, sensor noise, compression artifacts. Most LEOMs were
+            trained on pristine research datasets but struggle with operational imagery quality.
+          </p>
+          <p>
+            <strong>Scaling Laws Study (2026):</strong> PhilEO Bench systematic evaluation across three dataset
+            scales (0.5TB → 23TB) shows CNNs remain competitive in few-shot settings, but ViT-UPerNet dominates
+            when training data scales to multi-terabyte size <Cite ids={['scaling_laws2026']} />. 
+            Key finding: dataset size matters more than architecture choice for downstream performance.
+          </p>
           <p>
             GEO-Bench <Cite ids={['lacoste2023geobench']} /> was the first attempt at standardized benchmarking
             for geospatial foundation models, providing 12 classification and segmentation tasks. But significant gaps remain:
@@ -950,6 +967,53 @@ function OpenQuestionsDeepDive() {
             For science that depends on reproducibility, proprietary models are fundamentally problematic —
             you can't verify, extend, or reproduce results built on undisclosed architectures. For
             operational deployment, proprietary models often win on quality and convenience.
+          </p>
+        </>
+      ),
+    },
+    {
+      title: 'Foundations of Ideal Earth FMs — Nature 2026 Framework',
+      icon: '🎯',
+      status: 'Framework defined',
+      statusColor: '#6366f1',
+      body: (
+        <>
+          <p>
+            The definitive Nature Communications Earth & Environment paper (2026) establishes 11 critical 
+            features for ideal Earth foundation models <Cite ids={['earth_foundations2026']} />:
+          </p>
+          <div className="ei-feature-grid">
+            <div className="ei-feature-category">
+              <h6>Technical Capabilities</h6>
+              <ul>
+                <li><strong>Geolocation & scale awareness</strong> — Understanding spatial context across resolutions</li>
+                <li><strong>Multisensor integration</strong> — Optical, SAR, hyperspectral fusion</li>
+                <li><strong>Temporal dynamics</strong> — Seasonal, annual, and long-term change modeling</li>
+                <li><strong>Multi-resolution support</strong> — Local to global scale transfer</li>
+              </ul>
+            </div>
+            <div className="ei-feature-category">
+              <h6>Scientific Rigor</h6>
+              <ul>
+                <li><strong>Physical consistency</strong> — Adherence to Earth system physics</li>
+                <li><strong>Uncertainty quantification</strong> — Confidence estimation for science</li>
+                <li><strong>Interpretability</strong> — Understanding model decisions</li>
+              </ul>
+            </div>
+            <div className="ei-feature-category">
+              <h6>Operational Requirements</h6>
+              <ul>
+                <li><strong>Carbon-efficient operation</strong> — Sustainable training/inference</li>
+                <li><strong>Transferability</strong> — Cross-region adaptation</li>
+                <li><strong>Real-time capability</strong> — Operational monitoring support</li>
+                <li><strong>Scalability</strong> — Petabyte-scale data handling</li>
+              </ul>
+            </div>
+          </div>
+          <p>
+            <strong>Current gap:</strong> No existing model meets all criteria. Most excel at 3-4 features
+            but fall short on physical consistency, uncertainty quantification, and carbon efficiency.
+            This framework provides the roadmap for next-generation LEOMs.
           </p>
         </>
       ),

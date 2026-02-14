@@ -6948,6 +6948,60 @@ body {
   border-radius: 6px;
 }
 
+/* Quick Dimension Tests */
+.fm-quick-tests {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.fm-quick-tests h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.fm-quick-tests .fm-hint {
+  margin: 0 0 1rem 0;
+  font-size: 0.75rem;
+}
+
+.fm-test-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.fm-test-btn {
+  padding: 0.75rem 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.fm-test-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.fm-test-btn:active {
+  transform: translateY(0);
+}
+
 /* Similarity Search Results */
 .fm-similarity-results {
   margin-top: 1rem;

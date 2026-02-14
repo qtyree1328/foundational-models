@@ -745,9 +745,284 @@ def sample_embeddings():
         return jsonify({'error': str(e)}), 500
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# SNOW TRACKER ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+# ---------- SNODAS Tile URL ----------
+@app.route('/api/snow/tiles/snodas')
+def snow_tiles_snodas():
+    """
+    GET /snow/tiles/snodas?date=2024-02-15&band=Snow_Depth
+    Returns tile URL for SNODAS data on a given date.
+    Bands: Snow_Depth, SWE, Snowfall
+    """
+    try:
+        date_str = request.args.get('date', '2024-02-15')
+        band = request.args.get('band', 'Snow_Depth')
+
+        cache_key = _cache_key('snodas_tile', date_str, band)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        # SNODAS daily collection
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily')
+        # Filter to the single day
+        img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'day')).first()
+
+        selected = img.select(band)
+
+        # Visualization params per band
+        vis_params = {
+            'Snow_Depth': {'min': 0, 'max': 1.5, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#08306b', '#4a148c', '#e1bee7']},
+            'SWE':        {'min': 0, 'max': 500, 'palette': ['#f7fbff', '#9ecae1', '#3182bd', '#08519c', '#6a1b9a', '#e91e63']},
+            'Snowfall':   {'min': 0, 'max': 50,  'palette': ['#f7fbff', '#9ecae1', '#4292c6', '#08519c', '#4a148c']},
+        }
+        vp = vis_params.get(band, vis_params['Snow_Depth'])
+        vis = selected.visualize(**vp)
+        tile_url = get_tile_url(vis)
+
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'date': date_str, 'band': band})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- ERA5-Land Tile URL ----------
+@app.route('/api/snow/tiles/era5')
+def snow_tiles_era5():
+    """
+    GET /snow/tiles/era5?year=2023&month=01&band=snowfall_sum
+    Returns tile URL for ERA5-Land monthly aggregate.
+    Bands: snow_depth, snowfall_sum, snow_cover
+    """
+    try:
+        year = request.args.get('year', '2023')
+        month = request.args.get('month', '01')
+        band = request.args.get('band', 'snowfall_sum')
+
+        cache_key = _cache_key('era5_tile', year, month, band)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+
+        date_str = f'{year}-{month.zfill(2)}-01'
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR')
+        img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
+        selected = img.select(band)
+
+        vis_params = {
+            'snowfall_sum':    {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a', '#1b263b', '#415a77', '#778da9', '#93c5fd', '#6366f1', '#a855f7', '#e9d5ff']},
+            'snow_depth':      {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a', '#1e3a5f', '#3b82f6', '#60a5fa', '#93c5fd', '#c8b4ff', '#f3e8ff']},
+            'snow_cover':      {'min': 0, 'max': 100, 'palette': ['#0d1b2a', '#1e3a5f', '#60a5fa', '#c8b4ff', '#ffffff']},
+        }
+        vp = vis_params.get(band, vis_params['snowfall_sum'])
+        vis = selected.visualize(**vp)
+        tile_url = get_tile_url(vis)
+
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'year': year, 'month': month, 'band': band})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- SNODAS Time Series at a Point ----------
+@app.route('/api/snow/stats/snodas')
+def snow_stats_snodas():
+    """
+    GET /snow/stats/snodas?lat=40&lon=-105&start=2023-10-01&end=2024-04-01&band=Snow_Depth
+    Returns daily time series at a point.
+    """
+    try:
+        lat = float(request.args.get('lat', '40'))
+        lon = float(request.args.get('lon', '-105'))
+        start = request.args.get('start', '2023-10-01')
+        end = request.args.get('end', '2024-04-01')
+        band = request.args.get('band', 'Snow_Depth')
+
+        point = ee.Geometry.Point([lon, lat])
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily') \
+            .filterDate(start, end) \
+            .select(band)
+
+        def extract(img):
+            val = img.reduceRegion(
+                reducer=ee.Reducer.first(),
+                geometry=point,
+                scale=1000
+            ).get(band)
+            return ee.Feature(None, {
+                'date': img.date().format('YYYY-MM-dd'),
+                'value': val
+            })
+
+        series = col.map(extract).getInfo()
+        results = []
+        for f in series.get('features', []):
+            p = f.get('properties', {})
+            if p.get('value') is not None:
+                results.append({'date': p['date'], 'value': round(p['value'], 4)})
+
+        return jsonify({'series': results, 'lat': lat, 'lon': lon, 'band': band})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- ERA5-Land Time Series at a Point ----------
+@app.route('/api/snow/stats/era5')
+def snow_stats_era5():
+    """
+    GET /snow/stats/era5?lat=60&lon=10&start=2015-01&end=2024-12&band=snowfall_sum
+    Returns monthly time series at a point.
+    """
+    try:
+        lat = float(request.args.get('lat', '60'))
+        lon = float(request.args.get('lon', '10'))
+        start = request.args.get('start', '2015-01')
+        end = request.args.get('end', '2024-12')
+        band = request.args.get('band', 'snowfall_sum')
+
+        point = ee.Geometry.Point([lon, lat])
+
+        start_date = f'{start}-01'
+        # Parse end to get the last day of that month
+        end_parts = end.split('-')
+        end_date = ee.Date(f'{end_parts[0]}-{end_parts[1]}-01').advance(1, 'month')
+
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR') \
+            .filterDate(start_date, end_date) \
+            .select(band)
+
+        def extract(img):
+            val = img.reduceRegion(
+                reducer=ee.Reducer.first(),
+                geometry=point,
+                scale=11000
+            ).get(band)
+            return ee.Feature(None, {
+                'date': img.date().format('YYYY-MM'),
+                'value': val
+            })
+
+        series = col.map(extract).getInfo()
+        results = []
+        for f in series.get('features', []):
+            p = f.get('properties', {})
+            if p.get('value') is not None:
+                results.append({'date': p['date'], 'value': round(p['value'], 6)})
+
+        return jsonify({'series': results, 'lat': lat, 'lon': lon, 'band': band})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- SNODAS Animation (array of tile URLs) ----------
+@app.route('/api/snow/animation/snodas')
+def snow_animation_snodas():
+    """
+    GET /snow/animation/snodas?start=2024-01-01&end=2024-04-01&band=Snow_Depth&interval=7
+    Returns array of {date, tileUrl} for timelapse.
+    """
+    try:
+        start = request.args.get('start', '2024-01-01')
+        end = request.args.get('end', '2024-04-01')
+        band = request.args.get('band', 'Snow_Depth')
+        interval = int(request.args.get('interval', '7'))
+
+        vis_params = {
+            'Snow_Depth': {'min': 0, 'max': 1.5, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#08306b', '#4a148c', '#e1bee7']},
+            'SWE':        {'min': 0, 'max': 500, 'palette': ['#f7fbff', '#9ecae1', '#3182bd', '#08519c', '#6a1b9a', '#e91e63']},
+            'Snowfall':   {'min': 0, 'max': 50,  'palette': ['#f7fbff', '#9ecae1', '#4292c6', '#08519c', '#4a148c']},
+        }
+        vp = vis_params.get(band, vis_params['Snow_Depth'])
+
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily').select(band)
+        start_date = ee.Date(start)
+        end_date = ee.Date(end)
+        n_frames = end_date.difference(start_date, 'day').divide(interval).ceil().getInfo()
+        n_frames = min(int(n_frames), 60)  # Cap at 60 frames
+
+        frames = []
+        for i in range(n_frames):
+            d = start_date.advance(i * interval, 'day')
+            d_str = d.format('YYYY-MM-dd').getInfo()
+
+            ck = _cache_key('snodas_anim', d_str, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'date': d_str, 'tileUrl': cached_url})
+                continue
+
+            img = col.filterDate(d, d.advance(1, 'day')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'date': d_str, 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'interval': interval})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- ERA5-Land Animation (annual comparison) ----------
+@app.route('/api/snow/animation/era5')
+def snow_animation_era5():
+    """
+    GET /snow/animation/era5?startYear=2015&endYear=2024&month=01&band=snowfall_sum
+    Returns array of {year, tileUrl} for year-by-year comparison.
+    """
+    try:
+        start_year = int(request.args.get('startYear', '2015'))
+        end_year = int(request.args.get('endYear', '2024'))
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'snowfall_sum')
+
+        vis_params = {
+            'snowfall_sum': {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a', '#1b263b', '#415a77', '#778da9', '#93c5fd', '#6366f1', '#a855f7', '#e9d5ff']},
+            'snow_depth':   {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a', '#1e3a5f', '#3b82f6', '#60a5fa', '#93c5fd', '#c8b4ff', '#f3e8ff']},
+            'snow_cover':   {'min': 0, 'max': 100, 'palette': ['#0d1b2a', '#1e3a5f', '#60a5fa', '#c8b4ff', '#ffffff']},
+        }
+        vp = vis_params.get(band, vis_params['snowfall_sum'])
+
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR').select(band)
+        frames = []
+
+        for year in range(start_year, end_year + 1):
+            ck = _cache_key('era5_anim', year, month, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'year': year, 'tileUrl': cached_url})
+                continue
+
+            date_str = f'{year}-{month}-01'
+            img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'year': year, 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'month': month})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     print('🌍 GEE Tile Proxy starting on port 3013...')
     print(f'   Service account: {creds_data["client_email"]}')
     print(f'   Project: {creds_data["project_id"]}')
+    print(f'   Snow endpoints: /snow/tiles/snodas, /snow/tiles/era5, /snow/stats/*, /snow/animation/*')
     app.run(host='0.0.0.0', port=3013, debug=False, threaded=True)

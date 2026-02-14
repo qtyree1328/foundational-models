@@ -13,17 +13,19 @@ interface BandPresets {
 
 const BAND_PRESETS: BandPresets = {
   'Default RGB': 'A01,A16,A09',
-  'Vegetation Focus': 'A00,A03,A07',
-  'Urban Detection': 'A02,A10,A20',
-  'Water Bodies': 'A05,A15,A30',
-  'Change Sensitive': 'A01,A08,A32',
+  'Infrastructure Focus': 'A26,A06,A20', // Element 84: A26=airports, A06=buildings, A20=urban structures
+  'Industrial & Energy': 'A51,A08,A41', // A51=oil/gas facilities (Nature 2024), A08=water infra, A41=transport
+  'Agriculture & Forest': 'A12,A03,A15', // A12=crops/cocoa (Airbus research), A03=ag machinery, A15=forest health
+  'Water & Coastal': 'A08,A48,A15', // A08=water features, A48=coastal/aquaculture, A15=deforestation gradients
+  'Mining & Resources': 'A32,A51,A03', // A32=mining sites (PMC study), A51=industrial, A03=heavy machinery
+  'Change Sensitive': 'A01,A08,A32', // Keep original - good for detecting various change types
 };
 
 const MODE_DESCRIPTIONS: Record<VizMode, string> = {
-  embeddings: 'Maps 3 of the 64 axes to R/G/B. Similar colors = similar embeddings = similar landscape type. The axes aren\'t labeled — the model learned them automatically from data.',
-  clustering: 'Runs K-means on all 64 dimensions in the visible region. Each cluster represents a distinct landscape type discovered from embedding similarity — no labels required.',
-  change: 'Computes embedding difference between two years. High values = the 64D vector changed significantly, indicating land cover change (deforestation, urbanization, etc.).',
-  similarity: 'Click a reference point, then compute cosine similarity against the entire map. Find locations with similar landscape characteristics anywhere in the world.',
+  embeddings: 'Maps 3 of the 64 axes to R/G/B false-color. Similar colors = similar unit-length vectors on the embedding hypersphere. AlphaEarth learned these dimensions from petabytes of multi-sensor data without labels — Element 84 research shows A26 encodes airports, A51 captures industrial facilities.',
+  clustering: 'Runs K-means on all 64 dimensions in the visible region. Each cluster represents a distinct landscape type discovered from embedding similarity. Used operationally for crop type mapping (Krishna Raja Sagara Reservoir, India) and Global Ecosystems Atlas land cover classification.',
+  change: 'Computes cosine distance between annual embeddings (2017-2024). AlphaEarth stability mapping: values near 1.0 = stable landscape, values near 0 = major change events (fires, deforestation, urbanization). More sensitive than traditional NDVI differencing.',
+  similarity: 'Click to compute cosine similarity across global 10m embeddings. Core functionality behind Google\'s similarity search demo and production ecosystem mapping. Find similar agricultural regions, urban patterns, or landscape types anywhere on Earth using the 64-dimensional embedding space.',
 };
 
 interface EmbeddingInfo {

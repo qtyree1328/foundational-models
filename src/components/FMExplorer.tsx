@@ -164,6 +164,63 @@ const REAL_EVENTS: RealEvent[] = [
     description: 'Africa\'s largest hydroelectric dam project on Blue Nile. Featured in Element 84 research.',
     source: 'Element 84 AlphaEarth Analysis',
     question: 'Can embeddings detect major infrastructure and water impoundment changes?'
+  },
+  // VALIDATION TEST SITES
+  {
+    id: 'philadelphia-airport',
+    name: 'Philadelphia International Airport',
+    category: 'urban',
+    icon: '✈️',
+    coords: [-75.24, 39.87],
+    zoom: 13,
+    bbox: [-75.28, 39.85, -75.20, 39.89],
+    beforeYear: 2022,
+    afterYear: 2023,
+    description: 'Major international airport for testing AlphaEarth dimension 26 (airport detection). Features multiple long runways, clear aviation infrastructure patterns.',
+    source: 'Element 84 validation study',
+    question: 'Does dimension 26 accurately highlight airport runways and aviation infrastructure?'
+  },
+  {
+    id: 'singapore-changi',
+    name: 'Singapore Changi Airport',
+    category: 'urban', 
+    icon: '✈️',
+    coords: [103.99, 1.35],
+    zoom: 13,
+    bbox: [103.95, 1.32, 104.03, 1.38],
+    beforeYear: 2022,
+    afterYear: 2023,
+    description: 'One of world\'s busiest airports. Test case for dimension 26 validation across different geographic regions.',
+    source: 'Global airport validation',
+    question: 'Does airport detection dimension generalize globally across different climates?'
+  },
+  {
+    id: 'cocoa-farms-ghana',
+    name: 'Cocoa Plantations, Ghana',
+    category: 'agriculture',
+    icon: '🍫', 
+    coords: [-1.85, 6.15],
+    zoom: 12,
+    bbox: [-1.95, 6.05, -1.75, 6.25],
+    beforeYear: 2021,
+    afterYear: 2023,
+    description: 'Cocoa farming region for testing dimension 12 (agricultural patterns). Partnership with Airbus and Barry Callebaut for cocoa detection.',
+    source: 'Airbus + Barry Callebaut study',
+    question: 'Can dimension 12 accurately identify specific crop types like cocoa plantations?'
+  },
+  {
+    id: 'port-rotterdam',
+    name: 'Port of Rotterdam',
+    category: 'urban',
+    icon: '🚢',
+    coords: [4.47, 51.95],
+    zoom: 12, 
+    bbox: [4.35, 51.90, 4.59, 52.00],
+    beforeYear: 2021,
+    afterYear: 2023,
+    description: 'Europe\'s largest port for testing industrial/logistics infrastructure detection. Test site for dimensions 41 (transport networks) and 48 (coastal development).',
+    source: 'Infrastructure analysis research',
+    question: 'Do transport and coastal development dimensions capture major port logistics infrastructure?'
   }
 ];
 
@@ -996,16 +1053,19 @@ export default function FMExplorer() {
                 />
                 <p className="fm-single-hint">
                   🎯 <strong>A{singleBand.toString().padStart(2, '0')}:</strong> {
-                    singleBand === 26 ? 'Airports & Infrastructure (Element 84) — validated in Philadelphia' :
-                    singleBand === 6 ? 'Buildings (Element 84)' :
-                    singleBand === 20 ? 'Urban structures (Element 84)' :
-                    singleBand === 24 ? 'Tall buildings (Element 84)' :
-                    singleBand === 51 ? 'Industrial areas — oil/gas infrastructure, storage tanks (Nature 2024 research)' :
-                    singleBand === 8 ? 'Water features — dams, reservoirs, infrastructure monitoring' :
-                    singleBand === 12 ? 'Vegetation patterns — cocoa farms (Airbus+Barry Callebaut), crop classification' :
-                    singleBand === 32 ? 'Mixed land use — mining detection (PMC study), tailings dams' :
-                    singleBand === 48 ? 'Coastal features — offshore aquaculture potential' :
-                    `Embedding dimension ${singleBand} - explore to discover patterns`
+                    singleBand === 26 ? 'Airports & Infrastructure (Element 84) — validated in Philadelphia International Airport' :
+                    singleBand === 6 ? 'Buildings & Urban Structures (Element 84) — test on downtown cores, skyscraper districts' :
+                    singleBand === 20 ? 'Urban Infrastructure (Element 84) — highways, bridges, major transport hubs' :
+                    singleBand === 24 ? 'Tall Buildings & Towers (Element 84) — high-rise detection, city skylines' :
+                    singleBand === 51 ? 'Industrial Infrastructure — oil refineries, gas storage, chemical facilities (Nature 2024)' :
+                    singleBand === 8 ? 'Water Infrastructure — dams, reservoirs, water treatment, canal systems' :
+                    singleBand === 12 ? 'Agricultural Patterns — cocoa plantations (Airbus+Barry Callebaut), crop type classification' :
+                    singleBand === 32 ? 'Resource Extraction — mining sites, quarries, tailings dams (PMC study), industrial scars' :
+                    singleBand === 48 ? 'Coastal Development — aquaculture farms, offshore platforms, port facilities' :
+                    singleBand === 15 ? 'Forest Health — deforestation gradients, logging roads, forest fragmentation' :
+                    singleBand === 41 ? 'Transportation Networks — rail yards, logistics hubs, intermodal facilities' :
+                    singleBand === 3 ? 'Agricultural Machinery — center-pivot irrigation, grain silos, farm equipment' :
+                    `Embedding dimension ${singleBand} - explore to discover new patterns and use cases`
                   }
                 </p>
               </div>
@@ -1166,6 +1226,60 @@ export default function FMExplorer() {
                   <strong>📍 Active:</strong> {customLocation.name}
                 </div>
               )}
+              
+              <div className="fm-quick-tests">
+                <h5>🧪 Quick Dimension Tests</h5>
+                <p className="fm-hint">Validate specific embedding dimensions on known test sites</p>
+                <div className="fm-test-buttons">
+                  <button
+                    className="fm-test-btn"
+                    onClick={() => {
+                      setSingleBand(26);
+                      setViewMode('single');
+                      loadCustomLocation([-75.24, 39.87], 2023, 'Philadelphia Airport (Dim 26 Test)');
+                    }}
+                    title="Test dimension 26 airport detection on Philadelphia International"
+                  >
+                    ✈️ Test Airports (Dim 26)
+                  </button>
+                  
+                  <button
+                    className="fm-test-btn"
+                    onClick={() => {
+                      setSingleBand(12);
+                      setViewMode('single');
+                      loadCustomLocation([-1.85, 6.15], 2023, 'Ghana Cocoa Farms (Dim 12 Test)');
+                    }}
+                    title="Test dimension 12 crop detection on cocoa plantations"
+                  >
+                    🍫 Test Crops (Dim 12)
+                  </button>
+                  
+                  <button
+                    className="fm-test-btn" 
+                    onClick={() => {
+                      setSingleBand(41);
+                      setViewMode('single');
+                      loadCustomLocation([4.47, 51.95], 2023, 'Rotterdam Port (Dim 41 Test)');
+                    }}
+                    title="Test dimension 41 transport networks on major port infrastructure"
+                  >
+                    🚢 Test Transport (Dim 41)
+                  </button>
+                  
+                  <button
+                    className="fm-test-btn"
+                    onClick={() => {
+                      setSingleBand(8);
+                      setViewMode('single');
+                      loadCustomLocation([35.09, 11.22], 2023, 'GERD Dam (Dim 8 Test)');
+                    }}
+                    title="Test dimension 8 water infrastructure on major dam project"
+                  >
+                    🌊 Test Water (Dim 8)
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

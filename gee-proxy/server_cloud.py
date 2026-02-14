@@ -277,6 +277,273 @@ def list_images():
         return jsonify({'error': str(e)}), 500
 
 
+# ========== Endpoint: Multi-Tile Coverage Analysis ==========
+@app.route('/api/images/coverage')
+def images_coverage():
+    """
+    GET /api/images/coverage - Find dates with complete multi-tile coverage
+    
+    For AOIs spanning multiple S2 tiles, this endpoint:
+    1. Identifies which MGRS tiles are needed for full coverage
+    2. Groups images by date (12-hour window)
+    3. Returns only dates where ALL required tiles have qualifying imagery
+    
+    Required params:
+      - dataset: GEE collection ID (must be S2 for now)
+      - bbox: bounds (west,south,east,north)
+      - startDate: start date (YYYY-MM-DD)
+      - endDate: end date (YYYY-MM-DD)
+      
+    Optional params:
+      - maxCloud: max cloud percentage per tile (default 30)
+      - limit: max dates to return (default 50)
+    
+    Returns:
+      - requiredTiles: list of MGRS tile IDs needed
+      - dates: list of {date, tiles: [{tileId, imageId, cloudCover}]}
+    """
+    try:
+        dataset = request.args.get('dataset', 'COPERNICUS/S2_SR_HARMONIZED')
+        bbox = request.args.get('bbox', '')
+        start_date = request.args.get('startDate', '2023-01-01')
+        end_date = request.args.get('endDate', '2024-01-01')
+        max_cloud = float(request.args.get('maxCloud', 30))
+        limit = int(request.args.get('limit', 50))
+        
+        if not bbox:
+            return jsonify({'error': 'bbox parameter required'}), 400
+        
+        if 'S2' not in dataset and 'COPERNICUS' not in dataset:
+            return jsonify({'error': 'Multi-tile coverage only supported for Sentinel-2'}), 400
+        
+        coords = [float(x) for x in bbox.split(',')]
+        bounds = ee.Geometry.Rectangle(coords)
+        
+        # Get all images in date range that intersect bounds
+        collection = ee.ImageCollection(dataset) \
+            .filterDate(start_date, end_date) \
+            .filterBounds(bounds) \
+            .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', max_cloud))
+        
+        # Extract image info including MGRS tile
+        def get_tile_info(image):
+            return ee.Feature(None, {
+                'id': image.get('system:index'),
+                'date': ee.Date(image.get('system:time_start')).format('YYYY-MM-dd'),
+                'timestamp': image.get('system:time_start'),
+                'mgrs_tile': image.get('MGRS_TILE'),
+                'cloudCover': image.get('CLOUDY_PIXEL_PERCENTAGE'),
+            })
+        
+        image_list = collection.map(get_tile_info)
+        features = image_list.getInfo()['features']
+        
+        if not features:
+            return jsonify({
+                'dataset': dataset,
+                'bbox': bbox,
+                'dateRange': [start_date, end_date],
+                'requiredTiles': [],
+                'completeDates': 0,
+                'dates': [],
+                'message': 'No images found matching criteria'
+            })
+        
+        # Extract unique MGRS tiles (these are required for full coverage)
+        all_tiles = set()
+        images_by_date = {}
+        
+        for f in features:
+            props = f['properties']
+            tile_id = props.get('mgrs_tile')
+            date = props.get('date')
+            
+            if tile_id:
+                all_tiles.add(tile_id)
+            
+            if date not in images_by_date:
+                images_by_date[date] = []
+            
+            images_by_date[date].append({
+                'id': props.get('id'),
+                'tileId': tile_id,
+                'cloudCover': round(props.get('cloudCover', 0), 1),
+                'timestamp': props.get('timestamp')
+            })
+        
+        required_tiles = sorted(list(all_tiles))
+        
+        # Find dates with complete coverage (all required tiles present)
+        complete_dates = []
+        
+        for date, images in sorted(images_by_date.items()):
+            # Get unique tiles for this date
+            date_tiles = set(img['tileId'] for img in images if img['tileId'])
+            
+            # Check if all required tiles are present
+            if date_tiles >= set(required_tiles):
+                # Pick best (lowest cloud) image for each tile
+                best_per_tile = {}
+                for img in images:
+                    tile = img['tileId']
+                    if tile and (tile not in best_per_tile or img['cloudCover'] < best_per_tile[tile]['cloudCover']):
+                        best_per_tile[tile] = img
+                
+                # Calculate average cloud cover across all tiles
+                avg_cloud = sum(img['cloudCover'] for img in best_per_tile.values()) / len(best_per_tile)
+                
+                complete_dates.append({
+                    'date': date,
+                    'avgCloudCover': round(avg_cloud, 1),
+                    'tiles': [
+                        {
+                            'tileId': tile,
+                            'imageId': img['id'],
+                            'cloudCover': img['cloudCover']
+                        }
+                        for tile, img in sorted(best_per_tile.items())
+                    ]
+                })
+        
+        # Sort by date and limit
+        complete_dates = complete_dates[:limit]
+        
+        return jsonify({
+            'dataset': dataset,
+            'bbox': bbox,
+            'dateRange': [start_date, end_date],
+            'filters': {
+                'maxCloud': max_cloud
+            },
+            'requiredTiles': required_tiles,
+            'tileCount': len(required_tiles),
+            'completeDates': len(complete_dates),
+            'dates': complete_dates
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ========== Endpoint: Mosaic Timelapse Frames ==========
+@app.route('/api/timelapse/mosaic')
+def timelapse_mosaic():
+    """
+    GET /api/timelapse/mosaic - Get tile URLs for multi-tile mosaics
+    
+    Takes output from /api/images/coverage and creates mosaicked tile URLs.
+    
+    Required params:
+      - dataset: GEE collection ID
+      - dates: JSON array of {date, imageIds: [ids]} from coverage endpoint
+      
+    Optional params:
+      - bands: visualization bands
+      - min/max: visualization range
+      - index: spectral index (ndvi, ndwi, etc.)
+    """
+    try:
+        dataset = request.args.get('dataset', 'COPERNICUS/S2_SR_HARMONIZED')
+        dates_json = request.args.get('dates', '[]')
+        bands = request.args.get('bands', '')
+        vis_min = float(request.args.get('min', 0))
+        vis_max = float(request.args.get('max', 3000))
+        index = request.args.get('index', '')
+        
+        try:
+            dates_data = json.loads(dates_json)
+        except:
+            return jsonify({'error': 'Invalid dates JSON'}), 400
+        
+        if not dates_data:
+            return jsonify({'error': 'dates parameter required'}), 400
+        
+        # Band mappings for spectral indices
+        band_mapping = {
+            'COPERNICUS/S2': {'RED': 'B4', 'GREEN': 'B3', 'BLUE': 'B2', 'NIR': 'B8', 'SWIR': 'B11'},
+        }
+        
+        mapping = None
+        for key in band_mapping:
+            if key in dataset:
+                mapping = band_mapping[key]
+                break
+        
+        frames = []
+        
+        for date_entry in dates_data:
+            date = date_entry.get('date')
+            image_ids = date_entry.get('imageIds', [])
+            
+            if not image_ids:
+                continue
+            
+            try:
+                # Load all images for this date and mosaic them
+                images = [ee.Image(f"{dataset}/{img_id}") for img_id in image_ids]
+                mosaic = ee.ImageCollection(images).mosaic()
+                
+                # Apply spectral index if specified
+                if index and mapping:
+                    if index.lower() == 'ndvi':
+                        calc = mosaic.normalizedDifference([mapping['NIR'], mapping['RED']])
+                        vis_params = {'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']}
+                    elif index.lower() == 'ndwi':
+                        calc = mosaic.normalizedDifference([mapping['GREEN'], mapping['NIR']])
+                        vis_params = {'min': -0.5, 'max': 0.5, 'palette': ['brown', 'white', 'blue']}
+                    elif index.lower() == 'ndbi':
+                        calc = mosaic.normalizedDifference([mapping['SWIR'], mapping['NIR']])
+                        vis_params = {'min': -0.5, 'max': 0.5, 'palette': ['green', 'white', 'red']}
+                    elif index.lower() == 'evi':
+                        nir = mosaic.select(mapping['NIR'])
+                        red = mosaic.select(mapping['RED'])
+                        blue = mosaic.select(mapping['BLUE'])
+                        calc = nir.subtract(red).multiply(2.5).divide(
+                            nir.add(red.multiply(6)).subtract(blue.multiply(7.5)).add(1)
+                        )
+                        vis_params = {'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']}
+                    else:
+                        calc = mosaic.normalizedDifference([mapping['NIR'], mapping['RED']])
+                        vis_params = {'min': -0.2, 'max': 0.8, 'palette': ['brown', 'yellow', 'green']}
+                    
+                    vis = calc.visualize(**vis_params)
+                else:
+                    # Standard RGB
+                    if bands:
+                        band_list = bands.split(',')
+                    elif mapping:
+                        band_list = [mapping['RED'], mapping['GREEN'], mapping['BLUE']]
+                    else:
+                        band_list = ['B4', 'B3', 'B2']
+                    
+                    vis = mosaic.select(band_list).visualize(min=vis_min, max=vis_max)
+                
+                tile_url = get_tile_url(vis)
+                
+                frames.append({
+                    'date': date,
+                    'tileUrl': tile_url,
+                    'imageCount': len(image_ids)
+                })
+                
+            except Exception as img_error:
+                frames.append({
+                    'date': date,
+                    'error': str(img_error)
+                })
+        
+        return jsonify({
+            'dataset': dataset,
+            'frameCount': len(frames),
+            'frames': frames
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Endpoint: Generate Timelapse Frames ==========
 @app.route('/api/timelapse/frames')
 def timelapse_frames():
@@ -795,10 +1062,192 @@ def band_info():
     return jsonify({'bands': bands, 'totalBands': 64, 'presets': presets})
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# SNOW TRACKER ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route('/api/snow/tiles/snodas')
+def snow_tiles_snodas():
+    """GET /api/snow/tiles/snodas?date=YYYY-MM-DD&band=Snow_Depth"""
+    try:
+        date_str = request.args.get('date', '2024-02-15')
+        band = request.args.get('band', 'Snow_Depth')
+        ck = _cache_key('snodas_tile', date_str, band)
+        cached = _get_cached(ck)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily')
+        img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'day')).first()
+        vp = {
+            'Snow_Depth': {'min': 0, 'max': 1.5, 'palette': ['#f7fbff','#c6dbef','#6baed6','#2171b5','#08306b','#4a148c','#e1bee7']},
+            'SWE': {'min': 0, 'max': 500, 'palette': ['#f7fbff','#9ecae1','#3182bd','#08519c','#6a1b9a','#e91e63']},
+            'Snowfall': {'min': 0, 'max': 50, 'palette': ['#f7fbff','#9ecae1','#4292c6','#08519c','#4a148c']},
+        }.get(band, {'min': 0, 'max': 1.5, 'palette': ['#f7fbff','#08306b']})
+        vis = img.select(band).visualize(**vp)
+        tile_url = get_tile_url(vis)
+        _set_cached(ck, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'date': date_str, 'band': band})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/tiles/era5')
+def snow_tiles_era5():
+    """GET /api/snow/tiles/era5?year=2023&month=01&band=snowfall_sum"""
+    try:
+        year = request.args.get('year', '2023')
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'snowfall_sum')
+        ck = _cache_key('era5_tile', year, month, band)
+        cached = _get_cached(ck)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True})
+        date_str = f'{year}-{month}-01'
+        img = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR') \
+            .filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
+        vp = {
+            'snowfall_sum': {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a','#1b263b','#415a77','#778da9','#93c5fd','#6366f1','#a855f7','#e9d5ff']},
+            'snow_depth': {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a','#1e3a5f','#3b82f6','#60a5fa','#93c5fd','#c8b4ff','#f3e8ff']},
+            'snow_cover': {'min': 0, 'max': 100, 'palette': ['#0d1b2a','#1e3a5f','#60a5fa','#c8b4ff','#ffffff']},
+        }.get(band, {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a','#e9d5ff']})
+        vis = img.select(band).visualize(**vp)
+        tile_url = get_tile_url(vis)
+        _set_cached(ck, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'year': year, 'month': month, 'band': band})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/stats/snodas')
+def snow_stats_snodas():
+    """GET /api/snow/stats/snodas?lat=40&lon=-105&start=2023-10-01&end=2024-04-01&band=Snow_Depth"""
+    try:
+        lat = float(request.args.get('lat', '40'))
+        lon = float(request.args.get('lon', '-105'))
+        start = request.args.get('start', '2023-10-01')
+        end = request.args.get('end', '2024-04-01')
+        band = request.args.get('band', 'Snow_Depth')
+        point = ee.Geometry.Point([lon, lat])
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily') \
+            .filterDate(start, end).select(band)
+
+        def extract(img):
+            val = img.reduceRegion(reducer=ee.Reducer.first(), geometry=point, scale=1000).get(band)
+            return ee.Feature(None, {'date': img.date().format('YYYY-MM-dd'), 'value': val})
+
+        series = col.map(extract).getInfo()
+        results = [{'date': f['properties']['date'], 'value': round(f['properties']['value'], 4)}
+                   for f in series.get('features', []) if f.get('properties', {}).get('value') is not None]
+        return jsonify({'series': results, 'lat': lat, 'lon': lon, 'band': band})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/stats/era5')
+def snow_stats_era5():
+    """GET /api/snow/stats/era5?lat=60&lon=10&start=2015-01&end=2024-12&band=snowfall_sum"""
+    try:
+        lat = float(request.args.get('lat', '60'))
+        lon = float(request.args.get('lon', '10'))
+        start = request.args.get('start', '2015-01')
+        end = request.args.get('end', '2024-12')
+        band = request.args.get('band', 'snowfall_sum')
+        point = ee.Geometry.Point([lon, lat])
+        start_date = f'{start}-01'
+        end_parts = end.split('-')
+        end_date = ee.Date(f'{end_parts[0]}-{end_parts[1]}-01').advance(1, 'month')
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR') \
+            .filterDate(start_date, end_date).select(band)
+
+        def extract(img):
+            val = img.reduceRegion(reducer=ee.Reducer.first(), geometry=point, scale=11000).get(band)
+            return ee.Feature(None, {'date': img.date().format('YYYY-MM'), 'value': val})
+
+        series = col.map(extract).getInfo()
+        results = [{'date': f['properties']['date'], 'value': round(f['properties']['value'], 6)}
+                   for f in series.get('features', []) if f.get('properties', {}).get('value') is not None]
+        return jsonify({'series': results, 'lat': lat, 'lon': lon, 'band': band})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/animation/snodas')
+def snow_animation_snodas():
+    """GET /api/snow/animation/snodas?start=2024-01-01&end=2024-04-01&band=Snow_Depth&interval=7"""
+    try:
+        start = request.args.get('start', '2024-01-01')
+        end = request.args.get('end', '2024-04-01')
+        band = request.args.get('band', 'Snow_Depth')
+        interval = int(request.args.get('interval', '7'))
+        vp = {
+            'Snow_Depth': {'min': 0, 'max': 1.5, 'palette': ['#f7fbff','#c6dbef','#6baed6','#2171b5','#08306b','#4a148c','#e1bee7']},
+            'SWE': {'min': 0, 'max': 500, 'palette': ['#f7fbff','#9ecae1','#3182bd','#08519c','#6a1b9a','#e91e63']},
+            'Snowfall': {'min': 0, 'max': 50, 'palette': ['#f7fbff','#9ecae1','#4292c6','#08519c','#4a148c']},
+        }.get(band, {'min': 0, 'max': 1.5, 'palette': ['#f7fbff','#08306b']})
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily').select(band)
+        start_date = ee.Date(start)
+        end_date = ee.Date(end)
+        n_frames = min(int(end_date.difference(start_date, 'day').divide(interval).ceil().getInfo()), 60)
+        frames = []
+        for i in range(n_frames):
+            d = start_date.advance(i * interval, 'day')
+            d_str = d.format('YYYY-MM-dd').getInfo()
+            ck = _cache_key('snodas_anim', d_str, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'date': d_str, 'tileUrl': cached_url}); continue
+            img = col.filterDate(d, d.advance(1, 'day')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'date': d_str, 'tileUrl': tile_url})
+        return jsonify({'frames': frames, 'band': band, 'interval': interval})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/animation/era5')
+def snow_animation_era5():
+    """GET /api/snow/animation/era5?startYear=2015&endYear=2024&month=01&band=snowfall_sum"""
+    try:
+        start_year = int(request.args.get('startYear', '2015'))
+        end_year = int(request.args.get('endYear', '2024'))
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'snowfall_sum')
+        vp = {
+            'snowfall_sum': {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a','#1b263b','#415a77','#778da9','#93c5fd','#6366f1','#a855f7','#e9d5ff']},
+            'snow_depth': {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a','#1e3a5f','#3b82f6','#60a5fa','#93c5fd','#c8b4ff','#f3e8ff']},
+            'snow_cover': {'min': 0, 'max': 100, 'palette': ['#0d1b2a','#1e3a5f','#60a5fa','#c8b4ff','#ffffff']},
+        }.get(band, {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a','#e9d5ff']})
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR').select(band)
+        frames = []
+        for year in range(start_year, end_year + 1):
+            ck = _cache_key('era5_anim', year, month, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'year': year, 'tileUrl': cached_url}); continue
+            date_str = f'{year}-{month}-01'
+            img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'year': year, 'tileUrl': tile_url})
+        return jsonify({'frames': frames, 'band': band, 'month': month})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     print(f'🌍 GEE Tile Proxy starting on port {port}...')
     print(f'   Service account: {creds_data["client_email"]}')
     print(f'   Project: {creds_data["project_id"]}')
+    print(f'   Snow endpoints: /api/snow/tiles/*, /api/snow/stats/*, /api/snow/animation/*')
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)

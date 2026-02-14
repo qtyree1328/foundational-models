@@ -49,4 +49,18 @@ export const GeeEndpoints = {
     `${getGeeProxyUrl()}/api/sample?year=${year}&bbox=${bbox}&numPoints=${numPoints}`,
   pointInfo: (lat: number, lng: number, year: string) =>
     `${getGeeProxyUrl()}/api/info?lat=${lat}&lng=${lng}&year=${year}`,
+
+  // Snow Tracker endpoints
+  snowSnodasTiles: (date: string, band: string) =>
+    `${getGeeProxyUrl()}/api/snow/tiles/snodas?date=${date}&band=${band}`,
+  snowEra5Tiles: (year: string, month: string, band: string) =>
+    `${getGeeProxyUrl()}/api/snow/tiles/era5?year=${year}&month=${month}&band=${band}`,
+  snowSnodasStats: (lat: number, lon: number, start: string, end: string, band: string) =>
+    `${getGeeProxyUrl()}/api/snow/stats/snodas?lat=${lat}&lon=${lon}&start=${start}&end=${end}&band=${band}`,
+  snowEra5Stats: (lat: number, lon: number, start: string, end: string, band: string) =>
+    `${getGeeProxyUrl()}/api/snow/stats/era5?lat=${lat}&lon=${lon}&start=${start}&end=${end}&band=${band}`,
+  snowSnodasAnimation: (start: string, end: string, band: string, interval: number) =>
+    `${getGeeProxyUrl()}/api/snow/animation/snodas?start=${start}&end=${end}&band=${band}&interval=${interval}`,
+  snowEra5Animation: (startYear: string, endYear: string, month: string, band: string) =>
+    `${getGeeProxyUrl()}/api/snow/animation/era5?startYear=${startYear}&endYear=${endYear}&month=${month}&band=${band}`,
 }
