@@ -155,15 +155,15 @@ export default function ParadigmShift() {
       <div className="container">
         <div className="section-header fade-in">
           <span className="section-label">The Paradigm Shift</span>
-          <h2>Why Geo-Embeddings Can Change Everything</h2>
+          <h2>From Research to Operational Deployment</h2>
           <p className="section-subtitle">
-            The same revolution that transformed text search (keywords → embeddings) and image search 
-            (tags → vectors) is now happening for Earth observation. Geospatial analysis is shifting 
-            from pixel classification to geo-embeddings — a new first-order data object that lets AI 
-            reason spatially. The same embedding vector that identifies crop types also enables 
-            similarity search (find places that look like this one globally), change detection 
-            (what changed between these dates?), and anomaly detection — all without retraining. 
-            These geo-embeddings have the potential to be as fundamental as the imagery itself.
+            The geo-embedding revolution has moved beyond research into production. Vantor is deploying 
+            Google Earth AI in air-gapped government environments. Planet Labs and Airbus are integrating 
+            vision-language models into commercial workflows. LGND raised $9M to build geo-embedding 
+            infrastructure. The same paradigm shift that transformed text search (keywords → embeddings) 
+            and image search (tags → vectors) is now operationally deployed for Earth observation — 
+            geospatial analysis has shifted from pixel classification to geo-embeddings, a first-order 
+            data object that lets AI reason spatially at planetary scale.
           </p>
         </div>
 

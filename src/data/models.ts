@@ -945,18 +945,18 @@ sar_emb = model(sar_patch, wavelengths=[5600])
 dsm_emb = model(dsm_patch, wavelengths=[0])`,
   },
   {
-    id: 'earth-ai-rs',
-    name: 'Earth AI Remote Sensing Foundations',
+    id: 'google-rsfm',
+    name: 'Google RSFM',
     org: 'Google Research',
-    tagline: 'Vision-language foundation models for Earth observation with open-vocabulary capabilities',
-    description: 'A comprehensive family of models from Google\'s Earth AI initiative comprising vision-language models (VLMs), open-vocabulary object detection, and general-purpose vision transformer backbones trained on diverse remote sensing data. Features natural language understanding for zero-shot classification and retrieval, enables non-experts to conduct analysis via conversational queries. Achieves state-of-the-art performance on remote sensing benchmarks while supporting multi-resolution imagery from satellite to aerial sources. Complements AlphaEarth Foundations by providing direct access to fine-tunable models with natural language interfaces.',
-    params: '~1B+ (variable)',
+    tagline: 'Vision-language foundation models with open-vocabulary detection for satellite imagery',
+    description: 'Google Research\'s Remote Sensing Foundation Models (RSFM) — distinct from DeepMind\'s AlphaEarth — are task-oriented vision-language models purpose-built for satellite and aerial imagery analysis. Built on proven architectures (SigLIP, MaMMUT, OWL-ViT, masked autoencoders) adapted for remote sensing, RSFM enables natural language queries over imagery, open-vocabulary object detection (detect objects by typing what you\'re looking for), and adaptable vision backbones for downstream tasks. Achieves >16% improvement on text-based image search benchmarks and doubles zero-shot novel object detection accuracy. Currently available to trusted testers: Planet Labs, Airbus, and Vantor (formerly Maxar Intelligence). While AlphaEarth answers "what does this place LOOK like?", RSFM answers "what OBJECTS and FEATURES are in this image?" — together they form a complete analysis stack. Paper: arXiv 2510.18318.',
+    params: '~1B+ (multiple variants)',
     paramsNum: 1000,
-    resolution: '0.1m-10m',
-    modalities: ['RGB Satellite', 'RGB Aerial', 'Ground-level', 'Multi-resolution'],
-    license: 'Research/Academic (Google)',
-    dataSource: 'Specialized RS imagery + Google Maps places + synthetic captions via Gemini',
-    keyStrength: 'First production-scale vision-language models purpose-built for remote sensing',
+    resolution: '0.1m-10m (satellite to aerial)',
+    modalities: ['RGB Satellite', 'RGB Aerial', 'Text/Language', 'Multi-resolution'],
+    license: 'Trusted Tester Program (Vantor, Planet, Airbus)',
+    dataSource: 'High-res satellite/aerial imagery + text descriptions + synthetic captions via Gemini',
+    keyStrength: 'Vision-language queries, open-vocabulary detection, >16% search improvement',
     color: '#ea4335',
     icon: '🗣️',
     paperYear: 2025,
@@ -964,19 +964,21 @@ dsm_emb = model(dsm_patch, wavelengths=[0])`,
     temporal: false,
     openWeights: false,
     architecture: {
-      type: 'Vision-Language Model Family',
+      type: 'Vision-Language Model Family (SigLIP/MaMMUT/OWL-ViT)',
       encoder: 'Vision Transformer + Language Encoder',
       embeddingDim: 512,
-      pretrainingStrategy: 'Contrastive learning between imagery and natural language captions + open-vocabulary object detection + multi-task foundation pretraining',
+      pretrainingStrategy: 'Contrastive vision-language learning (SigLIP/MaMMUT) + open-vocabulary detection heads (OWL-ViT) + masked autoencoder pretraining. Trained on satellite/aerial imagery paired with natural language descriptions.',
     },
     training: {
-      dataset: 'Large-scale aerial/satellite imagery + Google Maps places data',
-      samples: 'Undisclosed (multi-modal RS dataset)',
-      sensors: ['Diverse RGB sources', 'Satellite imagery', 'Aerial imagery', 'Ground-level'],
-      geoCoverage: 'Global coverage with focus on diverse geographic regions',
+      dataset: 'Google proprietary satellite/aerial imagery + text descriptions',
+      samples: 'Large-scale (undisclosed)',
+      sensors: ['Various satellite platforms', 'Aerial imagery', 'Ground-level imagery'],
+      geoCoverage: 'Global',
       temporalRange: 'Multiple years of imagery',
     },
     benchmarks: [
+      { task: 'Text-based image search', dataset: 'RS retrieval benchmarks', metric: 'Improvement over baselines', value: 16, unit: '% improvement', citation: 'arxiv.org/abs/2510.18318' },
+      { task: 'Zero-shot novel object detection', dataset: 'RS detection benchmarks', metric: 'Accuracy improvement', value: 100, unit: '% (2× baseline accuracy)', citation: 'arxiv.org/abs/2510.18318' },
       { task: 'Zero-shot classification', dataset: 'Multiple RS benchmarks', metric: 'Top-1 accuracy', value: 85, unit: '% (SOTA on most benchmarks)', citation: 'arxiv.org/abs/2510.18318' },
       { task: 'Object detection (zero-shot)', dataset: 'DOTA', metric: 'mAP', value: 31.8, unit: '%', citation: 'arxiv.org/abs/2510.18318' },
       { task: 'Object detection (few-shot)', dataset: 'DOTA', metric: 'mAP', value: 54.0, unit: '% (30 examples)', citation: 'arxiv.org/abs/2510.18318' },
@@ -984,198 +986,79 @@ dsm_emb = model(dsm_patch, wavelengths=[0])`,
       { task: 'Semantic segmentation', dataset: 'FLAIR', metric: 'mIoU', value: 64.7, unit: '% (new SOTA)', citation: 'arxiv.org/abs/2510.18318' },
     ],
     pros: [
-      'First production-scale vision-language models for Earth observation',
-      'Natural language interface enables non-expert usage',
-      'State-of-the-art performance across multiple RS benchmarks',
-      'Zero-shot capabilities for unseen object classes and descriptions',
+      'Vision-language interface — query satellite imagery with natural language',
+      'Open-vocabulary detection: detect objects by typing what you\'re looking for',
+      '>16% improvement on text-based image search benchmarks',
+      'Doubles zero-shot novel object detection accuracy vs baselines',
+      'Adaptable vision backbones for custom downstream tasks',
       'Multi-resolution support (0.1m aerial to 10m satellite)',
-      'Part of comprehensive Earth AI ecosystem with synergistic models',
-      'Open-vocabulary object detection without predefined labels',
+      'Complements AlphaEarth: RSFM tells you WHAT changed, AlphaEarth tells you WHERE',
+      'Already deployed by Vantor, Planet Labs, and Airbus via trusted tester program',
     ],
     cons: [
-      'Research/academic access only (not publicly available)',
-      'Limited fine-tuning access compared to open-source models',
+      'Trusted tester access only — not publicly available',
+      'No open-source weights or code',
       'Requires Google infrastructure for deployment',
-      'Undisclosed model details limit reproducibility',
-      'No direct access to raw model weights',
-      'Newer system with less community adoption',
+      'Undisclosed architecture details limit reproducibility',
+      'Commercial licensing model still evolving',
     ],
     useCases: [
-      'Natural language queries over satellite imagery ("Find all airports")',
-      'Zero-shot object detection in remote sensing without training data',
+      'Natural language queries over satellite imagery ("Find all solar farms near rivers")',
+      'Open-vocabulary object detection — detect novel objects without retraining',
       'Cross-modal retrieval (text descriptions ↔ satellite images)',
-      'Rapid analysis by non-experts via conversational interfaces',
-      'Crisis response and disaster management with natural language',
-      'Large-scale geographic analysis via automated reasoning',
+      'Post-disaster damage assessment with conversational queries',
+      'Infrastructure monitoring via Vantor\'s Tensorglobe platform',
+      'Planet Labs imagery analysis at scale',
     ],
     links: [
-      { label: 'Earth AI Paper', url: 'https://arxiv.org/abs/2510.18318' },
+      { label: 'Paper (arXiv 2510.18318)', url: 'https://arxiv.org/abs/2510.18318' },
       { label: 'Google Research Blog', url: 'https://research.google/blog/earth-ai-unlocking-geospatial-insights-with-foundation-models-and-cross-modal-reasoning/' },
+      { label: 'Geospatial Reasoning Blog', url: 'https://research.google/blog/geospatial-reasoning-unlocking-insights-with-generative-ai-and-multiple-foundation-models/' },
     ],
-    scores: { parameters: 8, resolution: 9, modalities: 7, temporal: 3, openness: 2, benchmarks: 9 },
-    codeExample: `# Earth AI Remote Sensing Foundations
-# Research/Academic access via Google
-# Natural language interface for Earth observation
+    scores: { parameters: 8, resolution: 9, modalities: 7, temporal: 3, openness: 1, benchmarks: 9 },
+    codeExample: `# Google RSFM — Remote Sensing Foundation Models
+# Access via Trusted Tester Program (Vantor, Planet, Airbus)
+# Vision-language models for satellite imagery
 
-# Conceptual API (not publicly available)
-from google.earth_ai import RemoteSensingFoundations
+# Conceptual API (access restricted)
+from google.earth_ai import RSFM
 
-# Initialize vision-language model
-rs_vlm = RemoteSensingFoundations.VisionLanguage()
-
-# Zero-shot classification with natural language
-result = rs_vlm.classify(
+# Vision-Language Model: natural language queries
+vlm = RSFM.VisionLanguage()
+result = vlm.classify(
     image=satellite_patch,
     candidates=[
-        "agricultural field",
-        "urban development", 
-        "forest area",
-        "water body"
+        "agricultural field with center pivot irrigation",
+        "solar farm installation",
+        "residential development",
+        "undeveloped forest"
     ]
 )
 
-# Open-vocabulary object detection
-objects = rs_vlm.detect_objects(
+# Open-Vocabulary Detection (OVD)
+# Detect objects by typing what you're looking for
+# No predefined labels needed!
+detections = RSFM.OpenVocabularyDetector().detect(
     image=aerial_image,
-    query="Find all buildings and roads in this area"
+    query="damaged buildings after flooding"
+)
+# >2× zero-shot accuracy vs baselines
+
+# Text-based image search (>16% improvement)
+similar = vlm.retrieve_similar(
+    text_query="coastal wetlands with residential encroachment",
+    image_database=satellite_collection,
+    top_k=20
 )
 
-# Cross-modal retrieval
-similar_images = rs_vlm.retrieve_similar(
-    text_query="coastal wetlands with residential development",
-    image_database=satellite_collection
-)
+# Adaptable vision backbones for downstream tasks
+backbone = RSFM.VisionBackbone(pretrained=True)
+features = backbone.extract(satellite_tile)
+# Fine-tune for your specific application
 
-# Natural language reasoning (via Gemini agent)
-analysis = earth_ai.analyze(
-    query="Which coastal cities have high flood risk?",
-    models=["imagery", "population", "environment"],
-    timeframe="next_5_years"
-)
-
-print(f"VLM classification: {result}")
-print(f"Detected objects: {len(objects)}")`,
-  },
-  {
-    id: 'google-rs-fm',
-    name: 'Google Remote Sensing Foundation Models',
-    org: 'Google Research',
-    tagline: 'Natural language-grounded foundation models for satellite and aerial imagery',
-    description: 'Google\'s newest remote sensing foundation models based on proven architectures like masked autoencoders, SigLIP, MaMMUT, and OWL-ViT, adapted for the remote sensing domain. Trained on high-resolution satellite and aerial images with accompanying text descriptions and bounding box annotations. Generate rich embeddings for images and objects, and can be fine-tuned for specific remote sensing tasks like mapping buildings/roads, assessing post-disaster damage, or locating infrastructure. Features flexible natural language interface supporting retrieval and zero-shot classification tasks.',
-    params: 'Multiple variants',
-    paramsNum: 400, // Estimated based on typical Google model sizes
-    resolution: 'High-resolution (satellite/aerial)',
-    modalities: ['RGB', 'Multispectral', 'Text Descriptions', 'Bounding Boxes'],
-    license: 'Trusted Tester Program',
-    dataSource: 'High-resolution satellite and aerial images with text descriptions',
-    keyStrength: 'Natural language interface, zero-shot capabilities, multi-task foundation',
-    color: '#4285F4',
-    icon: '🔍',
-    paperYear: 2024,
-    paperVenue: 'Google Research Blog',
-    temporal: false,
-    openWeights: false,
-    architecture: {
-      type: 'Multi-Architecture Ensemble',
-      encoder: 'SigLIP/MaMMUT/OWL-ViT variants',
-      embeddingDim: 512, // Estimated
-      pretrainingStrategy: 'Masked autoencoding + contrastive learning',
-      inputSize: 'Variable (high-resolution)',
-    },
-    training: {
-      dataset: 'Google proprietary satellite/aerial imagery',
-      samples: 'Large-scale (undisclosed)',
-      sensors: ['Various satellite platforms', 'Aerial imagery'],
-      geoCoverage: 'Global',
-      computeDetails: 'Google infrastructure',
-    },
-    benchmarks: [
-      {
-        task: 'Building Detection',
-        dataset: 'Internal benchmarks',
-        metric: 'mAP',
-        value: 85, // Estimated
-        unit: '%',
-        citation: 'Google Research Blog 2024'
-      },
-      {
-        task: 'Zero-shot Classification',
-        dataset: 'Multiple RS benchmarks', 
-        metric: 'Accuracy',
-        value: 78, // Estimated
-        unit: '%',
-        citation: 'Trusted tester program results'
-      }
-    ],
-    pros: [
-      'Natural language interface for queries',
-      'Zero-shot classification capabilities', 
-      'Multi-task foundation (detection, segmentation, retrieval)',
-      'Google-scale training infrastructure',
-      'Integration with Geospatial Reasoning framework',
-      'Partnership with major industry players (Airbus, Maxar, Planet)',
-    ],
-    cons: [
-      'Limited public access (trusted tester program only)',
-      'No open-source weights or code',
-      'Proprietary training data',
-      'Commercial licensing model unclear',
-      'Limited technical details published',
-    ],
-    useCases: [
-      'Post-disaster damage assessment',
-      'Infrastructure mapping and monitoring',
-      'Zero-shot object detection with natural language',
-      'Cross-modal retrieval (text-to-image search)',
-      'Building and road extraction',
-      'Geospatial reasoning workflows',
-    ],
-    links: [
-      { label: 'Google Research Blog', url: 'https://research.google/blog/geospatial-reasoning-unlocking-insights-with-generative-ai-and-multiple-foundation-models/' },
-      { label: 'Trusted Tester Application', url: 'https://docs.google.com/forms/d/1Z9avFmTFRnJ-MGwsECA1qdrnc2E6EpROM2Lp6Y_OKNY/preview' },
-    ],
-    scores: { parameters: 7, resolution: 9, modalities: 6, temporal: 2, openness: 1, benchmarks: 5 },
-    codeExample: `# Google Remote Sensing Foundation Models
-# Available via Trusted Tester Program
-# Natural language interface for RS tasks
-
-# Conceptual API (access restricted)
-from google.earth.foundation import RemoteSensingFM
-
-# Initialize foundation model
-rs_fm = RemoteSensingFM(
-    model_type="satellite_foundation",
-    api_key="your_trusted_tester_key"
-)
-
-# Zero-shot classification with natural language
-result = rs_fm.classify(
-    image=satellite_image,
-    query="residential buildings with solar panels"
-)
-
-# Object detection with natural language prompts
-detections = rs_fm.detect(
-    image=aerial_image, 
-    prompt="damaged buildings after hurricane"
-)
-
-# Cross-modal retrieval
-similar_images = rs_fm.search(
-    query="urban areas with flood damage",
-    dataset="post_disaster_imagery",
-    top_k=10
-)
-
-# Fine-tuning for specific tasks
-fine_tuned = rs_fm.fine_tune(
-    task="building_extraction",
-    training_data=labeled_building_dataset,
-    epochs=10
-)
-
-print(f"Classification confidence: {result.confidence}")
-print(f"Detected {len(detections)} objects")`,
+# Combined with AlphaEarth for full stack:
+# AlphaEarth → WHERE things changed (embedding similarity)
+# RSFM → WHAT changed (vision-language understanding)`,
   },
 ];
 
@@ -1215,12 +1098,12 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
   },
   'Land Cover Classification': {
     best: ['alphaearth', 'clay', 'prithvi'],
-    good: ['satmae', 'dofa', 'skysense', 'earth-ai-rs'],
+    good: ['satmae', 'dofa', 'skysense', 'google-rsfm'],
     limited: ['croma', 'spectralgpt'],
     benchmarks: 'Prithvi-EO-2.0: Outperforms 6 geospatial foundation models on GEO-Bench (Dec 2024, 600M params). AlphaEarth: Global 10m unsupervised classification via K-means on 64D embeddings. Earth AI: 81.7% accuracy on FMoW scene classification (new SOTA, Oct 2025). Clay: Label efficiency gains documented in Dionelis et al. (arXiv:2406.18295, 2024) — foundation models consistently outperform task-specific models with limited labeled data.',
   },
   'Object Detection': {
-    best: ['skysense', 'earth-ai-rs'],
+    best: ['skysense', 'google-rsfm'],
     good: ['clay', 'dofa'],
     limited: ['alphaearth', 'prithvi', 'satmae', 'croma', 'spectralgpt'],
     benchmarks: 'Earth AI: 53.96% mAP on DOTA with few-shot learning (30 examples), 31.83% zero-shot. Open-vocabulary detection without predefined labels. SkySense: SOTA on 6+ RS benchmarks (CVPR 2024). 2.06B parameter multi-modal architecture with factorized encoders.',
@@ -1240,11 +1123,11 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
   'Production Deployment': {
     best: ['alphaearth'],
     good: ['clay', 'prithvi'],
-    limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa', 'earth-ai-rs'],
+    limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa', 'google-rsfm'],
     benchmarks: 'AlphaEarth: Pre-computed global tiles in GEE/GCS. 16× less storage than competitors. Clay: Open source with HuggingFace integration.',
   },
   'Vision-Language Understanding': {
-    best: ['earth-ai-rs'],
+    best: ['google-rsfm'],
     good: [],
     limited: ['alphaearth', 'clay', 'prithvi', 'satmae', 'croma', 'spectralgpt', 'skysense', 'dofa'],
     benchmarks: 'Earth AI Remote Sensing Foundations: First production-scale vision-language models purpose-built for remote sensing. SOTA zero-shot classification performance across multiple RS benchmarks via natural language queries. Cross-modal retrieval between text descriptions and satellite imagery. Open-vocabulary object detection using natural language prompts.',

@@ -8,6 +8,7 @@ import LiveExplorer from './components/LiveExplorer';
 import EmbeddingViz from './components/EmbeddingViz';
 import DeepComparison from './components/DeepComparison';
 import Ecosystem from './components/Ecosystem';
+import GoogleDualApproach from './components/GoogleDualApproach';
 import ModelRecommender from './components/ModelRecommender';
 import GettingStarted from './components/GettingStarted';
 import Sources from './components/Sources';
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { id: 'pipeline', label: 'How It Works' },
   { id: 'paradigm', label: 'Why It Matters' },
   { id: 'models', label: 'Models' },
+  { id: 'google-dual', label: 'Google\'s Approach' },
   { id: 'deep-compare', label: 'Compare' },
   { id: 'ecosystem', label: 'Ecosystem' },
   { id: 'explorer', label: 'Live Explorer' },
@@ -175,6 +177,7 @@ export default function App() {
       <Pipeline />
       <ParadigmShift />
       <ModelGallery />
+      <GoogleDualApproach />
       <DeepComparison />
       <Ecosystem />
       <LiveExplorer />

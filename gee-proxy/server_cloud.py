@@ -1243,11 +1243,63 @@ def snow_animation_era5():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/snow/trends/era5')
+def snow_trends_era5():
+    """GET /api/snow/trends/era5?band=snowfall_sum&startYear=1980&endYear=2024&month=1&metric=trend"""
+    try:
+        band = request.args.get('band', 'snowfall_sum')
+        start_year = int(request.args.get('startYear', 1980))
+        end_year = int(request.args.get('endYear', 2024))
+        month = int(request.args.get('month', 1))
+        metric = request.args.get('metric', 'trend')
+
+        ck = _cache_key('snow_trends', band, start_year, end_year, month, metric)
+        cached_url = _get_cached(ck)
+        if cached_url:
+            return jsonify({'tileUrl': cached_url, 'metric': metric, 'band': band,
+                            'startYear': start_year, 'endYear': end_year, 'month': month})
+
+        def make_annual_image(yr):
+            yr_num = ee.Number(yr)
+            img = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR') \
+                .filter(ee.Filter.calendarRange(yr_num, yr_num, 'year')) \
+                .filter(ee.Filter.calendarRange(month, month, 'month')) \
+                .first()
+            return img.select(band).set('year', yr_num).set('system:time_start', ee.Date.fromYMD(yr_num, month, 1).millis())
+
+        years = ee.List.sequence(start_year, end_year)
+        collection = ee.ImageCollection(years.map(make_annual_image))
+
+        if metric == 'variability':
+            mean = collection.mean()
+            std = collection.reduce(ee.Reducer.stdDev())
+            cv = std.divide(mean.add(0.0001))
+            vis = {'min': 0, 'max': 1.5, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#6a1b9a', '#e91e63']}
+            result_img = cv.visualize(**vis)
+        else:
+            def add_time(img):
+                return img.addBands(ee.Image.constant(img.get('year')).float().rename('year'))
+            with_time = collection.map(add_time)
+            fit = with_time.select(['year', band]).reduce(ee.Reducer.linearFit())
+            slope_decade = fit.select('scale').multiply(10)
+            vis = {'min': -0.05, 'max': 0.05,
+                   'palette': ['#d32f2f', '#ef5350', '#ffcdd2', '#e0e0e0', '#bbdefb', '#42a5f5', '#1565c0']}
+            result_img = slope_decade.visualize(**vis)
+
+        tile_url = get_tile_url(result_img)
+        _set_cached(ck, tile_url)
+        return jsonify({'tileUrl': tile_url, 'metric': metric, 'band': band,
+                        'startYear': start_year, 'endYear': end_year, 'month': month})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     print(f'🌍 GEE Tile Proxy starting on port {port}...')
     print(f'   Service account: {creds_data["client_email"]}')
     print(f'   Project: {creds_data["project_id"]}')
-    print(f'   Snow endpoints: /api/snow/tiles/*, /api/snow/stats/*, /api/snow/animation/*')
+    print(f'   Snow endpoints: /api/snow/tiles/*, /api/snow/stats/*, /api/snow/animation/*, /api/snow/trends/*')
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)

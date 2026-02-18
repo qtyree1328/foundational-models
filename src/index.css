@@ -7975,3 +7975,291 @@ body {
     border-radius: 2px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Google Dual Approach Section
+   ══════════════════════════════════════════════════════════════ */
+
+.google-dual-section {
+  background: var(--bg-alt, #f8fafc);
+}
+
+.dual-approach-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .dual-approach-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dual-card {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dual-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.dual-card-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.dual-card-header h3 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.3rem;
+}
+
+.dual-card-purpose {
+  color: var(--text-muted, #64748b);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dual-card-badge {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dual-card-badge.deepmind {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.dual-card-badge.research {
+  background: #fce8e6;
+  color: #ea4335;
+}
+
+.dual-card-body {
+  padding: 1.5rem;
+}
+
+.dual-card-question {
+  font-size: 1.05rem;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-alt, #f8fafc);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent, #6366f1);
+}
+
+.dual-card-specs {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.dual-card-specs li {
+  padding: 0.4rem 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.dual-card-analogy {
+  padding: 0.75rem 1rem;
+  background: var(--bg-alt, #f8fafc);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.analogy-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+/* Why Both / Workflow */
+.dual-why {
+  margin: 3rem 0 2rem;
+  padding: 2rem;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+}
+
+.dual-why h3 {
+  margin: 0 0 0.5rem;
+}
+
+.dual-workflow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.workflow-step {
+  flex: 1;
+  min-width: 180px;
+  text-align: center;
+  padding: 1.25rem;
+  background: var(--bg-alt, #f8fafc);
+  border-radius: 10px;
+}
+
+.workflow-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.workflow-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.workflow-action {
+  font-size: 0.88rem;
+  margin-bottom: 0.25rem;
+}
+
+.workflow-detail {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+}
+
+.workflow-arrow {
+  font-size: 1.5rem;
+  color: var(--text-muted, #64748b);
+  font-weight: bold;
+}
+
+/* Comparison Table */
+.dual-comparison-table {
+  margin: 2rem 0;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dual-table-header,
+.dual-table-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .dual-table-header,
+  .dual-table-row {
+    grid-template-columns: 100px 1fr 1fr;
+  }
+}
+
+.dual-table-header {
+  background: var(--bg-alt, #f1f5f9);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dual-table-header span,
+.dual-table-row span {
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+}
+
+.dual-table-row {
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.dual-table-row:nth-child(even) {
+  background: var(--bg-alt, #f8fafc);
+}
+
+.dual-table-label {
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Ecosystem Deployment Cards
+   ══════════════════════════════════════════════════════════════ */
+
+.ecosystem-deployment {
+  margin: 2.5rem 0;
+}
+
+.ecosystem-deployment h3 {
+  margin-bottom: 0.5rem;
+}
+
+.ecosystem-deployment-desc {
+  color: var(--text-muted, #64748b);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.deployment-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .deployment-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deployment-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.deployment-card:hover {
+  transform: translateY(-1px);
+}
+
+.deployment-logo {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.deployment-card strong {
+  font-size: 1.05rem;
+  display: block;
+}
+
+.deployment-detail {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.deployment-card p {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}

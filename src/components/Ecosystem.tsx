@@ -21,7 +21,7 @@ export default function Ecosystem() {
               <span className="ecosystem-item">ESA (Sentinel)</span>
               <span className="ecosystem-item">NASA (Landsat, MODIS)</span>
               <span className="ecosystem-item">Planet</span>
-              <span className="ecosystem-item">Maxar</span>
+              <span className="ecosystem-item">Vantor (formerly Maxar)</span>
             </div>
             <div className="layer-desc">Raw satellite imagery — petabytes of pixels</div>
           </div>
@@ -30,6 +30,7 @@ export default function Ecosystem() {
             <div className="layer-label">LEOMs (Foundation Models)</div>
             <div className="layer-items">
               <span className="ecosystem-item highlight">AlphaEarth</span>
+              <span className="ecosystem-item highlight">Google RSFM</span>
               <span className="ecosystem-item highlight">Clay</span>
               <span className="ecosystem-item">Prithvi</span>
               <span className="ecosystem-item">SatMAE</span>
@@ -79,8 +80,48 @@ export default function Ecosystem() {
           </div>
         </div>
 
+        <div className="ecosystem-deployment fade-in">
+          <h3>Commercial Deployment: From Research to Production</h3>
+          <p className="ecosystem-deployment-desc">
+            LEOMs are no longer just research artifacts — they're being deployed in production environments 
+            by major commercial and government organizations, validating the "deployment gap" thesis.
+          </p>
+          <div className="deployment-cards">
+            <div className="deployment-card">
+              <div className="deployment-logo">🏢</div>
+              <div>
+                <strong>Vantor</strong>
+                <span className="deployment-detail">(formerly Maxar Intelligence, rebranded Oct 2025)</span>
+                <p>First to deploy Google Earth AI in air-gapped government environments via their Tensorglobe platform. Trusted tester for Google RSFM.</p>
+              </div>
+            </div>
+            <div className="deployment-card">
+              <div className="deployment-logo">🛰️</div>
+              <div>
+                <strong>Planet Labs</strong>
+                <p>Trusted tester for Google RSFM — integrating vision-language models with their daily satellite imagery constellation for commercial analysis.</p>
+              </div>
+            </div>
+            <div className="deployment-card">
+              <div className="deployment-logo">✈️</div>
+              <div>
+                <strong>Airbus</strong>
+                <p>Trusted tester for Google RSFM — applying open-vocabulary detection and vision-language capabilities to their high-resolution satellite and aerial imagery products.</p>
+              </div>
+            </div>
+            <div className="deployment-card">
+              <div className="deployment-logo">🧱</div>
+              <div>
+                <strong>LGND</strong>
+                <span className="deployment-detail">(Founded by Clay creators Dan Hammer & Bruno Sánchez-Andrade Nuño)</span>
+                <p>Geo-embeddings infrastructure company. Raised $9M seed (Jul 2025, led by Javelin Venture Partners) to build queryable, production-ready embedding pipelines.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="ecosystem-trends fade-in">
-          <h3>2024-2025 Ecosystem Developments</h3>
+          <h3>2024-2026 Ecosystem Developments</h3>
           <div className="trend-cards">
             <div className="trend-card">
               <span className="trend-icon">🏛️</span>
