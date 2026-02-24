@@ -7,3 +7,4 @@ dist/
 gee-proxy/venv/
 gee-proxy/__pycache__/
 gee-proxy/*.json
+gee-proxy/key_b64.txt
