@@ -6,13 +6,13 @@ const BASE = import.meta.env.BASE_URL;
 const PARADIGM_COMPARISON = [
   {
     era: 'Text Search Evolution',
-    icon: '📝',
+    icon: '',
     before: 'Keyword matching — "apple" returns every document with that string, whether about fruit, companies, or orchards. No understanding of context or meaning.',
     after: 'Language embeddings (Word2Vec → BERT → GPT) — "apple" near "fruit" vs "apple" near "iPhone" map to different high-dimensional vectors. Semantic similarity enables "find documents like this one" without keyword matching.',
   },
   {
     era: 'Earth Observation Revolution',
-    icon: '🛰️',
+    icon: '',
     before: 'Task-specific pixel classification — train separate models per sensor (Landsat vs Sentinel-2), per region (tropics vs arctic), per application (crops vs buildings). Every new question requires new labeled training data.',
     after: 'Large Earth Observation Models (LEOMs) — AlphaEarth compresses petabytes of multi-sensor data into 64-dimensional unit vectors on a hypersphere. "Find places similar to this hospital in terms of local food access" becomes embedding similarity search across global coverage.',
   },

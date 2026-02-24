@@ -96,7 +96,7 @@ export default function GettingStarted() {
         {/* Quick start cards */}
         <div className="quickstart-grid fade-in">
           <div className="quickstart-card">
-            <div className="quickstart-icon">🌐</div>
+            <div className="quickstart-icon"></div>
             <h4>Google Earth Engine</h4>
             <p>
               Access AlphaEarth embeddings directly in GEE. 
@@ -107,7 +107,7 @@ export default function GettingStarted() {
             </a>
           </div>
           <div className="quickstart-card">
-            <div className="quickstart-icon">🤗</div>
+            <div className="quickstart-icon"></div>
             <h4>HuggingFace Hub</h4>
             <p>
               Download Clay and Prithvi model weights directly. 
@@ -118,7 +118,7 @@ export default function GettingStarted() {
             </a>
           </div>
           <div className="quickstart-card">
-            <div className="quickstart-icon">🔧</div>
+            <div className="quickstart-icon"></div>
             <h4>TerraTorch Toolkit</h4>
             <p>
               IBM's fine-tuning framework for Prithvi. 

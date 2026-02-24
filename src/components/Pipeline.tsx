@@ -58,10 +58,10 @@ const steps = [
         <rect x="26" y="6" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
         <rect x="6" y="26" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
         <rect x="26" y="26" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
-        <text x="14" y="16" textAnchor="middle" fontSize="8" fill="currentColor">🌾</text>
-        <text x="34" y="16" textAnchor="middle" fontSize="8" fill="currentColor">🌊</text>
-        <text x="14" y="36" textAnchor="middle" fontSize="8" fill="currentColor">🔥</text>
-        <text x="34" y="36" textAnchor="middle" fontSize="8" fill="currentColor">🏗️</text>
+        <text x="14" y="16" textAnchor="middle" fontSize="8" fill="currentColor"></text>
+        <text x="34" y="16" textAnchor="middle" fontSize="8" fill="currentColor"></text>
+        <text x="14" y="36" textAnchor="middle" fontSize="8" fill="currentColor"></text>
+        <text x="34" y="36" textAnchor="middle" fontSize="8" fill="currentColor"></text>
       </svg>
     ),
     title: 'Applications',
@@ -112,21 +112,21 @@ export default function Pipeline() {
           </div>
           <div className="advances-grid">
             <div className="advance-card">
-              <div className="advance-icon">🏛️</div>
+              <div className="advance-icon"></div>
               <div className="advance-content">
                 <h4>Institutional Adoption</h4>
                 <p>NASA and IBM Research released the first open-source geospatial AI foundation model (August 2023), establishing precedent for institutional LEOM development and validation.</p>
               </div>
             </div>
             <div className="advance-card">
-              <div className="advance-icon">📊</div>
+              <div className="advance-icon"></div>
               <div className="advance-content">
                 <h4>Standardized Benchmarking</h4>
                 <p>The GeoBench ecosystem (GEO-Bench, GEO-Bench-2, GeoCrossBench) provides standardized evaluation frameworks for cross-satellite generalization and capability assessment.</p>
               </div>
             </div>
             <div className="advance-card">
-              <div className="advance-icon">✅</div>
+              <div className="advance-icon"></div>
               <div className="advance-content">
                 <h4>Label Efficiency Proven</h4>
                 <p>Recent research (Dionelis et al. 2024) demonstrates foundation models consistently outperform task-specific models when labeled training data is limited.</p>

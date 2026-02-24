@@ -22,7 +22,7 @@ export default function GoogleDualApproach() {
           <div className="dual-card alphaearth-card">
             <div className="dual-card-header">
               <div className="dual-card-badge deepmind">DeepMind</div>
-              <h3>🌍 AlphaEarth Foundations</h3>
+              <h3> AlphaEarth Foundations</h3>
               <p className="dual-card-purpose">Representation Layer</p>
             </div>
             <div className="dual-card-body">
@@ -57,7 +57,7 @@ export default function GoogleDualApproach() {
           <div className="dual-card rsfm-card">
             <div className="dual-card-header">
               <div className="dual-card-badge research">Google Research</div>
-              <h3>🗣️ RSFM</h3>
+              <h3> RSFM</h3>
               <p className="dual-card-purpose">Task Layer</p>
             </div>
             <div className="dual-card-body">
@@ -95,21 +95,21 @@ export default function GoogleDualApproach() {
           <p>They solve fundamentally different problems that combine into a complete workflow:</p>
           <div className="dual-workflow">
             <div className="workflow-step">
-              <div className="workflow-icon">🌍</div>
+              <div className="workflow-icon"></div>
               <div className="workflow-label">AlphaEarth</div>
               <div className="workflow-action">Embedding similarity detects <strong>WHERE</strong> things changed</div>
               <div className="workflow-detail">Dot product between annual embeddings → stability map</div>
             </div>
             <div className="workflow-arrow">→</div>
             <div className="workflow-step">
-              <div className="workflow-icon">🗣️</div>
+              <div className="workflow-icon"></div>
               <div className="workflow-label">RSFM</div>
               <div className="workflow-action">Vision-language analysis identifies <strong>WHAT</strong> changed</div>
               <div className="workflow-detail">Natural language query: "What structures were damaged?"</div>
             </div>
             <div className="workflow-arrow">→</div>
             <div className="workflow-step">
-              <div className="workflow-icon">📊</div>
+              <div className="workflow-icon"></div>
               <div className="workflow-label">Complete Picture</div>
               <div className="workflow-action"><strong>WHERE</strong> + <strong>WHAT</strong> = actionable intelligence</div>
               <div className="workflow-detail">Full situational awareness from satellite imagery</div>

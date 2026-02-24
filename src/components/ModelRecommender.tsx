@@ -20,20 +20,20 @@ interface Recommendation {
 
 // ─── Options ───
 const TASK_TYPES = [
-  { id: 'classification', label: 'Classification', icon: '🏷️', desc: 'Land cover, scene type, crop ID' },
-  { id: 'segmentation', label: 'Segmentation', icon: '🗺️', desc: 'Pixel-level class maps' },
-  { id: 'change_detection', label: 'Change Detection', icon: '🔄', desc: 'Before/after comparison' },
-  { id: 'similarity', label: 'Similarity Search', icon: '🔍', desc: 'Find similar locations' },
-  { id: 'regression', label: 'Regression', icon: '📈', desc: 'Continuous values (biomass, flux)' },
-  { id: 'object_detection', label: 'Object Detection', icon: '📦', desc: 'Buildings, ships, vehicles' },
+  { id: 'classification', label: 'Classification', icon: '', desc: 'Land cover, scene type, crop ID' },
+  { id: 'segmentation', label: 'Segmentation', icon: '', desc: 'Pixel-level class maps' },
+  { id: 'change_detection', label: 'Change Detection', icon: '', desc: 'Before/after comparison' },
+  { id: 'similarity', label: 'Similarity Search', icon: '', desc: 'Find similar locations' },
+  { id: 'regression', label: 'Regression', icon: '', desc: 'Continuous values (biomass, flux)' },
+  { id: 'object_detection', label: 'Object Detection', icon: '', desc: 'Buildings, ships, vehicles' },
 ];
 
 const DATA_TYPES = [
-  { id: 'optical', label: 'Optical (RGB/MS)', icon: '🌅' },
-  { id: 'sar', label: 'SAR (Radar)', icon: '📡' },
-  { id: 'hyperspectral', label: 'Hyperspectral', icon: '🌈' },
-  { id: 'multitemporal', label: 'Multi-temporal', icon: '📅' },
-  { id: 'lidar', label: 'LiDAR / Elevation', icon: '🏔️' },
+  { id: 'optical', label: 'Optical (RGB/MS)', icon: '' },
+  { id: 'sar', label: 'SAR (Radar)', icon: '' },
+  { id: 'hyperspectral', label: 'Hyperspectral', icon: '' },
+  { id: 'multitemporal', label: 'Multi-temporal', icon: '' },
+  { id: 'lidar', label: 'LiDAR / Elevation', icon: '' },
 ];
 
 const RESOLUTIONS = [
@@ -44,14 +44,14 @@ const RESOLUTIONS = [
 ];
 
 const LICENSES = [
-  { id: 'open', label: 'Must be open source', icon: '🔓' },
-  { id: 'any', label: 'Any (including proprietary)', icon: '🔑' },
+  { id: 'open', label: 'Must be open source', icon: '' },
+  { id: 'any', label: 'Any (including proprietary)', icon: '' },
 ];
 
 const COMPUTE = [
-  { id: 'low', label: 'Low (laptop/CPU)', icon: '💻' },
-  { id: 'medium', label: 'Medium (single GPU)', icon: '🖥️' },
-  { id: 'high', label: 'High (multi-GPU/cluster)', icon: '🏢' },
+  { id: 'low', label: 'Low (laptop/CPU)', icon: '' },
+  { id: 'medium', label: 'Medium (single GPU)', icon: '' },
+  { id: 'high', label: 'High (multi-GPU/cluster)', icon: '' },
 ];
 
 // ─── Scoring Engine ───
@@ -145,7 +145,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
     <div className="rec-steps">
       {Array.from({ length: total }, (_, i) => (
         <div key={i} className={`rec-step ${i < current ? 'done' : ''} ${i === current ? 'active' : ''}`}>
-          <div className="rec-step-dot">{i < current ? '✓' : i + 1}</div>
+          <div className="rec-step-dot">{i < current ? '' : i + 1}</div>
           <span className="rec-step-label">
             {['Task', 'Data', 'Resolution', 'License', 'Compute'][i]}
           </span>
@@ -200,14 +200,14 @@ function ResultCard({ rec, rank }: { rec: Recommendation; rank: number }) {
       {rec.reasons.length > 0 && (
         <div className="rec-result-reasons">
           {rec.reasons.map((r, i) => (
-            <span key={i} className="rec-reason good">✓ {r}</span>
+            <span key={i} className="rec-reason good"> {r}</span>
           ))}
         </div>
       )}
       {rec.warnings.length > 0 && (
         <div className="rec-result-warnings">
           {rec.warnings.map((w, i) => (
-            <span key={i} className="rec-reason warn">⚠ {w}</span>
+            <span key={i} className="rec-reason warn"> {w}</span>
           ))}
         </div>
       )}
@@ -331,7 +331,7 @@ export default function ModelRecommender() {
                         <OptionCard key={r.id}
                           selected={needs.resolution === r.id}
                           onClick={() => setNeeds({ ...needs, resolution: r.id })}
-                          icon="📐" label={r.label} desc={r.desc}
+                          icon="" label={r.label} desc={r.desc}
                         />
                       ))}
                     </div>
@@ -393,12 +393,12 @@ export default function ModelRecommender() {
               </div>
 
               <div className="rec-summary">
-                <span className="rec-summary-item">🎯 {TASK_TYPES.find(t => t.id === needs.taskType)?.label}</span>
+                <span className="rec-summary-item"> {TASK_TYPES.find(t => t.id === needs.taskType)?.label}</span>
                 {needs.dataTypes.map(dt => (
                   <span key={dt} className="rec-summary-item">{DATA_TYPES.find(d => d.id === dt)?.icon} {DATA_TYPES.find(d => d.id === dt)?.label}</span>
                 ))}
-                <span className="rec-summary-item">📐 {RESOLUTIONS.find(r => r.id === needs.resolution)?.label}</span>
-                <span className="rec-summary-item">{needs.license === 'open' ? '🔓 Open source' : '🔑 Any license'}</span>
+                <span className="rec-summary-item"> {RESOLUTIONS.find(r => r.id === needs.resolution)?.label}</span>
+                <span className="rec-summary-item">{needs.license === 'open' ? ' Open source' : ' Any license'}</span>
                 <span className="rec-summary-item">{COMPUTE.find(c => c.id === needs.compute)?.icon} {COMPUTE.find(c => c.id === needs.compute)?.label}</span>
               </div>
 

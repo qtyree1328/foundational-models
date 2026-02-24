@@ -133,7 +133,7 @@ export default function ComparisonMatrix() {
           <div className="arch-grid">
             <div className="arch-card">
               <div className="arch-card-header">
-                <span className="arch-card-icon">🔄</span>
+                <span className="arch-card-icon"></span>
                 <h4>Masked Autoencoder (MAE)</h4>
               </div>
               <p>Mask random patches of satellite imagery, train model to reconstruct them. Learns spatial features.</p>
@@ -164,7 +164,7 @@ export default function ComparisonMatrix() {
 
             <div className="arch-card">
               <div className="arch-card-header">
-                <span className="arch-card-icon">⏱️</span>
+                <span className="arch-card-icon">⏱</span>
                 <h4>Temporal Vision Transformer</h4>
               </div>
               <p>3D spatiotemporal attention across multiple dates. Captures phenological change patterns.</p>
@@ -193,7 +193,7 @@ export default function ComparisonMatrix() {
 
             <div className="arch-card">
               <div className="arch-card-header">
-                <span className="arch-card-icon">🔗</span>
+                <span className="arch-card-icon"></span>
                 <h4>Multi-Modal Fusion</h4>
               </div>
               <p>Separate encoders for optical, SAR, and other modalities with cross-attention fusion.</p>

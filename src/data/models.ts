@@ -114,7 +114,7 @@ export const models: Model[] = [
     dataSource: 'Petabytes — 10.1M video sequences (v2.1)',
     keyStrength: 'Global production-ready, multi-modal fusion, GEE-native',
     color: '#1a73e8',
-    icon: '🌍',
+    icon: '',
     paperYear: 2025,
     paperVenue: 'arXiv',
     temporal: true,
@@ -166,7 +166,7 @@ export const models: Model[] = [
     ],
     scores: { parameters: 5, resolution: 9, modalities: 10, temporal: 6, openness: 3, benchmarks: 8 },
     codeExample: `// Google Earth Engine — AlphaEarth Embeddings
-// ⚠ Requires GEE account (code.earthengine.google.com)
+//  Requires GEE account (code.earthengine.google.com)
 var embeddings = ee.ImageCollection(
   'GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL'
 );
@@ -215,7 +215,7 @@ Map.addLayer(clusters.randomVisualizer(),
     dataSource: '70M globally distributed chips (256×256)',
     keyStrength: 'Fully open, any-sensor input, DINOv2 representation quality',
     color: '#e07a2f',
-    icon: '🏺',
+    icon: '',
     paperYear: 2024,
     paperVenue: 'Documentation',
     temporal: false,
@@ -321,7 +321,7 @@ with torch.no_grad():
     dataSource: 'NASA HLS (Harmonized Landsat Sentinel-2)',
     keyStrength: 'NASA institutional backing, HLS data pipeline, open-source milestone',
     color: '#1e40af',
-    icon: '🚀',
+    icon: '',
     paperYear: 2023,
     paperVenue: 'NASA Earthdata',
     temporal: true,
@@ -391,7 +391,7 @@ with torch.no_grad():
     dataSource: '4.2M global time series (HLS 2014–2023)',
     keyStrength: 'Multi-temporal 3D attention, location-aware, TerraTorch ecosystem',
     color: '#059669',
-    icon: '🛰️',
+    icon: '',
     paperYear: 2024,
     paperVenue: 'arXiv',
     temporal: true,
@@ -495,7 +495,7 @@ model = BACKBONE_REGISTRY.build(
     dataSource: 'fMoW-temporal + fMoW-Sentinel',
     keyStrength: 'Pioneered temporal + spectral position encodings for satellite MAE',
     color: '#8b5cf6',
-    icon: '🔬',
+    icon: '',
     paperYear: 2022,
     paperVenue: 'NeurIPS 2022',
     temporal: true,
@@ -585,7 +585,7 @@ loss, pred, mask = model(x)
     dataSource: 'Large-scale spectral RS dataset',
     keyStrength: 'Purpose-built for spectral data with 3D masking',
     color: '#ec4899',
-    icon: '🌈',
+    icon: '',
     paperYear: 2024,
     paperVenue: 'IEEE TPAMI 2024',
     temporal: false,
@@ -674,7 +674,7 @@ with torch.no_grad():
     dataSource: '21.5M temporal sequences (optical + SAR)',
     keyStrength: 'Largest GFM, factorized multi-modal encoders, CVPR 2024 SOTA',
     color: '#0ea5e9',
-    icon: '🔭',
+    icon: '',
     paperYear: 2024,
     paperVenue: 'CVPR 2024',
     temporal: true,
@@ -737,7 +737,7 @@ with torch.no_grad():
 #   ViT-L for SAR (Sentinel-1)
 # Multi-granularity contrastive learning
 
-# ⚠ Weights partially available for research
+#  Weights partially available for research
 
 # Conceptual usage:
 from skysense import SkySense
@@ -771,7 +771,7 @@ features = model.encode(
     dataSource: 'Aligned Sentinel-1 + Sentinel-2 pairs',
     keyStrength: 'Explicit SAR↔optical alignment, cross-modal retrieval',
     color: '#f59e0b',
-    icon: '🔗',
+    icon: '',
     paperYear: 2023,
     paperVenue: 'NeurIPS 2023',
     temporal: false,
@@ -858,7 +858,7 @@ sim = torch.cosine_similarity(opt_emb, sar_emb)
     dataSource: 'Five modalities: optical, MS, SAR, DSM, temporal',
     keyStrength: 'Universal sensor compatibility via wavelength-conditioned hypernetwork',
     color: '#6366f1',
-    icon: '⚡',
+    icon: '',
     paperYear: 2024,
     paperVenue: 'arXiv 2024',
     temporal: false,
@@ -958,7 +958,7 @@ dsm_emb = model(dsm_patch, wavelengths=[0])`,
     dataSource: 'High-res satellite/aerial imagery + text descriptions + synthetic captions via Gemini',
     keyStrength: 'Vision-language queries, open-vocabulary detection, >16% search improvement',
     color: '#ea4335',
-    icon: '🗣️',
+    icon: '',
     paperYear: 2025,
     paperVenue: 'arXiv',
     temporal: false,
@@ -1074,7 +1074,7 @@ features = backbone.extract(satellite_tile)
     dataSource: '~800M d-pixels, down-sampled 400:1 from S1/S2 (2017-2024)',
     keyStrength: 'Pixel-level temporal embeddings preserve phenology — no spatial context contamination',
     color: '#10b981',
-    icon: '🧩',
+    icon: '',
     paperYear: 2025,
     paperVenue: 'CVPR 2026 / arXiv',
     temporal: true,

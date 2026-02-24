@@ -38,7 +38,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'creek-fire',
     name: 'Creek Fire 2020',
     category: 'fire',
-    icon: '🔥',
+    icon: '',
     coords: [-119.3, 37.2],
     zoom: 10,
     bbox: [-119.6, 37.0, -119.0, 37.5],
@@ -52,7 +52,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'paradise-fire',
     name: 'Camp Fire 2018 (Paradise)',
     category: 'fire',
-    icon: '🔥',
+    icon: '',
     coords: [-121.6, 39.76],
     zoom: 11,
     bbox: [-121.75, 39.65, -121.45, 39.87],
@@ -67,7 +67,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'iowa-corn',
     name: 'Iowa Corn Belt',
     category: 'agriculture',
-    icon: '🌾',
+    icon: '',
     coords: [-93.5, 42.0],
     zoom: 10,
     bbox: [-94.0, 41.5, -93.0, 42.5],
@@ -81,7 +81,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'ca-central-valley',
     name: 'CA Central Valley',
     category: 'agriculture',
-    icon: '🌾',
+    icon: '',
     coords: [-120.5, 37.0],
     zoom: 9,
     bbox: [-121.0, 36.5, -120.0, 37.5],
@@ -96,7 +96,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'amazon-rondonia',
     name: 'Amazon Rondônia',
     category: 'deforestation',
-    icon: '🌳',
+    icon: '',
     coords: [-63.0, -10.5],
     zoom: 9,
     bbox: [-63.5, -11.0, -62.5, -10.0],
@@ -111,7 +111,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'philadelphia-urban',
     name: 'Philadelphia (Element 84 Study)',
     category: 'urban',
-    icon: '🏙️',
+    icon: '',
     coords: [-75.16, 39.95],
     zoom: 11,
     bbox: [-75.28, 39.87, -75.04, 40.03],
@@ -125,7 +125,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'phoenix-expansion',
     name: 'Phoenix Urban Expansion',
     category: 'urban',
-    icon: '🏙️',
+    icon: '',
     coords: [-112.0, 33.5],
     zoom: 10,
     bbox: [-112.5, 33.0, -111.5, 34.0],
@@ -140,7 +140,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'harvey-houston',
     name: 'Hurricane Harvey 2017',
     category: 'flooding',
-    icon: '💧',
+    icon: '',
     coords: [-95.4, 29.76],
     zoom: 10,
     bbox: [-95.8, 29.4, -95.0, 30.1],
@@ -155,7 +155,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'gerd-dam',
     name: 'Great Ethiopian Renaissance Dam',
     category: 'urban',
-    icon: '🏗️',
+    icon: '',
     coords: [35.09, 11.22],
     zoom: 12,
     bbox: [35.05, 11.18, 35.13, 11.26],
@@ -170,7 +170,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'philadelphia-airport',
     name: 'Philadelphia International Airport',
     category: 'urban',
-    icon: '✈️',
+    icon: '',
     coords: [-75.24, 39.87],
     zoom: 13,
     bbox: [-75.28, 39.85, -75.20, 39.89],
@@ -184,7 +184,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'singapore-changi',
     name: 'Singapore Changi Airport',
     category: 'urban', 
-    icon: '✈️',
+    icon: '',
     coords: [103.99, 1.35],
     zoom: 13,
     bbox: [103.95, 1.32, 104.03, 1.38],
@@ -198,7 +198,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'cocoa-farms-ghana',
     name: 'Cocoa Plantations, Ghana',
     category: 'agriculture',
-    icon: '🍫', 
+    icon: '', 
     coords: [-1.85, 6.15],
     zoom: 12,
     bbox: [-1.95, 6.05, -1.75, 6.25],
@@ -212,7 +212,7 @@ const REAL_EVENTS: RealEvent[] = [
     id: 'port-rotterdam',
     name: 'Port of Rotterdam',
     category: 'urban',
-    icon: '🚢',
+    icon: '',
     coords: [4.47, 51.95],
     zoom: 12, 
     bbox: [4.35, 51.90, 4.59, 52.00],
@@ -248,14 +248,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 // Layer info
 const LAYER_INFO: Record<LayerType, { label: string; emoji: string; description: string }> = {
-  before: { label: 'Before', emoji: '📅', description: 'Embedding from before the event. Pre-event baseline.' },
-  after: { label: 'After', emoji: '📅', description: 'Embedding after the event. Post-event state.' },
-  change: { label: 'Change', emoji: '📈', description: 'Embedding difference between years. Bright = large change in 64D vector.' },
-  optical: { label: 'Optical', emoji: '🛰️', description: 'Sentinel-2 true color imagery for visual reference.' },
-  cdl: { label: 'CDL', emoji: '🌾', description: 'USDA Cropland Data Layer — purpose-trained crop classifier. Compare to FM.' },
-  burn: { label: 'dNBR', emoji: '🔥', description: 'Differenced Normalized Burn Ratio. Red = severe burn, blue = unburned.' },
-  degradation: { label: 'Degradation', emoji: '🌳', description: 'Process vector projection. Red = high deforestation similarity, green = healthy.' },
-  clusters: { label: 'K-Means', emoji: '🎯', description: 'K-means clustering on ALL 64 dims. Often reveals more than RGB visualization.' }
+  before: { label: 'Before', emoji: '', description: 'Embedding from before the event. Pre-event baseline.' },
+  after: { label: 'After', emoji: '', description: 'Embedding after the event. Post-event state.' },
+  change: { label: 'Change', emoji: '', description: 'Embedding difference between years. Bright = large change in 64D vector.' },
+  optical: { label: 'Optical', emoji: '', description: 'Sentinel-2 true color imagery for visual reference.' },
+  cdl: { label: 'CDL', emoji: '', description: 'USDA Cropland Data Layer — purpose-trained crop classifier. Compare to FM.' },
+  burn: { label: 'dNBR', emoji: '', description: 'Differenced Normalized Burn Ratio. Red = severe burn, blue = unburned.' },
+  degradation: { label: 'Degradation', emoji: '', description: 'Process vector projection. Red = high deforestation similarity, green = healthy.' },
+  clusters: { label: 'K-Means', emoji: '', description: 'K-means clustering on ALL 64 dims. Often reveals more than RGB visualization.' }
 };
 
 // ===== Helper Components =====
@@ -614,7 +614,7 @@ export default function FMExplorer() {
         id: 'custom',
         name: name,
         category: 'urban', // default category
-        icon: '📍',
+        icon: '',
         coords: coords,
         zoom: 12,
         bbox: [coords[0] - 0.1, coords[1] - 0.1, coords[0] + 0.1, coords[1] + 0.1],
@@ -967,7 +967,7 @@ export default function FMExplorer() {
             <h2>FM Explorer</h2>
           </div>
           <div className="fm-error-state">
-            <span>⚠️</span>
+            <span></span>
             <h3>GEE Proxy Not Available</h3>
             <p>Start the proxy server to enable live exploration.</p>
           </div>
@@ -989,13 +989,13 @@ export default function FMExplorer() {
           </p>
           <div className="fm-external-links">
             <a href="https://earthengine-ai.projects.earthengine.app/view/embedding-similarity-search" target="_blank" rel="noopener">
-              🔍 Google Similarity Demo
+               Google Similarity Demo
             </a>
             <a href="https://element84.com/machine-learning/exploring-alphaearth-embeddings/" target="_blank" rel="noopener">
-              📊 Element 84 Research
+               Element 84 Research
             </a>
             <a href="https://developers.google.com/earth-engine/tutorials/community/satellite-embedding-01-introduction" target="_blank" rel="noopener">
-              📚 GEE Tutorials
+               GEE Tutorials
             </a>
           </div>
         </div>
@@ -1016,7 +1016,7 @@ export default function FMExplorer() {
         <div className="fm-sidebar">
           {/* Band controls */}
           <div className="fm-control-group">
-            <h4>🎨 Band Visualization</h4>
+            <h4> Band Visualization</h4>
             <p className="fm-hint">Explore embedding dimensions: RGB composite or single band with colorbar. Element 84 found Dim 26 = airports (validated on Philadelphia International)!</p>
             
             {/* View Mode Switcher */}
@@ -1025,13 +1025,13 @@ export default function FMExplorer() {
                 className={`fm-mode-btn ${viewMode === 'rgb' ? 'active' : ''}`}
                 onClick={() => setViewMode('rgb')}
               >
-                🌈 RGB Composite
+                 RGB Composite
               </button>
               <button
                 className={`fm-mode-btn ${viewMode === 'single' ? 'active' : ''}`}
                 onClick={() => setViewMode('single')}
               >
-                📊 Single Band + Colorbar
+                 Single Band + Colorbar
               </button>
             </div>
             
@@ -1058,7 +1058,7 @@ export default function FMExplorer() {
                   }}
                 />
                 <p className="fm-single-hint">
-                  🎯 <strong>A{singleBand.toString().padStart(2, '0')}:</strong> {
+                   <strong>A{singleBand.toString().padStart(2, '0')}:</strong> {
                     singleBand === 26 ? 'Airports & Infrastructure (Element 84) — validated in Philadelphia International Airport' :
                     singleBand === 6 ? 'Buildings & Urban Structures (Element 84) — test on downtown cores, skyscraper districts' :
                     singleBand === 20 ? 'Urban Infrastructure (Element 84) — highways, bridges, major transport hubs' :
@@ -1094,7 +1094,7 @@ export default function FMExplorer() {
                   onClick={randomizeBands}
                   title="Discover new band combinations"
                 >
-                  🎲 Random
+                   Random
                 </button>
               </div>
             )}
@@ -1106,63 +1106,63 @@ export default function FMExplorer() {
                   onClick={() => setSingleBand(26)}
                   title="Element 84 discovered: airports & runways"
                 >
-                  ✈️ Airports (26)
+                   Airports (26)
                 </button>
                 <button
                   className={`fm-preset-btn ${singleBand === 6 ? 'active' : ''}`}
                   onClick={() => setSingleBand(6)}
                   title="Element 84 discovered: building structures"
                 >
-                  🏢 Buildings (6)
+                   Buildings (6)
                 </button>
                 <button
                   className={`fm-preset-btn ${singleBand === 51 ? 'active' : ''}`}
                   onClick={() => setSingleBand(51)}
                   title="Oil/gas infrastructure, storage tanks (research-backed)"
                 >
-                  🏭 Industrial (51)
+                   Industrial (51)
                 </button>
                 <button
                   className={`fm-preset-btn ${singleBand === 8 ? 'active' : ''}`}
                   onClick={() => setSingleBand(8)}
                   title="Water features - test on dams, reservoirs, infrastructure"
                 >
-                  🌊 Water (8)
+                   Water (8)
                 </button>
                 <button
                   className={`fm-preset-btn ${singleBand === 12 ? 'active' : ''}`}
                   onClick={() => setSingleBand(12)}
                   title="Vegetation patterns - test on cocoa farms, crop classification"
                 >
-                  🌾 Crops (12)
+                   Crops (12)
                 </button>
                 <button
                   className={`fm-preset-btn ${singleBand === 32 ? 'active' : ''}`}
                   onClick={() => setSingleBand(32)}
                   title="Mixed land use - test on mining areas, complex landscapes"
                 >
-                  ⛏️ Mining (32)
+                   Mining (32)
                 </button>
                 <button
                   className="fm-preset-btn random"
                   onClick={() => setSingleBand(Math.floor(Math.random() * 64))}
                   title="Discover what other dimensions capture"
                 >
-                  🎲 Random
+                   Random
                 </button>
               </div>
             )}
 
             {selectedEvent && tilesReady && (
               <button className="fm-reload-btn" onClick={reloadWithBands}>
-                🔄 Apply New Bands
+                 Apply New Bands
               </button>
             )}
           </div>
 
           {/* Custom Location Controls */}
           <div className="fm-control-group">
-            <h4>🌍 Custom Location</h4>
+            <h4> Custom Location</h4>
             <p className="fm-hint">Explore any coordinates with AlphaEarth embeddings</p>
             
             <div className="fm-custom-location">
@@ -1210,31 +1210,31 @@ export default function FMExplorer() {
                   onClick={handleCoordinateInput}
                   disabled={!inputLat || !inputLon}
                 >
-                  🎯 Explore Location
+                   Explore Location
                 </button>
                 
                 <button
                   className={`fm-custom-btn ${clickToExplore ? 'active' : ''}`}
                   onClick={() => setClickToExplore(!clickToExplore)}
                 >
-                  {clickToExplore ? '✋ Cancel Click' : '👆 Click to Explore'}
+                  {clickToExplore ? ' Cancel Click' : ' Click to Explore'}
                 </button>
               </div>
               
               {clickToExplore && (
                 <p className="fm-click-hint">
-                  🗺️ Click anywhere on the map to explore that location
+                   Click anywhere on the map to explore that location
                 </p>
               )}
 
               {customLocation && (
                 <div className="fm-custom-active">
-                  <strong>📍 Active:</strong> {customLocation.name}
+                  <strong> Active:</strong> {customLocation.name}
                 </div>
               )}
               
               <div className="fm-quick-tests">
-                <h5>🧪 Quick Dimension Tests</h5>
+                <h5> Quick Dimension Tests</h5>
                 <p className="fm-hint">Validate specific embedding dimensions on known test sites</p>
                 <div className="fm-test-buttons">
                   <button
@@ -1246,7 +1246,7 @@ export default function FMExplorer() {
                     }}
                     title="Test dimension 26 airport detection on Philadelphia International"
                   >
-                    ✈️ Test Airports (Dim 26)
+                     Test Airports (Dim 26)
                   </button>
                   
                   <button
@@ -1258,7 +1258,7 @@ export default function FMExplorer() {
                     }}
                     title="Test dimension 12 crop detection on cocoa plantations"
                   >
-                    🍫 Test Crops (Dim 12)
+                     Test Crops (Dim 12)
                   </button>
                   
                   <button
@@ -1270,7 +1270,7 @@ export default function FMExplorer() {
                     }}
                     title="Test dimension 41 transport networks on major port infrastructure"
                   >
-                    🚢 Test Transport (Dim 41)
+                     Test Transport (Dim 41)
                   </button>
                   
                   <button
@@ -1282,7 +1282,7 @@ export default function FMExplorer() {
                     }}
                     title="Test dimension 8 water infrastructure on major dam project"
                   >
-                    🌊 Test Water (Dim 8)
+                     Test Water (Dim 8)
                   </button>
                 </div>
               </div>
@@ -1291,13 +1291,13 @@ export default function FMExplorer() {
 
           {/* Data Import Controls */}
           <div className="fm-control-group">
-            <h4>📁 Data Import</h4>
+            <h4> Data Import</h4>
             <p className="fm-hint">Upload coordinates or GeoTIFF for bulk analysis</p>
             
             <div className="fm-import-section">
               <div className="fm-import-option">
                 <label className="fm-upload-label" htmlFor="coords-file">
-                  <div className="fm-upload-icon">📄</div>
+                  <div className="fm-upload-icon"></div>
                   <div>
                     <strong>Upload Coordinates</strong>
                     <small>CSV file with lat,lon,name columns</small>
@@ -1314,7 +1314,7 @@ export default function FMExplorer() {
               
               <div className="fm-import-option">
                 <label className="fm-upload-label" htmlFor="geotiff-file">
-                  <div className="fm-upload-icon">🗺️</div>
+                  <div className="fm-upload-icon"></div>
                   <div>
                     <strong>Upload GeoTIFF</strong>
                     <small>Overlay your data on embeddings</small>
@@ -1331,7 +1331,7 @@ export default function FMExplorer() {
               
               {uploadedData && (
                 <div className="fm-uploaded-data">
-                  <strong>📊 Uploaded:</strong> {uploadedData.name}
+                  <strong> Uploaded:</strong> {uploadedData.name}
                   <button onClick={clearUploadedData}>×</button>
                 </div>
               )}
@@ -1340,7 +1340,7 @@ export default function FMExplorer() {
 
           {/* Similarity Search */}
           <div className="fm-control-group">
-            <h4>🔍 Similarity Search</h4>
+            <h4> Similarity Search</h4>
             <p className="fm-hint">Find locations similar to your selection</p>
             
             <div className="fm-similarity-section">
@@ -1349,7 +1349,7 @@ export default function FMExplorer() {
                 onClick={performSimilaritySearch}
                 disabled={!selectedEvent || loading}
               >
-                🎯 Find Similar Locations
+                 Find Similar Locations
               </button>
               
               <div className="fm-similarity-controls">
@@ -1369,12 +1369,12 @@ export default function FMExplorer() {
               
               {similarityResults && (
                 <div className="fm-similarity-results">
-                  <h5>🎯 Similar Locations Found:</h5>
+                  <h5> Similar Locations Found:</h5>
                   {similarityResults.map((result, i) => (
                     <div key={i} className="fm-similarity-result">
                       <button onClick={() => loadCustomLocation(result.coords, parseInt(inputYear), result.name)}>
                         <div className="similarity-header">
-                          <span className="similarity-name">📍 {result.name}</span>
+                          <span className="similarity-name"> {result.name}</span>
                           <span className="similarity-score">{(result.similarity * 100).toFixed(1)}%</span>
                         </div>
                         {result.reason && (
@@ -1390,7 +1390,7 @@ export default function FMExplorer() {
 
           {/* Export Controls */}
           <div className="fm-control-group">
-            <h4>💾 Export Data</h4>
+            <h4> Export Data</h4>
             <p className="fm-hint">Download embeddings and analysis results</p>
             
             <div className="fm-export-section">
@@ -1399,7 +1399,7 @@ export default function FMExplorer() {
                 onClick={() => exportEmbeddings('csv')}
                 disabled={!selectedEvent}
               >
-                📊 Export Embeddings (CSV)
+                 Export Embeddings (CSV)
               </button>
               
               <button
@@ -1407,7 +1407,7 @@ export default function FMExplorer() {
                 onClick={() => exportEmbeddings('geotiff')}
                 disabled={!selectedEvent}
               >
-                🗺️ Export as GeoTIFF
+                 Export as GeoTIFF
               </button>
               
               <button
@@ -1415,7 +1415,7 @@ export default function FMExplorer() {
                 onClick={exportCurrentView}
                 disabled={!tilesReady}
               >
-                📷 Export Current View
+                 Export Current View
               </button>
               
               {similarityResults && (
@@ -1423,7 +1423,7 @@ export default function FMExplorer() {
                   className="fm-export-btn"
                   onClick={exportSimilarityResults}
                 >
-                  🎯 Export Similarity Results
+                   Export Similarity Results
                 </button>
               )}
             </div>
@@ -1431,7 +1431,7 @@ export default function FMExplorer() {
 
           {/* Event list */}
           <div className="fm-control-group">
-            <h4>📍 Real Events</h4>
+            <h4> Real Events</h4>
             <p className="fm-hint">Click to explore with embeddings</p>
             
             <div className="fm-event-list">
@@ -1494,7 +1494,7 @@ export default function FMExplorer() {
               
               {/* Research question */}
               <div className="fm-question">
-                <strong>❓ Research Question:</strong>
+                <strong> Research Question:</strong>
                 <span>{selectedEvent.question}</span>
               </div>
               
@@ -1516,7 +1516,7 @@ export default function FMExplorer() {
               </div>
               
               <div className="fm-research-tip">
-                💡 <strong>Tip:</strong> {viewMode === 'single' ? 
+                 <strong>Tip:</strong> {viewMode === 'single' ? 
                   'Single band mode shows exactly what one dimension captures. Try A26 for airports or A06 for buildings!' :
                   'Try "Buildings" preset for urban areas, "Airport" for infrastructure. Switch to single band mode to see individual dimensions.'
                 }
@@ -1527,7 +1527,7 @@ export default function FMExplorer() {
           {/* Instructions */}
           {!selectedEvent && (
             <div className="fm-instructions">
-              <span>👆 Click a marker or select an event from the sidebar</span>
+              <span> Click a marker or select an event from the sidebar</span>
             </div>
           )}
         </div>

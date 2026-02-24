@@ -173,7 +173,7 @@ function StudyPanel({
           <span className="case-panel-location">{study.location}</span>
         </div>
         <button className="case-panel-close" onClick={onClose} title="Close">
-          ✕
+          
         </button>
       </div>
       
@@ -653,7 +653,7 @@ export default function CaseStudyMap() {
 
           {!selectedStudy && mapReady && (
             <div className="case-instructions-simple">
-              <span>👆 Click a pin to explore</span>
+              <span> Click a pin to explore</span>
             </div>
           )}
         </div>

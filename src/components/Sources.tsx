@@ -316,7 +316,7 @@ export default function Sources() {
         </div>
 
         <div className="sources-disclaimer fade-in">
-          <div className="disclaimer-icon">⚠️</div>
+          <div className="disclaimer-icon"></div>
           <div className="disclaimer-content">
             <h4>Accuracy Notice</h4>
             <p>
@@ -334,7 +334,7 @@ export default function Sources() {
               <div className="source-card-header">
                 <h3>{model.name}</h3>
                 <span className="verified-badge">
-                  {model.sources.every(s => s.verified) ? '✓ All Verified' : '⚠ Partially Verified'}
+                  {model.sources.every(s => s.verified) ? ' All Verified' : ' Partially Verified'}
                 </span>
               </div>
               

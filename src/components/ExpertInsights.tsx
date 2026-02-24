@@ -164,7 +164,7 @@ function PretrainingDeepDive() {
             by exploiting local texture patterns.
           </p>
           <div className="ei-callout">
-            <div className="ei-callout-icon">💡</div>
+            <div className="ei-callout-icon"></div>
             <div>
               <strong>SatMAE</strong> found that going to 75% masking on multi-spectral data forces the model to
               learn spectral correlations across bands, not just spatial interpolation <Cite ids={['cong2022satmae']} />.
@@ -232,7 +232,7 @@ function PretrainingDeepDive() {
           </div>
 
           <div className="ei-callout warning">
-            <div className="ei-callout-icon">⚠️</div>
+            <div className="ei-callout-icon"></div>
             <div>
               <strong>The fundamental tension:</strong> More timestamps = richer temporal modeling, but quadratic
               attention cost with sequence length. A ViT processing 4 Sentinel-2 dates at 224×224 with 16×16 patches
@@ -241,7 +241,7 @@ function PretrainingDeepDive() {
             </div>
           </div>
           <div className="ei-callout">
-            <div className="ei-callout-icon">📊</div>
+            <div className="ei-callout-icon"></div>
             <div>
               <strong>2024 Survey Findings:</strong> A comprehensive review of 58 foundation models (June 2021-2024)
               found that temporal modeling remains one of the most challenging aspects <Cite ids={['lu2024visionsurvey']} />.
@@ -277,10 +277,10 @@ function PretrainingDeepDive() {
                 This captures correlations between SAR backscatter and optical reflectance that late fusion misses <Cite ids={['alphaearth2025']} />.
               </p>
               <div className="ei-pro-con">
-                <span className="ei-pro">✓ Captures cross-modal correlations early</span>
-                <span className="ei-pro">✓ Single unified representation</span>
-                <span className="ei-con">✗ Requires all modalities at inference</span>
-                <span className="ei-con">✗ Training data must be co-registered across modalities</span>
+                <span className="ei-pro"> Captures cross-modal correlations early</span>
+                <span className="ei-pro"> Single unified representation</span>
+                <span className="ei-con"> Requires all modalities at inference</span>
+                <span className="ei-con"> Training data must be co-registered across modalities</span>
               </div>
             </div>
 
@@ -301,10 +301,10 @@ function PretrainingDeepDive() {
                 then fuses through cross-attention layers <Cite ids={['guo2024skysense']} />.
               </p>
               <div className="ei-pro-con">
-                <span className="ei-pro">✓ Can work with missing modalities</span>
-                <span className="ei-pro">✓ Each encoder specializes</span>
-                <span className="ei-con">✗ Cross-modal interactions only at fusion point</span>
-                <span className="ei-con">✗ More parameters (separate encoders)</span>
+                <span className="ei-pro"> Can work with missing modalities</span>
+                <span className="ei-pro"> Each encoder specializes</span>
+                <span className="ei-con"> Cross-modal interactions only at fusion point</span>
+                <span className="ei-con"> More parameters (separate encoders)</span>
               </div>
             </div>
           </div>
@@ -384,7 +384,7 @@ function PretrainingDeepDive() {
           </div>
 
           <div className="ei-callout">
-            <div className="ei-callout-icon">🧪</div>
+            <div className="ei-callout-icon"></div>
             <div>
               <strong>2024 EO Benchmark Results:</strong> Comprehensive evaluation across 5 EO datasets 
               found that LoRA adapters match full fine-tuning performance while using 95% fewer trainable 
@@ -398,7 +398,7 @@ function PretrainingDeepDive() {
           </div>
 
           <div className="ei-callout warning">
-            <div className="ei-callout-icon">⚠️</div>
+            <div className="ei-callout-icon"></div>
             <div>
               <strong>The adaptation paradox:</strong> Too little adaptation (very low rank r) fails to 
               capture task-specific patterns. Too much adaptation approaches full fine-tuning cost and 
@@ -702,7 +702,7 @@ function EmbeddingSpaceDeepDive() {
             </div>
           </div>
           <div className="ei-callout">
-            <div className="ei-callout-icon">🔬</div>
+            <div className="ei-callout-icon"></div>
             <div>
               The hypersphere constraint in AlphaEarth means that embedding dimensions are not independent —
               they are constrained by ‖v‖ = 1, so increasing one component must decrease others. This
@@ -780,7 +780,7 @@ function OpenQuestionsDeepDive() {
   const questions = [
     {
       title: 'Scaling Laws for EO Foundation Models',
-      icon: '📈',
+      icon: '',
       status: 'Unresolved',
       statusColor: '#dc2626',
       body: (
@@ -801,7 +801,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'The Resolution–Coverage Trade-off',
-      icon: '🔍',
+      icon: '',
       status: 'Structural',
       statusColor: '#f59e0b',
       body: (
@@ -821,7 +821,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Why Don\'t Sub-Meter Foundation Models Exist?',
-      icon: '🏗️',
+      icon: '',
       status: 'Data-limited',
       statusColor: '#6366f1',
       body: (
@@ -843,7 +843,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Temporal Resolution: Annual vs Multi-Date vs None',
-      icon: '⏱️',
+      icon: '',
       status: 'Active research',
       statusColor: '#059669',
       body: (
@@ -864,7 +864,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'SAR Integration — Why Most Models Skip It',
-      icon: '📡',
+      icon: '',
       status: 'Hard problem',
       statusColor: '#dc2626',
       body: (
@@ -891,7 +891,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Benchmark Standardization — Recent Progress & Limitations',
-      icon: '📏',
+      icon: '',
       status: 'Major progress',
       statusColor: '#059669',
       body: (
@@ -932,7 +932,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Proprietary vs Open: The Sustainability Question',
-      icon: '🔓',
+      icon: '',
       status: 'Philosophical',
       statusColor: '#6366f1',
       body: (
@@ -973,7 +973,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Foundations of Ideal Earth FMs — Nature 2026 Framework',
-      icon: '🎯',
+      icon: '',
       status: 'Framework defined',
       statusColor: '#6366f1',
       body: (
@@ -1020,7 +1020,7 @@ function OpenQuestionsDeepDive() {
     },
     {
       title: 'Responsible AI for Earth Observation',
-      icon: '⚖️',
+      icon: '',
       status: 'Emerging Focus',
       statusColor: '#059669',
       body: (
@@ -1079,56 +1079,56 @@ function GeoFMvsImageNet() {
       challenge: 'Spectral Depth',
       imagenet: '3 channels (RGB)',
       geofm: '2–200+ bands spanning 400nm–2500nm (optical) + radar wavelengths',
-      icon: '🌈',
+      icon: '',
       detail: 'Standard CNNs assume 3-channel input with batch normalization calibrated for [0,255] uint8. EO data uses calibrated reflectance (float32), negative values (SAR dB), and band counts that vary by sensor. the DOFA hypernetwork addresses this by generating input weights from wavelength metadata.',
     },
     {
       challenge: 'Temporal Dimension',
       imagenet: 'Single snapshot',
       geofm: 'Time series (days to decades) — phenology, seasonal cycles, change events',
-      icon: '📅',
+      icon: '',
       detail: 'A wheat field photographed in January vs July produces completely different embeddings. Foundation models must encode not just what the surface looks like, but when it was observed. This requires temporal positional encoding that has no ImageNet equivalent.',
     },
     {
       challenge: 'Spatial Scale',
       imagenet: 'Object-centric (224×224 at ~1m)',
       geofm: '0.3m to 1km GSD — different features emerge at different scales',
-      icon: '🔎',
+      icon: '',
       detail: 'At 0.3m you see roof materials; at 10m you see land parcels; at 100m you see biomes. The same ViT patch size (16×16 pixels) captures fundamentally different information at each scale. Scale-MAE explicitly addresses this with scale-aware positional encoding.',
     },
     {
       challenge: 'Multi-Modal Inputs',
       imagenet: 'Single camera',
       geofm: 'Optical, SAR, LiDAR, thermal, hyperspectral — each with unique physics',
-      icon: '📡',
+      icon: '',
       detail: 'SAR backscatter and optical reflectance measure completely different physical properties. Fusing them requires understanding that high SAR backscatter + high NDVI = forest, while high SAR backscatter + low NDVI = urban. This cross-modal reasoning is absent from ImageNet pre-training.',
     },
     {
       challenge: 'Geospatial Context',
       imagenet: 'No location awareness',
       geofm: 'Same patch looks different at different latitudes/altitudes/climates',
-      icon: '🌍',
+      icon: '',
       detail: 'A green patch at 60°N is probably boreal forest; the same spectral signature at 10°N is tropical agriculture. Geographic context (latitude, elevation, climate zone) modulates interpretation. Clay v1.5 and Prithvi encode lat/lon as additional input features.',
     },
     {
       challenge: 'Data Volume',
       imagenet: '14M images',
       geofm: 'Petabytes of continuously acquired global imagery (Sentinel alone: 12TB/day)',
-      icon: '📊',
+      icon: '',
       detail: 'ImageNet was curated once. Sentinel-2 generates 1.6 TB/day of new imagery. Pre-training must handle data that is continuously growing, seasonally varying, and unevenly distributed (more clear observations in arid regions than cloudy tropical zones).',
     },
     {
       challenge: 'Label Scarcity',
       imagenet: 'Crowd-sourced labels for 1000 classes',
       geofm: 'Expensive expert annotations — a single land cover map costs $100K+',
-      icon: '🏷️',
+      icon: '',
       detail: 'ImageNet labels can be crowd-sourced ("is this a dog?"). EO labels require domain expertise ("is this Spartina alterniflora or Phragmites?"). This is why self-supervised pre-training is not just useful but essential for EO foundation models.',
     },
     {
       challenge: 'Physical Constraints',
       imagenet: 'None — pure pattern recognition',
       geofm: 'Must respect physics: atmospheric correction, sun angle, SAR geometry, sensor calibration',
-      icon: '⚛️',
+      icon: '',
       detail: 'The same surface produces different pixel values depending on atmospheric conditions, sun-sensor geometry, and sensor calibration. Pre-processing (TOA→SR correction) is not standardized, creating domain shift between datasets that doesn\'t exist in ImageNet.',
     },
   ];
@@ -1379,11 +1379,11 @@ export default function ExpertInsights() {
   const [activeTab, setActiveTab] = useState<TabId>('pretrain');
 
   const tabs: { id: TabId; label: string; icon: string }[] = [
-    { id: 'pretrain', label: 'Pre-training Strategies', icon: '⚙️' },
-    { id: 'embedding', label: 'Embedding Spaces', icon: '🌌' },
-    { id: 'questions', label: 'Open Questions', icon: '❓' },
-    { id: 'geofm', label: 'LEOM vs ImageNet', icon: '🧠' },
-    { id: 'pixelpatch', label: 'Pixel vs Patch', icon: '🧩' },
+    { id: 'pretrain', label: 'Pre-training Strategies', icon: '' },
+    { id: 'embedding', label: 'Embedding Spaces', icon: '' },
+    { id: 'questions', label: 'Open Questions', icon: '' },
+    { id: 'geofm', label: 'LEOM vs ImageNet', icon: '' },
+    { id: 'pixelpatch', label: 'Pixel vs Patch', icon: '' },
   ];
 
   return (

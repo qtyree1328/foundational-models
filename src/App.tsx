@@ -89,7 +89,7 @@ function Nav({ activeSection }: { activeSection: string }) {
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
-            <span>LEOM Explorer</span>
+            <span>Geospatial Foundation Models</span>
           </div>
           <div className="nav-links">
             {NAV_ITEMS.map(item => (
@@ -170,9 +170,32 @@ export default function App() {
 
   useSectionInView(handleSectionChange);
 
+  const allSections = ['hero', ...NAV_ITEMS.map(n => n.id)];
+  const activeIdx = allSections.indexOf(activeSection);
+  const progress = allSections.length > 1 ? (activeIdx / (allSections.length - 1)) * 100 : 0;
+
   return (
     <div ref={containerRef} className="app">
       <Nav activeSection={activeSection} />
+      {/* Left progress bar */}
+      <div className="progress-rail">
+        <div className="progress-track">
+          <div className="progress-fill" style={{ height: `${progress}%` }} />
+        </div>
+        {allSections.map((id, i) => (
+          <div
+            key={id}
+            className={`progress-dot ${i <= activeIdx ? 'active' : ''} ${id === activeSection ? 'current' : ''}`}
+            style={{ top: `${(i / (allSections.length - 1)) * 100}%` }}
+            onClick={() => {
+              const el = document.querySelector(`[data-section="${id}"]`);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+              else if (id === 'hero') window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            title={NAV_ITEMS.find(n => n.id === id)?.label || 'Top'}
+          />
+        ))}
+      </div>
       <Hero />
       <Pipeline />
       <ParadigmShift />

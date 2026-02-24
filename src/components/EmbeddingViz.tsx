@@ -719,10 +719,10 @@ export default function EmbeddingViz() {
   const [activeTab, setActiveTab] = useState<'pca' | 'kmeans' | 'similarity' | 'change'>('pca');
 
   const tabs = [
-    { id: 'pca' as const, label: 'PCA Projection', icon: '📊' },
-    { id: 'kmeans' as const, label: 'K-Means Clustering', icon: '🎯' },
-    { id: 'similarity' as const, label: 'Similarity Search', icon: '🔍' },
-    { id: 'change' as const, label: 'Change Detection', icon: '📈' },
+    { id: 'pca' as const, label: 'PCA Projection', icon: '' },
+    { id: 'kmeans' as const, label: 'K-Means Clustering', icon: '' },
+    { id: 'similarity' as const, label: 'Similarity Search', icon: '' },
+    { id: 'change' as const, label: 'Change Detection', icon: '' },
   ];
 
   return (
@@ -739,7 +739,7 @@ export default function EmbeddingViz() {
 
         {/* Simulation notice */}
         <div className="viz-simulation-notice fade-in">
-          <span className="simulation-badge-small">📊 SYNTHETIC DATA</span>
+          <span className="simulation-badge-small"> SYNTHETIC DATA</span>
           <span className="simulation-notice-text">
             These visualizations use <strong>generated data</strong> that mimics the statistical 
             properties of real embeddings (64D unit vectors, land cover clustering). The algorithms 

@@ -92,7 +92,7 @@ const specRows: { key: SpecKey; label: string; extract: (m: Model) => string }[]
   { key: 'resolution', label: 'Resolution', extract: m => m.resolution },
   { key: 'training', label: 'Training Scale', extract: m => m.training.samples },
   { key: 'pretraining', label: 'Pre-training', extract: m => m.architecture.type },
-  { key: 'temporal', label: 'Temporal', extract: m => m.temporal ? '✓ Yes' : '✗ No' },
+  { key: 'temporal', label: 'Temporal', extract: m => m.temporal ? ' Yes' : ' No' },
   { key: 'license', label: 'License', extract: m => m.license },
 ];
 
@@ -150,7 +150,7 @@ function SpecsTable({ selectedIds }: { selectedIds: string[] }) {
             {display.map(m => (
               <td key={m.id} className="specs-value">
                 <span className={m.openWeights ? 'temporal-yes' : 'temporal-no'}>
-                  {m.openWeights ? '✓ Available' : '✗ Closed'}
+                  {m.openWeights ? ' Available' : ' Closed'}
                 </span>
               </td>
             ))}
@@ -186,13 +186,13 @@ function BestForGuide() {
       </div>
       {matrix.benchmarks && (
         <div className="benchmark-context">
-          <h4>📊 Performance Benchmarks</h4>
+          <h4> Performance Benchmarks</h4>
           <p>{matrix.benchmarks}</p>
         </div>
       )}
       <div className="best-for-grid">
         <div className="best-for-col best">
-          <div className="best-for-header">🏆 Best Choice</div>
+          <div className="best-for-header"> Best Choice</div>
           {matrix.best.map(id => {
             const m = getModel(id);
             if (!m) return null;
@@ -208,7 +208,7 @@ function BestForGuide() {
           })}
         </div>
         <div className="best-for-col good">
-          <div className="best-for-header">👍 Good Option</div>
+          <div className="best-for-header"> Good Option</div>
           {matrix.good.map(id => {
             const m = getModel(id);
             if (!m) return null;
@@ -224,7 +224,7 @@ function BestForGuide() {
           })}
         </div>
         <div className="best-for-col limited">
-          <div className="best-for-header">⚠️ Limited Fit</div>
+          <div className="best-for-header"> Limited Fit</div>
           {matrix.limited.map(id => {
             const m = getModel(id);
             if (!m) return null;
@@ -500,11 +500,11 @@ export default function DeepComparison() {
   };
 
   const tabs = [
-    { id: 'specs' as const, label: 'Specifications', icon: '📊' },
-    { id: 'radar' as const, label: 'Radar Profiles', icon: '🕸️' },
-    { id: 'tasks' as const, label: 'Best For', icon: '🎯' },
-    { id: 'training' as const, label: 'Training Data', icon: '🗄️' },
-    { id: 'arch' as const, label: 'Architectures', icon: '🏗️' },
+    { id: 'specs' as const, label: 'Specifications', icon: '' },
+    { id: 'radar' as const, label: 'Radar Profiles', icon: '' },
+    { id: 'tasks' as const, label: 'Best For', icon: '' },
+    { id: 'training' as const, label: 'Training Data', icon: '' },
+    { id: 'arch' as const, label: 'Architectures', icon: '' },
   ];
 
   return (
@@ -675,15 +675,15 @@ export default function DeepComparison() {
                   <div className="task-results">
                     <div className="result-item">
                       <span className="result-model">Land Cover</span>
-                      <span className="result-score">✓ Label efficient</span>
+                      <span className="result-score"> Label efficient</span>
                     </div>
                     <div className="result-item">
                       <span className="result-model">Crop Mapping</span>
-                      <span className="result-score">✓ Label efficient</span>
+                      <span className="result-score"> Label efficient</span>
                     </div>
                     <div className="result-item">
                       <span className="result-model">Flood Detection</span>
-                      <span className="result-score">✓ Label efficient</span>
+                      <span className="result-score"> Label efficient</span>
                     </div>
                   </div>
                 </div>
@@ -701,37 +701,37 @@ export default function DeepComparison() {
               </div>
               <div className="task-performance-grid">
                 <div className="performance-item">
-                  <div className="perf-icon">🚁</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Airport Detection</div>
                   <div className="perf-model">AlphaEarth A26</div>
                   <div className="perf-result">Validated on Philadelphia (Element 84)</div>
                 </div>
                 <div className="performance-item">
-                  <div className="perf-icon">🏭</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Industrial Areas</div>
                   <div className="perf-model">AlphaEarth A51</div>
                   <div className="perf-result">Dimension-specific encoding</div>
                 </div>
                 <div className="performance-item">
-                  <div className="perf-icon">🌊</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Flood Mapping</div>
                   <div className="perf-model">Prithvi-EO-2.0</div>
                   <div className="perf-result">95.5% accuracy (fine-tuned)</div>
                 </div>
                 <div className="performance-item">
-                  <div className="perf-icon">🏗️</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Infrastructure Change</div>
                   <div className="perf-model">AlphaEarth</div>
                   <div className="perf-result">Ethiopian Renaissance Dam tracking</div>
                 </div>
                 <div className="performance-item">
-                  <div className="perf-icon">🌴</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Palm Oil Detection</div>
                   <div className="perf-model">General LEOMs</div>
                   <div className="perf-result">Star-pattern recognition (RSPO certified)</div>
                 </div>
                 <div className="performance-item">
-                  <div className="perf-icon">🌾</div>
+                  <div className="perf-icon"></div>
                   <div className="perf-task">Crop Segmentation</div>
                   <div className="perf-model">Clay Multi-sensor</div>
                   <div className="perf-result">Dynamic band adaptation</div>

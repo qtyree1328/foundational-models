@@ -68,7 +68,7 @@ export default function Ecosystem() {
         </div>
 
         <div className="ecosystem-insight fade-in">
-          <div className="ecosystem-insight-icon">💡</div>
+          <div className="ecosystem-insight-icon"></div>
           <div>
             <strong>The key insight:</strong> Just as NLP needed infrastructure companies between language models and 
             applications (Pinecone, Weaviate for vector search), geo-embeddings need their own infrastructure layer. 
@@ -88,7 +88,7 @@ export default function Ecosystem() {
           </p>
           <div className="deployment-cards">
             <div className="deployment-card">
-              <div className="deployment-logo">🏢</div>
+              <div className="deployment-logo"></div>
               <div>
                 <strong>Vantor</strong>
                 <span className="deployment-detail">(formerly Maxar Intelligence, rebranded Oct 2025)</span>
@@ -96,21 +96,21 @@ export default function Ecosystem() {
               </div>
             </div>
             <div className="deployment-card">
-              <div className="deployment-logo">🛰️</div>
+              <div className="deployment-logo"></div>
               <div>
                 <strong>Planet Labs</strong>
                 <p>Trusted tester for Google RSFM — integrating vision-language models with their daily satellite imagery constellation for commercial analysis.</p>
               </div>
             </div>
             <div className="deployment-card">
-              <div className="deployment-logo">✈️</div>
+              <div className="deployment-logo"></div>
               <div>
                 <strong>Airbus</strong>
                 <p>Trusted tester for Google RSFM — applying open-vocabulary detection and vision-language capabilities to their high-resolution satellite and aerial imagery products.</p>
               </div>
             </div>
             <div className="deployment-card">
-              <div className="deployment-logo">🧱</div>
+              <div className="deployment-logo"></div>
               <div>
                 <strong>LGND</strong>
                 <span className="deployment-detail">(Founded by Clay creators Dan Hammer & Bruno Sánchez-Andrade Nuño)</span>
@@ -124,21 +124,21 @@ export default function Ecosystem() {
           <h3>2024-2026 Ecosystem Developments</h3>
           <div className="trend-cards">
             <div className="trend-card">
-              <span className="trend-icon">🏛️</span>
+              <span className="trend-icon"></span>
               <div>
                 <strong>Institutional Adoption</strong>
                 <p>NASA and IBM's collaboration established the first open-source geospatial foundation model, signaling institutional validation of the LEOM approach.</p>
               </div>
             </div>
             <div className="trend-card">
-              <span className="trend-icon">📊</span>
+              <span className="trend-icon"></span>
               <div>
                 <strong>Standardized Benchmarking</strong>
                 <p>GeoBench ecosystem expansion (GEO-Bench-2, GeoCrossBench) provides standardized evaluation frameworks for cross-satellite and multi-modal performance assessment.</p>
               </div>
             </div>
             <div className="trend-card">
-              <span className="trend-icon">💰</span>
+              <span className="trend-icon"></span>
               <div>
                 <strong>Commercial Validation</strong>
                 <p>LGND's $9M seed funding (2025) and partnerships with major agricultural companies demonstrate commercial viability of geo-embedding infrastructure.</p>

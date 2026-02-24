@@ -751,21 +751,21 @@ export default function DemoClassification() {
             className={`demo-mode-btn ${mode === 'scatter' ? 'active' : ''}`}
             onClick={() => setMode('scatter')}
           >
-            <span className="demo-mode-icon">🗺️</span>
+            <span className="demo-mode-icon"></span>
             <span>PCA Scatter</span>
           </button>
           <button
             className={`demo-mode-btn ${mode === 'kmeans' ? 'active' : ''}`}
             onClick={() => setMode('kmeans')}
           >
-            <span className="demo-mode-icon">🔮</span>
+            <span className="demo-mode-icon"></span>
             <span>K-Means Clustering</span>
           </button>
           <button
             className={`demo-mode-btn ${mode === 'classify' ? 'active' : ''}`}
             onClick={() => setMode('classify')}
           >
-            <span className="demo-mode-icon">🎯</span>
+            <span className="demo-mode-icon"></span>
             <span>Nearest Centroid</span>
           </button>
         </div>
@@ -949,7 +949,7 @@ export default function DemoClassification() {
               </div>
             ) : (
               <div className="demo-point-placeholder">
-                <span className="demo-point-placeholder-icon">👆</span>
+                <span className="demo-point-placeholder-icon"></span>
                 <p>Hover or click a point to inspect its 64D embedding vector and similarity profile.</p>
               </div>
             )}

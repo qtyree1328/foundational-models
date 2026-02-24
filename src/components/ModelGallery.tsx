@@ -192,12 +192,12 @@ function ModelDetail({ model, onClose }: { model: Model; onClose: () => void }) 
           <div className="detail-pros-cons">
             <div className="detail-pros">
               {model.pros.slice(0, 4).map((p, i) => (
-                <span key={i} className="detail-pro-item">✓ {p}</span>
+                <span key={i} className="detail-pro-item"> {p}</span>
               ))}
             </div>
             <div className="detail-cons">
               {model.cons.slice(0, 3).map((c, i) => (
-                <span key={i} className="detail-con-item">⚠ {c}</span>
+                <span key={i} className="detail-con-item"> {c}</span>
               ))}
             </div>
           </div>

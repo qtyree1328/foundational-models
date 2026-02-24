@@ -461,10 +461,10 @@ export default function LiveExplorer() {
   }, [geeAvailable, vizMode, year, year2, bands, clusters, simPoint, applyTileLayer, loadSimilarityTiles]);
 
   const VIZ_MODES = [
-    { id: 'embeddings' as VizMode, label: 'Embedding RGB', icon: '🎨', desc: 'Visualize 3 embedding axes as RGB' },
-    { id: 'clustering' as VizMode, label: 'Clustering', icon: '🎯', desc: 'K-means on 64-dim embeddings' },
-    { id: 'change' as VizMode, label: 'Change Detection', icon: '📈', desc: 'Embedding difference between years' },
-    { id: 'similarity' as VizMode, label: 'Similarity Search', icon: '🔍', desc: 'Find similar areas to a point' },
+    { id: 'embeddings' as VizMode, label: 'Embedding RGB', icon: '', desc: 'Visualize 3 embedding axes as RGB' },
+    { id: 'clustering' as VizMode, label: 'Clustering', icon: '', desc: 'K-means on 64-dim embeddings' },
+    { id: 'change' as VizMode, label: 'Change Detection', icon: '', desc: 'Embedding difference between years' },
+    { id: 'similarity' as VizMode, label: 'Similarity Search', icon: '', desc: 'Find similar areas to a point' },
   ];
 
   if (geeAvailable === false) {
@@ -531,25 +531,25 @@ export default function LiveExplorer() {
         {/* What They Unlock - 4 boxes */}
         <div className="live-unlock-boxes fade-in">
           <div className="live-unlock-box">
-            <span className="unlock-icon">🔍</span>
+            <span className="unlock-icon"></span>
             <strong>Similarity Search</strong>
             <p>Draw a box around deforestation in Brazil → instantly find every similar pattern globally. No training, no labels — just vector math.</p>
             <span className="unlock-stat">&lt; 1 sec global</span>
           </div>
           <div className="live-unlock-box">
-            <span className="unlock-icon">🌾</span>
+            <span className="unlock-icon"></span>
             <strong>Label Efficiency</strong>
             <p>Research shows foundation models consistently outperform task-specific models when training data is limited (Dionelis et al. 2024). A few labels on embeddings beat thousands of pixels for crop mapping.</p>
             <span className="unlock-stat">10× fewer labels</span>
           </div>
           <div className="live-unlock-box">
-            <span className="unlock-icon">⏱️</span>
+            <span className="unlock-icon">⏱</span>
             <strong>Temporal Intelligence</strong>
             <p>Compare embeddings of the same location over time. Sudden vector shift = change event (fire, flood, deforestation, construction). No baselines required.</p>
             <span className="unlock-stat">64-dim monitoring</span>
           </div>
           <div className="live-unlock-box">
-            <span className="unlock-icon">📡</span>
+            <span className="unlock-icon"></span>
             <strong>Cross-Modal</strong>
             <p>SAR radar and optical imagery produce comparable embeddings — so cloudy regions still get analyzed. Shanghai and Chicago cluster together (urban), far from adjacent farmland.</p>
             <span className="unlock-stat">∞ weather independence</span>
@@ -642,7 +642,7 @@ export default function LiveExplorer() {
               ) : (
                 vizMode === 'similarity' && !simPoint
                   ? '← Click map first'
-                  : '🌍 Load Tiles'
+                  : ' Load Tiles'
               )}
             </button>
 
@@ -655,7 +655,7 @@ export default function LiveExplorer() {
                   setSimPoint(null);
                 }}
               >
-                ✕ Clear
+                 Clear
               </button>
             )}
           </div>
@@ -742,8 +742,8 @@ export default function LiveExplorer() {
           {/* Error */}
           {error && (
             <div className="live-error">
-              <span>⚠️ {error}</span>
-              <button onClick={() => setError(null)}>✕</button>
+              <span> {error}</span>
+              <button onClick={() => setError(null)}></button>
             </div>
           )}
 
@@ -765,16 +765,16 @@ export default function LiveExplorer() {
         {/* Help text */}
         <div className="live-help">
           <div className="live-help-item">
-            <strong>🎨 Embedding RGB:</strong> Map 3 of the 64 embedding dimensions to Red/Green/Blue channels. Different colors = different landscape types.
+            <strong> Embedding RGB:</strong> Map 3 of the 64 embedding dimensions to Red/Green/Blue channels. Different colors = different landscape types.
           </div>
           <div className="live-help-item">
-            <strong>🎯 Clustering:</strong> Run K-means on all 64 embedding dimensions in the visible area. Colors show natural landscape groupings.
+            <strong> Clustering:</strong> Run K-means on all 64 embedding dimensions in the visible area. Colors show natural landscape groupings.
           </div>
           <div className="live-help-item">
-            <strong>📈 Change Detection:</strong> Subtract embeddings between two years. Bright colors indicate significant landscape changes.
+            <strong> Change Detection:</strong> Subtract embeddings between two years. Bright colors indicate significant landscape changes.
           </div>
           <div className="live-help-item">
-            <strong>🔍 Similarity:</strong> Click a point, then load tiles. Warm colors show areas with similar 64-dim embeddings (cosine similarity).
+            <strong> Similarity:</strong> Click a point, then load tiles. Warm colors show areas with similar 64-dim embeddings (cosine similarity).
           </div>
         </div>
       </div>
