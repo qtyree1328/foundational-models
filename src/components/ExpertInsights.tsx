@@ -1274,7 +1274,47 @@ function PixelVsPatchDeepDive() {
         <Cite ids={['earth_foundations2026']} />
       </Collapsible>
 
-      <Collapsible title="The Nuance: When Each Approach Wins">
+      <Collapsible title="The Irreversibility Argument" defaultOpen={true}>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          Perhaps the strongest argument for pixel-level embeddings is <strong>irreversibility</strong>: spatial/patch embeddings
+          are <em>irreversibly spatial</em>. Once you've mixed neighboring pixels in a patch, you can't un-mix them.
+          But pixel-wise embeddings can still be interpreted spatially — you just aggregate them downstream.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          TESSERA demonstrates this directly: in their paper, they apply a spatial (patch-based) approach to their
+          pixel embeddings for crop type classification — and this <em>still outperforms baselines and other FMs</em>.
+          Pixel-level preserves maximum flexibility for downstream tasks. You can always go from pixels to patches,
+          but you can't go from patches back to pixels.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          This also has implications for <strong>overfitting</strong>: patch-based approaches that encode spatial context
+          from specific geographies are more prone to learning geography-specific spatial patterns that don't transfer
+          to new regions. Pixel-level temporal/spectral features are more universal.
+        </p>
+      </Collapsible>
+
+      <Collapsible title="The Real Debate: RS ≠ Image Processing">
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          The fundamental mistake isn't using spatial context — it's assuming that remote sensing is <em>only</em> an
+          image processing problem and that spatial context is king for everything. As TESSERA and practitioners
+          have shown, there are many situations where spatial context is not that important, and instead{' '}
+          <strong>spectral and temporal information is extremely valuable</strong>.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          Translating patch-based methods wholesale from computer vision (ImageNet, natural images) to satellite remote
+          sensing ignores a key difference: natural images are <em>spatially continuous</em> (a cat's ear blends into its head),
+          while Earth's surface is often <em>spatially discrete</em> (a wheat field has a hard boundary with an adjacent forest).
+          The spatial priors that help in image processing can actively hurt in remote sensing.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          Conversely, for <strong>Earth search and retrieval tasks</strong> — finding similar locations, searching imagery
+          with natural language — patch-level spatial embeddings can be <em>extremely powerful</em>. Companies like LGND
+          (founded by Clay creators) use pre-computed patch embeddings daily for exactly this purpose. The right
+          approach depends on the problem, not a universal architectural preference.
+        </p>
+      </Collapsible>
+
+      <Collapsible title="When Each Approach Wins">
         <div className="ei-strategy-grid">
           <div className="ei-strategy-card" style={{ '--sc': '#10b981' } as React.CSSProperties}>
             <div className="ei-strategy-header">
@@ -1286,6 +1326,7 @@ function PixelVsPatchDeepDive() {
               <li>Biomass & canopy height estimation</li>
               <li>Fire scar / burn detection</li>
               <li>Anything with discrete landscape boundaries</li>
+              <li>Tasks where temporal phenology matters most</li>
             </ul>
           </div>
           <div className="ei-strategy-card" style={{ '--sc': '#6366f1' } as React.CSSProperties}>
@@ -1295,27 +1336,36 @@ function PixelVsPatchDeepDive() {
             <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', fontSize: '0.9rem', lineHeight: '1.6' }}>
               <li>Object detection (buildings, vehicles, infrastructure)</li>
               <li>Urban analysis & planning</li>
-              <li>Infrastructure monitoring</li>
+              <li>Earth search & location retrieval (LGND)</li>
               <li>Texture-based classification</li>
               <li>Anything requiring spatial pattern recognition</li>
+              <li>Natural language → imagery search (Element 84)</li>
             </ul>
           </div>
         </div>
         <p className="insights-desc" style={{ marginTop: '1rem' }}>
-          This mirrors a debate in NLP: character-level vs word-level vs sentence-level embeddings — different
-          granularities serve different purposes. AlphaEarth uses 10m pixels (effectively pixel-level) but with
-          multi-modal spatial assimilation. The answer may be <strong>task-dependent, not architectural</strong> —
-          future FMs might offer both pixel and patch modes.
+          Interestingly, some problems can be solved well from <em>either</em> direction — purely spatial context
+          OR pixel-level spectro-temporal approaches can both achieve good results, just through different mechanisms.
         </p>
       </Collapsible>
 
-      <Collapsible title="Why This Matters for Practitioners">
+      <Collapsible title="What Comes Next?">
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          Google's AlphaEarth attempts to unify spatial and temporal information into a single embedding.
+          But some researchers question whether trying to unify space and time is the optimal path.
+          Perhaps the future is <strong>modular</strong>: pixel-level temporal/spectral embeddings as the
+          base layer, with optional spatial aggregation applied downstream when needed.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          TESSERA's results suggest that a simple, focused model — two sensors, pixel-level, strong temporal
+          encoding — can match or beat models with orders of magnitude more data and compute. This challenges
+          the "scale is all you need" narrative and points toward <strong>architectural efficiency</strong> as
+          an underexplored frontier in EO foundation models.
+        </p>
         <p className="insights-desc">
-          This is one of the most important open questions in EO foundation model design. TESSERA's strong
-          pixel-level results — outperforming AlphaEarth on multiple tasks while being fully open (MIT license) —
-          challenge the assumption that bigger patches with more spatial context automatically produce better embeddings.
-          When choosing a foundation model, consider whether your downstream task benefits more from spatial context
-          (objects, textures, patterns) or temporal fidelity (phenology, change, spectral signatures per pixel).
+          The field may ultimately converge on hybrid architectures that preserve pixel-level fidelity while
+          offering optional spatial context — giving practitioners the flexibility to choose the right level
+          of spatial aggregation for their specific downstream task, rather than having it baked into the embedding.
         </p>
       </Collapsible>
     </div>
