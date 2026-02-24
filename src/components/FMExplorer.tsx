@@ -347,24 +347,30 @@ export default function FMExplorer() {
   useEffect(() => {
     if (!mapContainer.current || mapRef.current || geeAvailable !== true) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          'carto-voyager': {
-            type: 'raster',
-            tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
-            tileSize: 256,
-            attribution: '© CARTO'
-          }
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            'carto-voyager': {
+              type: 'raster',
+              tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
+              tileSize: 256,
+              attribution: '© CARTO'
+            }
+          },
+          layers: [{ id: 'basemap', type: 'raster', source: 'carto-voyager' }]
         },
-        layers: [{ id: 'basemap', type: 'raster', source: 'carto-voyager' }]
-      },
-      center: [-85, 12],  // Americas center
-      zoom: 2.5,
-      maxZoom: 16
-    });
+        center: [-85, 12],  // Americas center
+        zoom: 2.5,
+        maxZoom: 16
+      });
+    } catch (e) {
+      console.warn('WebGL not available for FMExplorer:', e);
+      return;
+    }
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 

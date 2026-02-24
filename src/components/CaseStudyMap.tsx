@@ -239,7 +239,9 @@ export default function CaseStudyMap() {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = new maplibregl.Map({
+    let map: maplibregl.Map;
+    try {
+    map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: {
         version: 8,
@@ -315,6 +317,11 @@ export default function CaseStudyMap() {
 
       setMapReady(true);
     });
+    } catch (e) {
+      console.warn('WebGL not available for CaseStudyMap:', e);
+      setMapReady(false);
+      return;
+    }
 
     return () => {
       map.remove();

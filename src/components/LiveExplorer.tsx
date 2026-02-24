@@ -253,35 +253,41 @@ export default function LiveExplorer() {
     if (!mapContainer.current || mapRef.current) return;
     if (geeAvailable !== true) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          'esri-world': {
-            type: 'raster',
-            tiles: [
-              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-            ],
-            tileSize: 256,
-            attribution: '© Esri, Maxar'
-          }
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            'esri-world': {
+              type: 'raster',
+              tiles: [
+                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+              ],
+              tileSize: 256,
+              attribution: '© Esri, Maxar'
+            }
+          },
+          layers: [
+            {
+              id: 'esri-world-layer',
+              type: 'raster',
+              source: 'esri-world',
+              minzoom: 0,
+              maxzoom: 18
+            }
+          ]
         },
-        layers: [
-          {
-            id: 'esri-world-layer',
-            type: 'raster',
-            source: 'esri-world',
-            minzoom: 0,
-            maxzoom: 18
-          }
-        ]
-      },
-      center: [76.5, 12.5],
-      zoom: 5,
-      attributionControl: false,
-      maxZoom: 16
-    });
+        center: [76.5, 12.5],
+        zoom: 5,
+        attributionControl: false,
+        maxZoom: 16
+      });
+    } catch (e) {
+      console.warn('WebGL not available for LiveExplorer:', e);
+      return;
+    }
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
