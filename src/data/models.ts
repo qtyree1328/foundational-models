@@ -1060,6 +1060,111 @@ features = backbone.extract(satellite_tile)
 # AlphaEarth → WHERE things changed (embedding similarity)
 # RSFM → WHAT changed (vision-language understanding)`,
   },
+  {
+    id: 'tessera',
+    name: 'TESSERA',
+    org: 'University of Cambridge',
+    tagline: 'Pixel-level 128D embeddings from S1+S2 time series — outperforms AlphaEarth while being fully open',
+    description: 'Temporal Embeddings of Surface Spectra for Earth Representation and Analysis — a pixel-level foundation model that encodes each pixel\'s annual Sentinel-1 + Sentinel-2 time series into a compact 128-dimensional embedding. Uses dual Transformer encoders (one per modality) with GRU pooling and a fusion MLP, trained via modified Barlow Twins with mix-up regularization. The projector expands to 16,384 dims during training (accounting for >95% of training parameters) but is discarded at inference, yielding a lightweight model. Pre-computed global 2024 embeddings are freely available as 8-bit quantized GeoTIFFs (FAIR-compliant). Outperforms AlphaEarth and other FMs on crop classification (Austria), canopy height (Borneo), fire scar detection (California), above-ground biomass (Finland), and agroforestry (Brazil). Fully open: MIT license, weights, code, and training data. CVPR 2026 accepted.',
+    params: '~100M (inference encoders)',
+    paramsNum: 100,
+    resolution: '10m',
+    modalities: ['Sentinel-1 SAR (VV, VH)', 'Sentinel-2 MSI (10 bands)'],
+    license: 'MIT',
+    dataSource: '~800M d-pixels, down-sampled 400:1 from S1/S2 (2017-2024)',
+    keyStrength: 'Pixel-level temporal embeddings preserve phenology — no spatial context contamination',
+    color: '#10b981',
+    icon: '🧩',
+    paperYear: 2025,
+    paperVenue: 'CVPR 2026 / arXiv',
+    temporal: true,
+    openWeights: true,
+    architecture: {
+      type: 'Dual Transformer Encoder + GRU Pooling + Fusion MLP',
+      encoder: 'Dual-branch: 4-block Transformer + GRU for each modality (S1, S2)',
+      embeddingDim: 128,
+      pretrainingStrategy: 'Modified Barlow Twins (redundancy reduction + mix-up regularization). Cloud-free random subsampling of S2 time series as augmentation. Model learns to reconcile partial temporal views, effectively interpolating missing data. Projector expands to 16,384 dims during training only.',
+    },
+    training: {
+      dataset: 'Global S1+S2 time series (2017-2024)',
+      samples: '~800M d-pixels (down-sampled 400:1 from full Sentinel archive)',
+      sensors: ['Sentinel-1 SAR (VV, VH polarizations)', 'Sentinel-2 MSI (10 spectral bands)'],
+      computeDetails: 'Trained for 1 epoch on distributed infrastructure. Key: projector dimension (16,384) accounts for >95% of training parameters but is discarded at inference.',
+      epochs: 1,
+      geoCoverage: 'Global',
+      temporalRange: '2017-2024 (annual composites)',
+    },
+    benchmarks: [
+      { task: 'Crop classification', dataset: 'Austria crop mapping', metric: 'Performance', value: 1, unit: 'Outperforms AlphaEarth + baselines', citation: 'arXiv:2506.20380 (CVPR 2026)' },
+      { task: 'Canopy height estimation', dataset: 'Borneo tropical forest', metric: 'SOTA', value: 1, unit: 'Matches/outperforms task-specific models', citation: 'arXiv:2506.20380 (CVPR 2026)' },
+      { task: 'Fire scar detection', dataset: 'California wildfires', metric: 'SOTA', value: 1, unit: 'State-of-the-art detection', citation: 'arXiv:2506.20380 (CVPR 2026)' },
+      { task: 'Above-ground biomass', dataset: 'Finland forest biomass', metric: 'SOTA', value: 1, unit: 'State-of-the-art estimation', citation: 'arXiv:2506.20380 (CVPR 2026)' },
+      { task: 'Agroforestry stocking index', dataset: 'Brazil agroforestry', metric: 'SOTA', value: 1, unit: 'State-of-the-art assessment', citation: 'arXiv:2506.20380 (CVPR 2026)' },
+    ],
+    pros: [
+      'Fully open source (MIT) — weights, code, training data all reproducible',
+      'Pixel-level: no spatial context contamination from neighboring pixels',
+      'Preserves temporal phenological signal (unlike compositing approaches)',
+      'Pre-computed global embeddings available (FAIR-compliant) — users need zero GPU',
+      'Outperforms AlphaEarth on several downstream tasks while being open',
+      'Only 2 input sensors (S1+S2) yet competitive with multi-modal models',
+      '128D embeddings at 8-bit quantization — compact and efficient',
+      'Geotessera Python library for easy access',
+      'CVPR 2026 accepted',
+    ],
+    cons: [
+      'Pixel-only: no spatial context (may miss landscape-scale patterns)',
+      'Only S1+S2 inputs (no LiDAR, no high-res optical, no climate data)',
+      'Annual temporal resolution only (no sub-annual dynamics yet)',
+      'Currently only 2024 global map available (2017-2024 planned)',
+      'Relatively new — limited community adoption compared to Clay/Prithvi',
+    ],
+    useCases: [
+      'Agricultural crop classification (Austria demonstration)',
+      'Canopy height estimation in tropical forests',
+      'Fire scar/burn detection',
+      'Above-ground biomass mapping',
+      'Agroforestry assessment',
+      'Habitat mapping (interactive tools available)',
+    ],
+    links: [
+      { label: 'Paper', url: 'https://arxiv.org/abs/2506.20380' },
+      { label: 'GitHub', url: 'https://github.com/ucam-eo/tessera' },
+      { label: 'Geotessera Library', url: 'https://github.com/ucam-eo/geotessera' },
+      { label: 'Interactive Map', url: 'https://github.com/ucam-eo/tessera-interactive-map' },
+    ],
+    scores: { parameters: 3, resolution: 9, modalities: 5, temporal: 9, openness: 10, benchmarks: 8 },
+    codeExample: `# TESSERA — University of Cambridge
+# pip install geotessera
+# Pre-computed global embeddings (no GPU needed!)
+
+from geotessera import GeoTessera
+
+# Access pre-computed 2024 embeddings
+gt = GeoTessera()
+
+# Get 128D embedding for any location
+embedding = gt.get_embedding(
+    lat=47.5, lon=15.5,  # Austria
+    year=2024
+)
+# Returns: numpy array (128,) — 8-bit quantized
+
+# Or generate your own from S1+S2 time series
+from tessera import TesseraModel
+model = TesseraModel.from_pretrained()
+
+# Input: 'd-pixel' = annual time series per pixel
+# S1: (T, 2) — VV, VH polarizations
+# S2: (T, 10) — 10 spectral bands
+# T varies (cloud-masked observations)
+embedding = model.encode(s1_dpixel, s2_dpixel)
+# Output: (128,) embedding per pixel
+
+# Key insight: pixel-level only
+# No spatial patches — each pixel encoded independently
+# Preserves discrete landscape boundaries`,
+  },
 ];
 
 export const getModelById = (id: string) => models.find(m => m.id === id);
@@ -1067,7 +1172,7 @@ export const getModelById = (id: string) => models.find(m => m.id === id);
 // Helper for task-based recommendations with performance benchmarks
 export const taskModelMatrix: Record<string, { best: string[]; good: string[]; limited: string[]; benchmarks?: string }> = {
   'Crop Mapping': {
-    best: ['alphaearth', 'prithvi'],
+    best: ['tessera', 'alphaearth', 'prithvi'],
     good: ['clay', 'satmae', 'dofa'],
     limited: ['croma', 'spectralgpt', 'skysense'],
     benchmarks: 'AlphaEarth: Global crop type mapping via K-means clustering. Prithvi: Multi-temporal crop segmentation with 3D attention.',
@@ -1080,7 +1185,7 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
   },
   'Change Detection': {
     best: ['alphaearth', 'prithvi', 'skysense'],
-    good: ['clay', 'satmae'],
+    good: ['clay', 'satmae', 'tessera'],
     limited: ['croma', 'spectralgpt', 'dofa'],
     benchmarks: 'AlphaEarth: Cosine similarity via dot product between years. Prithvi: 4-timestamp 3D attention captures change. SkySense: 2.06B params with temporal contrastive learning.',
   },
@@ -1097,7 +1202,7 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
     benchmarks: 'SpectralGPT: 95% accuracy on multiple HSI classification benchmarks. 3D spectral-spatial masking strategy.',
   },
   'Land Cover Classification': {
-    best: ['alphaearth', 'clay', 'prithvi'],
+    best: ['tessera', 'alphaearth', 'clay', 'prithvi'],
     good: ['satmae', 'dofa', 'skysense', 'google-rsfm'],
     limited: ['croma', 'spectralgpt'],
     benchmarks: 'Prithvi-EO-2.0: Outperforms 6 geospatial foundation models on GEO-Bench (Dec 2024, 600M params). AlphaEarth: Global 10m unsupervised classification via K-means on 64D embeddings. Earth AI: 81.7% accuracy on FMoW scene classification (new SOTA, Oct 2025). Clay: Label efficiency gains documented in Dionelis et al. (arXiv:2406.18295, 2024) — foundation models consistently outperform task-specific models with limited labeled data.',
@@ -1116,12 +1221,12 @@ export const taskModelMatrix: Record<string, { best: string[]; good: string[]; l
   },
   'Multi-Sensor Fusion': {
     best: ['clay', 'dofa'],
-    good: ['alphaearth', 'skysense'],
+    good: ['alphaearth', 'skysense', 'tessera'],
     limited: ['prithvi', 'satmae', 'croma', 'spectralgpt'],
     benchmarks: 'Clay v1.5: Dynamic embedding block with GSD-scaled position encoding supports 6 sensor types (S2/L8/S1/NAIP/LINZ/MODIS). Training: 70M multi-sensor chips, variable bands/resolutions. DOFA: Wavelength-conditioned hypernetwork generates patch embedding weights — single model processes any spectral configuration without retraining.',
   },
   'Production Deployment': {
-    best: ['alphaearth'],
+    best: ['alphaearth', 'tessera'],
     good: ['clay', 'prithvi'],
     limited: ['satmae', 'croma', 'spectralgpt', 'skysense', 'dofa', 'google-rsfm'],
     benchmarks: 'AlphaEarth: Pre-computed global tiles in GEE/GCS. 16× less storage than competitors. Clay: Open source with HuggingFace integration.',

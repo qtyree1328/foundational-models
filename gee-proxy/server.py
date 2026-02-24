@@ -814,8 +814,15 @@ def snow_tiles_era5():
         img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
         selected = img.select(band)
 
+        # Named palette presets
+        palette_presets = {
+            'cool_blues': ['#0d1b2a', '#1b263b', '#415a77', '#778da9', '#93c5fd', '#6366f1', '#a855f7', '#e9d5ff'],
+            'arctic':     ['#0d1b2a', '#0c4a6e', '#0891b2', '#06b6d4', '#67e8f9', '#a5f3fc', '#cffafe', '#ecfeff'],
+            'warm_snow':  ['#0d1b2a', '#312e81', '#4c1d95', '#6d28d9', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ede9fe'],
+        }
+        custom_palette = request.args.get('palette')
         vis_params = {
-            'snowfall_sum':    {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a', '#1b263b', '#415a77', '#778da9', '#93c5fd', '#6366f1', '#a855f7', '#e9d5ff']},
+            'snowfall_sum':    {'min': 0, 'max': 0.5, 'palette': palette_presets.get(custom_palette, palette_presets['cool_blues'])},
             'snow_depth':      {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a', '#1e3a5f', '#3b82f6', '#60a5fa', '#93c5fd', '#c8b4ff', '#f3e8ff']},
             'snow_cover':      {'min': 0, 'max': 100, 'palette': ['#0d1b2a', '#1e3a5f', '#60a5fa', '#c8b4ff', '#ffffff']},
         }
@@ -1019,6 +1026,97 @@ def snow_animation_era5():
         return jsonify({'error': str(e)}), 500
 
 
+# ---------- ERA5-Land Seasonal Animation (months within a year) ----------
+@app.route('/api/snow/animation/era5/seasonal')
+def snow_animation_era5_seasonal():
+    """
+    GET /api/snow/animation/era5/seasonal?year=2024&band=snowfall_sum
+    Returns array of {month, monthName, tileUrl} for months 1-12 within that year.
+    """
+    try:
+        year = int(request.args.get('year', '2024'))
+        band = request.args.get('band', 'snowfall_sum')
+
+        vis_params = {
+            'snowfall_sum': {'min': 0, 'max': 0.5, 'palette': ['#0d1b2a', '#1b263b', '#415a77', '#778da9', '#93c5fd', '#6366f1', '#a855f7', '#e9d5ff']},
+            'snow_depth':   {'min': 0, 'max': 1.5, 'palette': ['#0d1b2a', '#1e3a5f', '#3b82f6', '#60a5fa', '#93c5fd', '#c8b4ff', '#f3e8ff']},
+            'snow_cover':   {'min': 0, 'max': 100, 'palette': ['#0d1b2a', '#1e3a5f', '#60a5fa', '#c8b4ff', '#ffffff']},
+        }
+        vp = vis_params.get(band, vis_params['snowfall_sum'])
+        col = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR').select(band)
+
+        month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December']
+        frames = []
+        for m in range(1, 13):
+            ck = _cache_key('era5_seasonal', year, m, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'month': m, 'monthName': month_names[m - 1], 'tileUrl': cached_url})
+                continue
+
+            date_str = f'{year}-{str(m).zfill(2)}-01'
+            img = col.filterDate(date_str, ee.Date(date_str).advance(1, 'month')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'month': m, 'monthName': month_names[m - 1], 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'year': year})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- SNODAS Seasonal Animation (biweekly water year) ----------
+@app.route('/api/snow/animation/snodas/seasonal')
+def snow_animation_snodas_seasonal():
+    """
+    GET /api/snow/animation/snodas/seasonal?year=2024&band=Snow_Depth&interval=15
+    Returns biweekly frames for water year (Oct prev year -> Sep current year). Cap 30 frames.
+    """
+    try:
+        year = int(request.args.get('year', '2024'))
+        band = request.args.get('band', 'Snow_Depth')
+        interval = int(request.args.get('interval', '15'))
+
+        vis_params = {
+            'Snow_Depth': {'min': 0, 'max': 1.5, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#08306b', '#4a148c', '#e1bee7']},
+            'SWE':        {'min': 0, 'max': 500, 'palette': ['#f7fbff', '#9ecae1', '#3182bd', '#08519c', '#6a1b9a', '#e91e63']},
+            'Snowfall':   {'min': 0, 'max': 50,  'palette': ['#f7fbff', '#9ecae1', '#4292c6', '#08519c', '#4a148c']},
+        }
+        vp = vis_params.get(band, vis_params['Snow_Depth'])
+        col = ee.ImageCollection('projects/climate-engine/snodas/daily').select(band)
+
+        start_date = ee.Date(f'{year - 1}-10-01')
+        end_date = ee.Date(f'{year}-09-30')
+        n_frames = min(int(end_date.difference(start_date, 'day').divide(interval).ceil().getInfo()), 30)
+
+        frames = []
+        for i in range(n_frames):
+            d = start_date.advance(i * interval, 'day')
+            d_str = d.format('YYYY-MM-dd').getInfo()
+
+            ck = _cache_key('snodas_seasonal', d_str, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'date': d_str, 'tileUrl': cached_url})
+                continue
+
+            img = col.filterDate(d, d.advance(1, 'day')).first()
+            vis = img.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'date': d_str, 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'year': year, 'interval': interval})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/snow/trends/era5')
 def snow_trends_era5():
     """
@@ -1077,10 +1175,385 @@ def snow_trends_era5():
         return jsonify({'error': str(e)}), 500
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# DAYMET V4 ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route('/api/snow/tiles/daymet')
+def snow_tiles_daymet():
+    """
+    GET /api/snow/tiles/daymet?year=2024&month=01&band=swe
+    Bands: swe, prcp (snowfall proxy: precip where tmin<0), tmin
+    GEE collection: NASA/ORNL/DAYMET_V4
+    """
+    try:
+        year = request.args.get('year', '2024')
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'swe')
+
+        cache_key = _cache_key('daymet_tile', year, month, band)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True, 'band': band, 'year': year, 'month': month})
+
+        start_date = f'{year}-{month}-01'
+        end_date = ee.Date(start_date).advance(1, 'month')
+        col = ee.ImageCollection('NASA/ORNL/DAYMET_V4').filterDate(start_date, end_date)
+
+        if band == 'prcp':
+            # Snowfall proxy: sum precip on days where tmin < 0
+            def snow_precip(img):
+                mask = img.select('tmin').lt(0)
+                return img.select('prcp').updateMask(mask)
+            selected = col.map(snow_precip).sum()
+            vp = {'min': 0, 'max': 300, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#08306b', '#4a148c', '#e1bee7']}
+        elif band == 'tmin':
+            selected = col.select('tmin').mean()
+            vp = {'min': -30, 'max': 5, 'palette': ['#08306b', '#2171b5', '#6baed6', '#c6dbef', '#f7fbff', '#fee0d2', '#fc9272']}
+        else:  # swe
+            selected = col.select('swe').mean()
+            vp = {'min': 0, 'max': 500, 'palette': ['#f7fbff', '#9ecae1', '#3182bd', '#08519c', '#6a1b9a', '#e91e63']}
+
+        vis = selected.visualize(**vp)
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'band': band, 'year': year, 'month': month})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/animation/daymet')
+def snow_animation_daymet():
+    """GET /api/snow/animation/daymet?startYear=2000&endYear=2024&month=01&band=swe"""
+    try:
+        start_year = int(request.args.get('startYear', '2000'))
+        end_year = int(request.args.get('endYear', '2024'))
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'swe')
+
+        vp_map = {
+            'swe':  {'min': 0, 'max': 500, 'palette': ['#f7fbff', '#9ecae1', '#3182bd', '#08519c', '#6a1b9a', '#e91e63']},
+            'prcp': {'min': 0, 'max': 300, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#08306b', '#4a148c', '#e1bee7']},
+            'tmin': {'min': -30, 'max': 5, 'palette': ['#08306b', '#2171b5', '#6baed6', '#c6dbef', '#f7fbff', '#fee0d2', '#fc9272']},
+        }
+        vp = vp_map.get(band, vp_map['swe'])
+        frames = []
+
+        for year in range(start_year, end_year + 1):
+            ck = _cache_key('daymet_anim', year, month, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'year': year, 'tileUrl': cached_url})
+                continue
+
+            start_date = f'{year}-{month}-01'
+            end_date = ee.Date(start_date).advance(1, 'month')
+            col = ee.ImageCollection('NASA/ORNL/DAYMET_V4').filterDate(start_date, end_date)
+
+            if band == 'prcp':
+                def snow_precip(img):
+                    mask = img.select('tmin').lt(0)
+                    return img.select('prcp').updateMask(mask)
+                selected = col.map(snow_precip).sum()
+            elif band == 'tmin':
+                selected = col.select('tmin').mean()
+            else:
+                selected = col.select('swe').mean()
+
+            vis = selected.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'year': year, 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'month': month})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/trends/daymet')
+def snow_trends_daymet():
+    """GET /api/snow/trends/daymet?band=swe&startYear=1980&endYear=2024&month=1&metric=trend"""
+    try:
+        band = request.args.get('band', 'swe')
+        start_year = int(request.args.get('startYear', 1980))
+        end_year = int(request.args.get('endYear', 2024))
+        month = int(request.args.get('month', 1))
+        metric = request.args.get('metric', 'trend')
+
+        ck = _cache_key('daymet_trends', band, start_year, end_year, month, metric)
+        cached_url = _get_cached(ck)
+        if cached_url:
+            return jsonify({'tileUrl': cached_url, 'metric': metric, 'band': band,
+                            'startYear': start_year, 'endYear': end_year, 'month': month})
+
+        def make_annual(yr):
+            yr_num = ee.Number(yr)
+            start = ee.Date.fromYMD(yr_num, month, 1)
+            end = start.advance(1, 'month')
+            col = ee.ImageCollection('NASA/ORNL/DAYMET_V4').filterDate(start, end)
+            if band == 'prcp':
+                def snow_precip(img):
+                    mask = img.select('tmin').lt(0)
+                    return img.select('prcp').updateMask(mask)
+                img = col.map(snow_precip).sum()
+            elif band == 'tmin':
+                img = col.select('tmin').mean()
+            else:
+                img = col.select('swe').mean()
+            return img.rename('value').set('year', yr_num).set('system:time_start', start.millis())
+
+        years = ee.List.sequence(start_year, end_year)
+        collection = ee.ImageCollection(years.map(make_annual))
+
+        if metric == 'variability':
+            mean = collection.mean()
+            std = collection.reduce(ee.Reducer.stdDev())
+            cv = std.divide(mean.add(0.0001))
+            vis = {'min': 0, 'max': 1.5, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5', '#6a1b9a', '#e91e63']}
+            result_img = cv.visualize(**vis)
+        else:
+            def add_time(img):
+                return img.addBands(ee.Image.constant(img.get('year')).float().rename('year'))
+            with_time = collection.map(add_time)
+            fit = with_time.select(['year', 'value']).reduce(ee.Reducer.linearFit())
+            slope_decade = fit.select('scale').multiply(10)
+            vis = {'min': -50, 'max': 50,
+                   'palette': ['#d32f2f', '#ef5350', '#ffcdd2', '#e0e0e0', '#bbdefb', '#42a5f5', '#1565c0']}
+            result_img = slope_decade.visualize(**vis)
+
+        tile_url = get_tile_url(result_img)
+        _set_cached(ck, tile_url)
+        return jsonify({'tileUrl': tile_url, 'metric': metric, 'band': band,
+                        'startYear': start_year, 'endYear': end_year, 'month': month})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# MODIS SNOW COVER ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route('/api/snow/tiles/modis')
+def snow_tiles_modis():
+    """
+    GET /api/snow/tiles/modis?year=2024&month=01&band=NDSI_Snow_Cover
+    GEE collection: MODIS/061/MOD10A1
+    """
+    try:
+        year = request.args.get('year', '2024')
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'NDSI_Snow_Cover')
+
+        cache_key = _cache_key('modis_tile', year, month, band)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True, 'band': band, 'year': year, 'month': month})
+
+        start_date = f'{year}-{month}-01'
+        end_date = ee.Date(start_date).advance(1, 'month')
+
+        col = ee.ImageCollection('MODIS/061/MOD10A1') \
+            .filterDate(start_date, end_date) \
+            .select(band)
+
+        # Filter valid NDSI values (0-100)
+        def mask_valid(img):
+            return img.updateMask(img.lte(100))
+
+        composite = col.map(mask_valid).mean()
+
+        vp = {'min': 0, 'max': 100, 'palette': ['#8B4513', '#D2B48C', '#F5F5DC', '#E0E0E0', '#FFFFFF', '#B0C4DE', '#4682B4']}
+        vis = composite.visualize(**vp)
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'band': band, 'year': year, 'month': month})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/tiles/modis/snowdays')
+def snow_tiles_modis_snowdays():
+    """
+    GET /api/snow/tiles/modis/snowdays?year=2024
+    Count of snow days (NDSI>40) for the water year (Oct prev year to Sep current year).
+    """
+    try:
+        year = int(request.args.get('year', '2024'))
+
+        cache_key = _cache_key('modis_snowdays', year)
+        cached = _get_cached(cache_key)
+        if cached:
+            return jsonify({'tileUrl': cached, 'cached': True, 'year': year})
+
+        start_date = f'{year - 1}-10-01'
+        end_date = f'{year}-09-30'
+
+        col = ee.ImageCollection('MODIS/061/MOD10A1') \
+            .filterDate(start_date, end_date) \
+            .select('NDSI_Snow_Cover')
+
+        def is_snow(img):
+            return img.gt(40).And(img.lte(100)).rename('snow_day')
+
+        snow_days = col.map(is_snow).sum()
+        vp = {'min': 0, 'max': 365, 'palette': ['#f7fbff', '#c6dbef', '#6baed6', '#3182bd', '#08519c', '#08306b']}
+        vis = snow_days.visualize(**vp)
+        tile_url = get_tile_url(vis)
+        _set_cached(cache_key, tile_url)
+        return jsonify({'tileUrl': tile_url, 'cached': False, 'year': year})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/animation/modis')
+def snow_animation_modis():
+    """GET /api/snow/animation/modis?startYear=2005&endYear=2024&month=01&band=NDSI_Snow_Cover"""
+    try:
+        start_year = int(request.args.get('startYear', '2005'))
+        end_year = int(request.args.get('endYear', '2024'))
+        month = request.args.get('month', '01').zfill(2)
+        band = request.args.get('band', 'NDSI_Snow_Cover')
+
+        vp = {'min': 0, 'max': 100, 'palette': ['#8B4513', '#D2B48C', '#F5F5DC', '#E0E0E0', '#FFFFFF', '#B0C4DE', '#4682B4']}
+        frames = []
+
+        for year in range(start_year, end_year + 1):
+            ck = _cache_key('modis_anim', year, month, band)
+            cached_url = _get_cached(ck)
+            if cached_url:
+                frames.append({'year': year, 'tileUrl': cached_url})
+                continue
+
+            start_date = f'{year}-{month}-01'
+            end_date = ee.Date(start_date).advance(1, 'month')
+            col = ee.ImageCollection('MODIS/061/MOD10A1') \
+                .filterDate(start_date, end_date) \
+                .select(band)
+
+            def mask_valid(img):
+                return img.updateMask(img.lte(100))
+
+            composite = col.map(mask_valid).mean()
+            vis = composite.visualize(**vp)
+            tile_url = get_tile_url(vis)
+            _set_cached(ck, tile_url)
+            frames.append({'year': year, 'tileUrl': tile_url})
+
+        return jsonify({'frames': frames, 'band': band, 'month': month})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/snow/trends/modis')
+def snow_trends_modis():
+    """
+    GET /api/snow/trends/modis?metric=snowdays_trend&startYear=2001&endYear=2024
+    metrics: onset_trend, melt_trend, duration_trend, snowdays_trend
+    """
+    try:
+        metric = request.args.get('metric', 'snowdays_trend')
+        start_year = int(request.args.get('startYear', 2001))
+        end_year = int(request.args.get('endYear', 2024))
+
+        ck = _cache_key('modis_trends', metric, start_year, end_year)
+        cached_url = _get_cached(ck)
+        if cached_url:
+            return jsonify({'tileUrl': cached_url, 'metric': metric,
+                            'startYear': start_year, 'endYear': end_year})
+
+        def compute_snow_days(yr):
+            yr_num = ee.Number(yr)
+            # Water year: Oct(yr-1) to Sep(yr)
+            start = ee.Date.fromYMD(yr_num.subtract(1), 10, 1)
+            end = ee.Date.fromYMD(yr_num, 9, 30)
+            col = ee.ImageCollection('MODIS/061/MOD10A1') \
+                .filterDate(start, end) \
+                .select('NDSI_Snow_Cover')
+            def is_snow(img):
+                return img.gt(40).And(img.lte(100)).rename('value')
+            return col.map(is_snow).sum().set('year', yr_num).set('system:time_start', start.millis())
+
+        years = ee.List.sequence(start_year, end_year)
+
+        if metric == 'snowdays_trend':
+            collection = ee.ImageCollection(years.map(compute_snow_days))
+        else:
+            # For onset/melt/duration, use snowdays as a simpler proxy
+            # Full DOY computation is very expensive in GEE; use snowdays as default
+            collection = ee.ImageCollection(years.map(compute_snow_days))
+
+        def add_time(img):
+            return img.addBands(ee.Image.constant(img.get('year')).float().rename('year'))
+        with_time = collection.map(add_time)
+        fit = with_time.select(['year', 'value']).reduce(ee.Reducer.linearFit())
+        slope_decade = fit.select('scale').multiply(10)
+
+        if metric in ['onset_trend', 'melt_trend']:
+            vis = {'min': -10, 'max': 10,
+                   'palette': ['#1565c0', '#42a5f5', '#bbdefb', '#e0e0e0', '#ffcdd2', '#ef5350', '#d32f2f']}
+        elif metric == 'duration_trend':
+            vis = {'min': -20, 'max': 20,
+                   'palette': ['#d32f2f', '#ef5350', '#ffcdd2', '#e0e0e0', '#bbdefb', '#42a5f5', '#1565c0']}
+        else:  # snowdays_trend
+            vis = {'min': -20, 'max': 20,
+                   'palette': ['#d32f2f', '#ef5350', '#ffcdd2', '#e0e0e0', '#bbdefb', '#42a5f5', '#1565c0']}
+
+        result_img = slope_decade.visualize(**vis)
+        tile_url = get_tile_url(result_img)
+        _set_cached(ck, tile_url)
+        return jsonify({'tileUrl': tile_url, 'metric': metric,
+                        'startYear': start_year, 'endYear': end_year})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+# ---------- SNOTEL Proxy (avoid CORS) ----------
+@app.route('/api/snow/snotel/stations')
+def snotel_stations():
+    """Proxy SNOTEL bulk station data to avoid CORS issues."""
+    import requests as req
+    url = 'https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customMultipleStationReport/daily/start_of_period/network=%22SNTL%22%7Cname/0,0/stationId,name,state.code,elevation,latitude,longitude,WTEQ::value,WTEQ::pctOfMedian_1991'
+    resp = req.get(url, timeout=30)
+    return resp.text, 200, {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*'}
+
+
+@app.route('/api/snow/snotel/station/<triplet>')
+def snotel_station_data(triplet):
+    """Proxy individual SNOTEL station data."""
+    import requests as req
+    start = request.args.get('start', '2025-10-01')
+    end = request.args.get('end', '2026-02-24')
+    elements = request.args.get('elements', 'WTEQ::value,WTEQ::median_1991,WTEQ::pctOfMedian_1991')
+    url = f'https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customSingleStationReport/daily/{triplet}/{start},{end}/{elements}'
+    resp = req.get(url, timeout=30)
+    return resp.text, 200, {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*'}
+
+
+@app.route('/api/snow/snotel/por/<triplet>')
+def snotel_por(triplet):
+    """Proxy SNOTEL period-of-record data."""
+    import requests as req
+    url = f'https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customSingleStationReport/daily/{triplet}/POR_BEGIN,POR_END/WTEQ::value'
+    resp = req.get(url, timeout=60)
+    return resp.text, 200, {'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*'}
+
+
 # ========== Run ==========
 if __name__ == '__main__':
     print('🌍 GEE Tile Proxy starting on port 3013...')
     print(f'   Service account: {creds_data["client_email"]}')
     print(f'   Project: {creds_data["project_id"]}')
-    print(f'   Snow endpoints: /snow/tiles/snodas, /snow/tiles/era5, /snow/stats/*, /snow/animation/*, /snow/trends/*')
+    print(f'   Snow endpoints: /snow/tiles/snodas, /snow/tiles/era5, /snow/tiles/daymet, /snow/tiles/modis, /snow/stats/*, /snow/animation/*, /snow/trends/*, /snow/snotel/*')
     app.run(host='0.0.0.0', port=3013, debug=False, threaded=True)

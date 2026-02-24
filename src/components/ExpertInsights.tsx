@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 
 // ─── Types ───
-type TabId = 'pretrain' | 'embedding' | 'questions' | 'geofm';
+type TabId = 'pretrain' | 'embedding' | 'questions' | 'geofm' | 'pixelpatch';
 
 interface Citation {
   id: string;
@@ -1178,6 +1178,151 @@ function GeoFMvsImageNet() {
 }
 
 // ═════════════════════════════════════════════════════════════════
+// TAB 5: Pixel vs Patch — The Spatial Context Debate
+// ═════════════════════════════════════════════════════════════════
+function PixelVsPatchDeepDive() {
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
+  return (
+    <div className="ei-tab-content">
+      <h3 className="insights-subtitle">Pixel vs Patch: The Spatial Context Debate</h3>
+      <p className="insights-desc">
+        Should a foundation model encode individual pixels independently, or should it process spatial patches
+        (e.g., 16×16 or 256×256 pixel windows)? This is one of the most important open questions in EO
+        foundation model design — and TESSERA's strong pixel-level results challenge prevailing assumptions.
+      </p>
+
+      <Collapsible title="Patch-Based Models (Majority of FMs)" defaultOpen={true}>
+        <div className="ei-strategy-card" style={{ '--sc': '#6366f1' } as React.CSSProperties}>
+          <div className="ei-strategy-header">
+            <span className="ei-strategy-badge mae">PATCH</span>
+            <span className="ei-strategy-label">Spatial Context via Patch Tokenization</span>
+          </div>
+          <p>
+            Most EO foundation models use Vision Transformers that process spatial patches (typically 8×8 or 16×16 pixels).
+            Each patch token captures spatial context from its neighborhood, allowing the model to learn textures,
+            edges, and spatial patterns within each token before attention connects them globally.
+          </p>
+          <div className="ei-strategy-detail">
+            <strong>Models:</strong> Clay (8×8 patches), Prithvi (16×16), SatMAE (16×16), SkySense, CROMA, Scale-MAE
+          </div>
+          <div className="ei-strategy-detail">
+            <strong>Advantages:</strong>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
+              <li>Spatial context helps identify objects, textures, and spatial patterns</li>
+              <li>Compatible with standard ViT architecture and transfer learning from ImageNet</li>
+              <li>Can learn spatial relationships (urban grids, field boundaries, river networks)</li>
+            </ul>
+          </div>
+          <div className="ei-strategy-detail">
+            <strong>Disadvantages:</strong>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
+              <li>Patch boundaries don't respect natural boundaries — a patch can contain half a field and half a forest</li>
+              <li>Spatial mixing within patches blurs discrete landscape features</li>
+              <li>Boundary pixels get "contaminated" by neighboring land cover types</li>
+            </ul>
+          </div>
+        </div>
+      </Collapsible>
+
+      <Collapsible title="Pixel-Based Models (TESSERA, PRESTO)" defaultOpen={true}>
+        <div className="ei-strategy-card" style={{ '--sc': '#10b981' } as React.CSSProperties}>
+          <div className="ei-strategy-header">
+            <span className="ei-strategy-badge contrastive">PIXEL</span>
+            <span className="ei-strategy-label">Independent Per-Pixel Temporal Encoding</span>
+          </div>
+          <p>
+            Each pixel is encoded independently from its full temporal signal — no spatial mixing whatsoever.
+            The embedding for a field pixel is completely unaffected by the adjacent forest pixel. TESSERA processes
+            each pixel's annual S1+S2 time series through dual Transformer encoders with GRU pooling.
+          </p>
+          <div className="ei-strategy-detail">
+            <strong>Models:</strong> TESSERA (Cambridge, CVPR 2026), PRESTO
+          </div>
+          <div className="ei-strategy-detail">
+            <strong>Advantages:</strong>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
+              <li>Preserves discrete landscape boundaries — critical for agriculture and land cover</li>
+              <li>Many landscapes ARE discrete: "the beach next to the ocean next to the coastal forest"</li>
+              <li>Simpler architecture, more efficient inference</li>
+              <li>No boundary artifacts from patch tokenization</li>
+            </ul>
+          </div>
+          <div className="ei-strategy-detail">
+            <strong>Disadvantages:</strong>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
+              <li>Misses spatial patterns (urban grid layouts, irrigation pivot circles)</li>
+              <li>Cannot learn spatial relationships between neighboring features</li>
+              <li>Relies entirely on temporal/spectral signal per pixel</li>
+            </ul>
+          </div>
+        </div>
+      </Collapsible>
+
+      <Collapsible title="TESSERA's Argument: Is Spatial Context Overrated?">
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          The TESSERA authors argue that <em>"spatial contextual information may not be what it's cracked up to be."</em>{' '}
+          Their pixel-based model outperforms many patch-based models on crop classification, canopy height,
+          fire detection, and biomass estimation — suggesting that for these tasks, the temporal phenological signal
+          per pixel is <strong>more informative</strong> than the spatial context around it.
+        </p>
+        <p className="insights-desc" style={{ marginBottom: '1rem' }}>
+          They argue that landscape features often have a <strong>discrete nature</strong> — adjacent agricultural fields,
+          beach-ocean-forest transitions — where mixing spatial context actually <em>hurts</em> classification at boundaries.
+          A 16×16 patch straddling two crop types produces a blended embedding that represents neither accurately.
+        </p>
+        <Cite ids={['earth_foundations2026']} />
+      </Collapsible>
+
+      <Collapsible title="The Nuance: When Each Approach Wins">
+        <div className="ei-strategy-grid">
+          <div className="ei-strategy-card" style={{ '--sc': '#10b981' } as React.CSSProperties}>
+            <div className="ei-strategy-header">
+              <span className="ei-strategy-badge contrastive">PIXEL WINS</span>
+            </div>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <li>Crop mapping & agricultural monitoring</li>
+              <li>Land cover classification at boundaries</li>
+              <li>Biomass & canopy height estimation</li>
+              <li>Fire scar / burn detection</li>
+              <li>Anything with discrete landscape boundaries</li>
+            </ul>
+          </div>
+          <div className="ei-strategy-card" style={{ '--sc': '#6366f1' } as React.CSSProperties}>
+            <div className="ei-strategy-header">
+              <span className="ei-strategy-badge mae">PATCH WINS</span>
+            </div>
+            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <li>Object detection (buildings, vehicles, infrastructure)</li>
+              <li>Urban analysis & planning</li>
+              <li>Infrastructure monitoring</li>
+              <li>Texture-based classification</li>
+              <li>Anything requiring spatial pattern recognition</li>
+            </ul>
+          </div>
+        </div>
+        <p className="insights-desc" style={{ marginTop: '1rem' }}>
+          This mirrors a debate in NLP: character-level vs word-level vs sentence-level embeddings — different
+          granularities serve different purposes. AlphaEarth uses 10m pixels (effectively pixel-level) but with
+          multi-modal spatial assimilation. The answer may be <strong>task-dependent, not architectural</strong> —
+          future FMs might offer both pixel and patch modes.
+        </p>
+      </Collapsible>
+
+      <Collapsible title="Why This Matters for Practitioners">
+        <p className="insights-desc">
+          This is one of the most important open questions in EO foundation model design. TESSERA's strong
+          pixel-level results — outperforming AlphaEarth on multiple tasks while being fully open (MIT license) —
+          challenge the assumption that bigger patches with more spatial context automatically produce better embeddings.
+          When choosing a foundation model, consider whether your downstream task benefits more from spatial context
+          (objects, textures, patterns) or temporal fidelity (phenology, change, spectral signatures per pixel).
+        </p>
+      </Collapsible>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════
 // Main Component
 // ═════════════════════════════════════════════════════════════════
 export default function ExpertInsights() {
@@ -1188,6 +1333,7 @@ export default function ExpertInsights() {
     { id: 'embedding', label: 'Embedding Spaces', icon: '🌌' },
     { id: 'questions', label: 'Open Questions', icon: '❓' },
     { id: 'geofm', label: 'LEOM vs ImageNet', icon: '🧠' },
+    { id: 'pixelpatch', label: 'Pixel vs Patch', icon: '🧩' },
   ];
 
   return (
@@ -1220,6 +1366,7 @@ export default function ExpertInsights() {
           {activeTab === 'embedding' && <EmbeddingSpaceDeepDive />}
           {activeTab === 'questions' && <OpenQuestionsDeepDive />}
           {activeTab === 'geofm' && <GeoFMvsImageNet />}
+          {activeTab === 'pixelpatch' && <PixelVsPatchDeepDive />}
         </div>
       </div>
     </section>
