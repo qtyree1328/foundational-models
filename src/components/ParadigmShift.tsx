@@ -67,9 +67,18 @@ function ImageSlider() {
       handleMove(e.clientX);
     }
   };
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
     handleMove(e.touches[0].clientX);
   };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging.current) {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX);
+    }
+  };
+  const handleTouchEnd = () => { isDragging.current = false; };
 
   useEffect(() => {
     const up = () => { isDragging.current = false; };
@@ -112,7 +121,9 @@ function ImageSlider() {
         className="image-slider"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onDragStart={e => e.preventDefault()}
       >
         <img 
