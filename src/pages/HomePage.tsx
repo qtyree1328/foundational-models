@@ -1,0 +1,20 @@
+import { useInView } from '../hooks/useInView';
+import Hero from '../components/Hero';
+import Pipeline from '../components/Pipeline';
+import ParadigmShift from '../components/ParadigmShift';
+import ModelGallery from '../components/ModelGallery';
+import Ecosystem from '../components/Ecosystem';
+
+export default function HomePage() {
+  const ref = useInView();
+
+  return (
+    <div ref={ref}>
+      <Hero />
+      <Pipeline />
+      <ParadigmShift />
+      <ModelGallery preview />
+      <Ecosystem />
+    </div>
+  );
+}

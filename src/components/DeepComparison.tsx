@@ -490,10 +490,124 @@ function ArchitectureDiagrams() {
   );
 }
 
+// ─── Benchmark Comparison Table ───
+const BENCHMARK_DATASETS = [
+  { dataset: 'Sen1Floods11', metric: 'mIoU', task: 'Flood Mapping' },
+  { dataset: 'BigEarthNet', metric: 'mAP', task: 'Land Cover Classification' },
+  { dataset: 'EuroSAT', metric: 'Accuracy', task: 'Scene Classification' },
+  { dataset: 'FMoW', metric: 'Accuracy', task: 'Scene Classification' },
+  { dataset: 'fMoW', metric: 'Accuracy', task: 'Scene Classification' },
+  { dataset: 'OSCD', metric: 'F1', task: 'Change Detection' },
+  { dataset: 'DFC2020', metric: 'mIoU', task: 'Semantic Segmentation' },
+  { dataset: 'UCM (21 classes)', metric: 'Accuracy', task: 'Zero-shot Classification' },
+  { dataset: 'AID (30 classes)', metric: 'Accuracy', task: 'Zero-shot Classification' },
+  { dataset: 'DOTA', metric: 'mAP', task: 'Object Detection' },
+  { dataset: 'FLAIR', metric: 'mIoU', task: 'Semantic Segmentation' },
+  { dataset: 'SpaceNet', metric: 'F1', task: 'Object Detection' },
+  { dataset: 'GEO-Bench', metric: '%', task: 'Multi-task Benchmark' },
+  { dataset: 'PhilEO Bench', metric: '%', task: 'Multi-task Benchmark' },
+  { dataset: 'RSICD', metric: 'R@1', task: 'Image-Text Retrieval' },
+  { dataset: 'WorldPop', metric: 'R\u00B2', task: 'Population Estimation' },
+];
+
+// Deduplicate datasets that differ only by case (fMoW vs FMoW)
+const UNIQUE_DATASETS = BENCHMARK_DATASETS.reduce<typeof BENCHMARK_DATASETS>((acc, cur) => {
+  const existing = acc.find(d => d.dataset.toLowerCase() === cur.dataset.toLowerCase());
+  if (!existing) acc.push(cur);
+  return acc;
+}, []);
+
+function BenchmarkComparisonTable({ selectedIds }: { selectedIds: string[] }) {
+  const display = selectedIds.length > 0
+    ? models.filter(m => selectedIds.includes(m.id))
+    : models;
+
+  // For each dataset row, find each model's benchmark value
+  const getModelValue = (model: Model, datasetName: string): { value: number; unit: string } | null => {
+    const bench = model.benchmarks.find(
+      b => b.dataset.toLowerCase() === datasetName.toLowerCase()
+    );
+    if (!bench) return null;
+    return { value: bench.value, unit: bench.unit };
+  };
+
+  // Find the best (highest) numeric value for a dataset row across displayed models
+  const getBestValue = (datasetName: string): number | null => {
+    let best: number | null = null;
+    for (const m of display) {
+      const result = getModelValue(m, datasetName);
+      if (result && result.value > 1) { // filter out flag values (0/1)
+        if (best === null || result.value > best) {
+          best = result.value;
+        }
+      }
+    }
+    return best;
+  };
+
+  // Only show dataset rows where at least one displayed model has data
+  const activeDatasets = UNIQUE_DATASETS.filter(d =>
+    display.some(m => getModelValue(m, d.dataset) !== null)
+  );
+
+  return (
+    <div className="specs-table-wrap">
+      <table className="specs-table">
+        <thead>
+          <tr>
+            <th className="specs-label-col">Dataset / Benchmark</th>
+            {display.map(m => (
+              <th key={m.id} style={{ borderBottom: `3px solid ${m.color}` }}>
+                <span className="specs-model-icon">{m.icon}</span>
+                <span className="specs-model-name">{m.name.split(' ')[0]}</span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {activeDatasets.map(row => {
+            const best = getBestValue(row.dataset);
+            return (
+              <tr key={row.dataset}>
+                <td className="specs-label">
+                  <div>{row.dataset}</div>
+                  <div style={{ fontSize: '10px', opacity: 0.6 }}>{row.task} ({row.metric})</div>
+                </td>
+                {display.map(m => {
+                  const result = getModelValue(m, row.dataset);
+                  const isBest = result && best !== null && result.value === best && result.value > 1;
+                  return (
+                    <td key={m.id} className={`specs-value ${isBest ? 'bench-best' : ''}`}>
+                      {result ? (
+                        <span title={result.unit}>
+                          {result.value}{result.unit.startsWith('%') ? '%' : ` ${result.unit}`.trim()}
+                        </span>
+                      ) : (
+                        <span style={{ opacity: 0.3 }}>--</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+          {activeDatasets.length === 0 && (
+            <tr>
+              <td colSpan={display.length + 1} style={{ textAlign: 'center', padding: '32px', opacity: 0.5 }}>
+                No benchmark data available for the selected models.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ─── Main Component ───
 export default function DeepComparison() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'specs' | 'radar' | 'tasks' | 'training' | 'arch'>('specs');
+  const [activeTab, setActiveTab] = useState<'specs' | 'radar' | 'tasks' | 'training' | 'arch' | 'benchmarks'>('specs');
 
   const toggleModel = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -505,6 +619,7 @@ export default function DeepComparison() {
     { id: 'tasks' as const, label: 'Best For', icon: '' },
     { id: 'training' as const, label: 'Training Data', icon: '' },
     { id: 'arch' as const, label: 'Architectures', icon: '' },
+    { id: 'benchmarks' as const, label: 'Benchmarks', icon: '' },
   ];
 
   return (
@@ -555,6 +670,7 @@ export default function DeepComparison() {
           {activeTab === 'tasks' && <BestForGuide />}
           {activeTab === 'training' && <TrainingDataViz />}
           {activeTab === 'arch' && <ArchitectureDiagrams />}
+          {activeTab === 'benchmarks' && <BenchmarkComparisonTable selectedIds={selectedIds} />}
         </div>
 
         {/* Benchmark Results Section */}

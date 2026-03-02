@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { models, Model } from '../data/models';
 
 // Model hero images — real FM output/architecture visualizations
@@ -254,8 +255,9 @@ function ModelDetail({ model, onClose }: { model: Model; onClose: () => void }) 
   );
 }
 
-export default function ModelGallery() {
+export default function ModelGallery({ preview = false }: { preview?: boolean }) {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const displayModels = preview ? models.slice(0, 6) : models;
 
   return (
     <section className="section model-gallery-section" data-section="models">
@@ -264,13 +266,13 @@ export default function ModelGallery() {
           <span className="section-label">The LEOMs</span>
           <h2>Large Earth Observation Models</h2>
           <p className="section-subtitle">
-            The major LEOMs producing geo-embeddings today. Each takes a different approach 
-            to encoding Earth — from multi-temporal optical to SAR fusion to hyperspectral. 
-            Click any card for architecture, benchmarks, and code.
+            {preview
+              ? 'The leading models encoding Earth observation data into geo-embeddings. Explore all models for architecture details, benchmarks, and code.'
+              : 'The major LEOMs producing geo-embeddings today. Each takes a different approach to encoding Earth — from multi-temporal optical to SAR fusion to hyperspectral. Click any card for architecture, benchmarks, and code.'}
           </p>
         </div>
         <div className="model-grid">
-          {models.map((model) => (
+          {displayModels.map((model) => (
             <ModelCard
               key={model.id}
               model={model}
@@ -279,6 +281,16 @@ export default function ModelGallery() {
             />
           ))}
         </div>
+        {preview && (
+          <div className="model-gallery-cta fade-in">
+            <Link to="/models" className="cta-button">
+              View All {models.length} Models
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        )}
       </div>
       {selectedModel && (
         <ModelDetail model={selectedModel} onClose={() => setSelectedModel(null)} />

@@ -1,53 +1,51 @@
-import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import Hero from './components/Hero';
-import Pipeline from './components/Pipeline';
-import ParadigmShift from './components/ParadigmShift';
-import ModelGallery from './components/ModelGallery';
-import CaseStudyMap from './components/CaseStudyMap';
-import LiveExplorer from './components/LiveExplorer';
-import EmbeddingViz from './components/EmbeddingViz';
-import DeepComparison from './components/DeepComparison';
-import Ecosystem from './components/Ecosystem';
-import GoogleDualApproach from './components/GoogleDualApproach';
-import ModelRecommender from './components/ModelRecommender';
-import GettingStarted from './components/GettingStarted';
-import Sources from './components/Sources';
-import { useInView, useSectionInView } from './hooks/useInView';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
+import SearchOverlay from './components/SearchOverlay';
 
-// Lazy load heavy components
-const ExpertInsights = lazy(() => import('./components/ExpertInsights'));
-const DemoClassification = lazy(() => import('./components/DemoClassification'));
+// Lazy load all pages for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ModelsPage = lazy(() => import('./pages/ModelsPage'));
+const ArchitecturePage = lazy(() => import('./pages/ArchitecturePage'));
+const CaseStudiesPage = lazy(() => import('./pages/CaseStudiesPage'));
+const ExplorePage = lazy(() => import('./pages/ExplorePage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 
-function LazySection({ children }: { children: React.ReactNode }) {
+const NAV_ITEMS = [
+  { path: '/', label: 'Home' },
+  { path: '/models', label: 'Models' },
+  { path: '/architecture', label: 'Architecture' },
+  { path: '/case-studies', label: 'Case Studies' },
+  { path: '/explore', label: 'Explore' },
+  { path: '/about', label: 'About' },
+];
+
+function PageLoader() {
   return (
-    <Suspense fallback={
-      <div className="section" style={{ minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="stac-spinner" />
-      </div>
-    }>
-      {children}
-    </Suspense>
+    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="stac-spinner" />
+    </div>
   );
 }
 
-const NAV_ITEMS = [
-  { id: 'pipeline', label: 'How It Works' },
-  { id: 'paradigm', label: 'Why It Matters' },
-  { id: 'models', label: 'Models' },
-  { id: 'google-dual', label: 'Google\'s Approach' },
-  { id: 'deep-compare', label: 'Compare' },
-  { id: 'ecosystem', label: 'Ecosystem' },
-  { id: 'explorer', label: 'Live Explorer' },
-  { id: 'demo-classify', label: 'Demo' },
-  { id: 'cases', label: 'Case Studies' },
-  { id: 'insights', label: 'Expert' },
-  { id: 'recommender', label: 'Recommender' },
-  { id: 'sources', label: 'Sources' },
-];
-
-function Nav({ activeSection }: { activeSection: string }) {
+function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const location = useLocation();
+
+  // Cmd+K / Ctrl+K to open search
+  const handleSearchClose = useCallback(() => setSearchOpen(false), []);
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -74,35 +72,50 @@ function Nav({ activeSection }: { activeSection: string }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  const scrollTo = (id: string) => {
-    const el = document.querySelector(`[data-section="${id}"]`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Close mobile menu on navigation
+  useEffect(() => {
     setMobileMenuOpen(false);
-  };
+  }, [location.pathname]);
+
+  // On home page and not scrolled, use transparent nav with white text
+  const isHome = location.pathname === '/';
+  const navClass = `main-nav ${scrolled ? 'scrolled' : ''} ${!isHome ? 'scrolled' : ''}`;
 
   return (
     <>
-      <nav className={`main-nav ${scrolled ? 'scrolled' : ''}`}>
+      <nav className={navClass}>
         <div className="nav-inner">
-          <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <NavLink to="/" className="nav-logo">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
             <span>Geospatial Foundation Models</span>
-          </div>
+          </NavLink>
           <div className="nav-links">
             {NAV_ITEMS.map(item => (
-              <button
-                key={item.id}
-                className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
-                onClick={() => scrollTo(item.id)}
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/'}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
               >
                 {item.label}
-              </button>
+              </NavLink>
             ))}
           </div>
-          <button 
+          <button
+            className="nav-search-btn"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            <span className="nav-search-label">Search</span>
+            <kbd className="nav-search-kbd">&#8984;K</kbd>
+          </button>
+          <button
             className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
@@ -113,7 +126,8 @@ function Nav({ activeSection }: { activeSection: string }) {
           </button>
         </div>
       </nav>
-      
+      <SearchOverlay open={searchOpen} onClose={handleSearchClose} />
+
       {/* Mobile Menu Overlay */}
       <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
@@ -122,17 +136,31 @@ function Nav({ activeSection }: { activeSection: string }) {
         </div>
         <div className="mobile-menu-links">
           {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              className={`mobile-menu-link ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => scrollTo(item.id)}
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileMenuOpen(false)}
             >
               {item.label}
-            </button>
+            </NavLink>
           ))}
         </div>
       </div>
     </>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="page-header" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center' }}>
+      <div className="container" style={{ textAlign: 'center' }}>
+        <h1 style={{ fontSize: '72px', marginBottom: '16px' }}>404</h1>
+        <p style={{ marginBottom: '32px' }}>Page not found</p>
+        <NavLink to="/" className="cta-button">Back to Home</NavLink>
+      </div>
+    </div>
   );
 }
 
@@ -152,7 +180,7 @@ function Footer() {
             <span>Built by <a href="https://tyreespatial.com" target="_blank" rel="noopener">Quintin Tyree</a></span>
           </div>
           <div className="footer-right">
-            <span>All specifications verified from published papers • Satellite imagery © Esri, Maxar</span>
+            <span>All specifications verified from published papers</span>
           </div>
         </div>
       </div>
@@ -161,55 +189,21 @@ function Footer() {
 }
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('hero');
-  const containerRef = useInView();
-
-  const handleSectionChange = useCallback((id: string) => {
-    setActiveSection(id);
-  }, []);
-
-  useSectionInView(handleSectionChange);
-
-  const allSections = ['hero', ...NAV_ITEMS.map(n => n.id)];
-  const activeIdx = allSections.indexOf(activeSection);
-  const progress = allSections.length > 1 ? (activeIdx / (allSections.length - 1)) * 100 : 0;
-
   return (
-    <div ref={containerRef} className="app">
-      <Nav activeSection={activeSection} />
-      {/* Left progress bar */}
-      <div className="progress-rail">
-        <div className="progress-track">
-          <div className="progress-fill" style={{ height: `${progress}%` }} />
-        </div>
-        {allSections.map((id, i) => (
-          <div
-            key={id}
-            className={`progress-dot ${i <= activeIdx ? 'active' : ''} ${id === activeSection ? 'current' : ''}`}
-            style={{ top: `${(i / (allSections.length - 1)) * 100}%` }}
-            onClick={() => {
-              const el = document.querySelector(`[data-section="${id}"]`);
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-              else if (id === 'hero') window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            title={NAV_ITEMS.find(n => n.id === id)?.label || 'Top'}
-          />
-        ))}
-      </div>
-      <Hero />
-      <Pipeline />
-      <ParadigmShift />
-      <ModelGallery />
-      <GoogleDualApproach />
-      <DeepComparison />
-      <Ecosystem />
-      <LiveExplorer />
-      <LazySection><DemoClassification /></LazySection>
-      <CaseStudyMap />
-      <LazySection><ExpertInsights /></LazySection>
-      <ModelRecommender />
-      <Sources />
-      <GettingStarted />
+    <div className="app">
+      <ScrollToTop />
+      <Nav />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/models" element={<ModelsPage />} />
+          <Route path="/architecture" element={<ArchitecturePage />} />
+          <Route path="/case-studies" element={<CaseStudiesPage />} />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
       <Footer />
     </div>
   );
