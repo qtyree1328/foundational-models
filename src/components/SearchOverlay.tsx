@@ -14,10 +14,8 @@ interface SearchResult {
 
 const PAGES: SearchResult[] = [
   { type: 'page', id: 'home', title: 'Home', subtitle: 'Overview and introduction', color: '#0d4f4f', path: '/' },
-  { type: 'page', id: 'models', title: 'Models', subtitle: 'All foundation model details', color: '#0d4f4f', path: '/models' },
-  { type: 'page', id: 'architecture', title: 'Architecture', subtitle: 'Radar charts, specs, benchmarks', color: '#0d4f4f', path: '/architecture' },
-  { type: 'page', id: 'case-studies', title: 'Case Studies', subtitle: 'Real-world evidence with imagery', color: '#0d4f4f', path: '/case-studies' },
-  { type: 'page', id: 'explore', title: 'Explore', subtitle: 'Live GEE explorer and demos', color: '#0d4f4f', path: '/explore' },
+  { type: 'page', id: 'models', title: 'Models', subtitle: 'Architecture, benchmarks, radar profiles', color: '#0d4f4f', path: '/models' },
+  { type: 'page', id: 'explore', title: 'Explore', subtitle: 'Live GEE explorer, case studies, demos', color: '#0d4f4f', path: '/explore' },
   { type: 'page', id: 'about', title: 'About', subtitle: 'Expert insights and sources', color: '#0d4f4f', path: '/about' },
 ];
 
@@ -79,7 +77,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
         title: c.title,
         subtitle: c.location,
         color: c.color,
-        path: '/case-studies',
+        path: '/explore',
       }));
 
     const pageResults: SearchResult[] = PAGES.filter(p =>

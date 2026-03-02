@@ -255,9 +255,9 @@ function ModelDetail({ model, onClose }: { model: Model; onClose: () => void }) 
   );
 }
 
-export default function ModelGallery({ preview = false }: { preview?: boolean }) {
+export default function ModelGallery({ preview = false }: { preview?: boolean | number }) {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
-  const displayModels = preview ? models.slice(0, 6) : models;
+  const displayModels = typeof preview === 'number' ? models.slice(0, preview) : preview ? models.slice(0, 6) : models;
 
   return (
     <section className="section model-gallery-section" data-section="models">

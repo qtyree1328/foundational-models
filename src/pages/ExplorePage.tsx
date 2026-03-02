@@ -1,9 +1,10 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { useInView } from '../hooks/useInView';
 import LiveExplorer from '../components/LiveExplorer';
+import RealApplications from '../components/RealApplications';
 
 const DemoClassification = lazy(() => import('../components/DemoClassification'));
-const FMExplorer = lazy(() => import('../components/FMExplorer'));
+const UnifiedExplorer = lazy(() => import('../components/UnifiedExplorer'));
 
 function LazySection({ children }: { children: React.ReactNode }) {
   return (
@@ -30,12 +31,13 @@ export default function ExplorePage() {
         <div className="container">
           <span className="page-label">Interactive Tools</span>
           <h1>Live Explorer</h1>
-          <p>Interact with real AlphaEarth embeddings via Google Earth Engine — clustering, change detection, similarity search, and more.</p>
+          <p>Interact with real AlphaEarth embeddings via Google Earth Engine — 19 case studies, band experimentation, clustering, change detection, and similarity search.</p>
         </div>
       </div>
       <LiveExplorer />
+      <LazySection><UnifiedExplorer /></LazySection>
       <LazySection><DemoClassification /></LazySection>
-      <LazySection><FMExplorer /></LazySection>
+      <RealApplications />
     </div>
   );
 }

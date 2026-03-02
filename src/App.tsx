@@ -1,21 +1,17 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import SearchOverlay from './components/SearchOverlay';
 
 // Lazy load all pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ModelsPage = lazy(() => import('./pages/ModelsPage'));
-const ArchitecturePage = lazy(() => import('./pages/ArchitecturePage'));
-const CaseStudiesPage = lazy(() => import('./pages/CaseStudiesPage'));
 const ExplorePage = lazy(() => import('./pages/ExplorePage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 const NAV_ITEMS = [
   { path: '/', label: 'Home' },
   { path: '/models', label: 'Models' },
-  { path: '/architecture', label: 'Architecture' },
-  { path: '/case-studies', label: 'Case Studies' },
   { path: '/explore', label: 'Explore' },
   { path: '/about', label: 'About' },
 ];
@@ -197,10 +193,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/models" element={<ModelsPage />} />
-          <Route path="/architecture" element={<ArchitecturePage />} />
-          <Route path="/case-studies" element={<CaseStudiesPage />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/architecture" element={<Navigate to="/models" replace />} />
+          <Route path="/case-studies" element={<Navigate to="/explore" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
